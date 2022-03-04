@@ -52,12 +52,15 @@ namespace PiHealth
             GlobalConfiguration.ContentRootPath = _webHostEnvironment.ContentRootPath;
 
             services.AddMemoryCache();
-            services.AddControllers().AddNewtonsoftJson(setup =>
+            if (!_webHostEnvironment.IsDevelopment())
             {
-                setup.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                setup.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                setup.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Local;
-            });
+                services.AddControllers().AddNewtonsoftJson(setup =>
+                {
+                    setup.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    setup.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+                    setup.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
+                });
+            }
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
             services.AddScoped<IAppUserService, AppUserService>();
             services.AddScoped<ITokenStoreService, TokenStoreService>();
@@ -88,7 +91,7 @@ namespace PiHealth
             services.Configure<BearerTokensOptions>(options => Configuration.GetSection("BearerTokens").Bind(options));
             services.Configure<PrefixOption>(options => Configuration.GetSection("PrefixOption").Bind(options));
             services.AddCustomizedDataStore(Configuration);
-          
+
             services.AddCors(options =>
             {
                 options.AddPolicy(MyAllowSpecificOrigins,
@@ -113,7 +116,7 @@ namespace PiHealth
            options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase
        );
 
-          
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PIHealth API", Version = "v1" });

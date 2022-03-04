@@ -47,6 +47,7 @@ namespace PiHealth.Web.Controllers.API
         {
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
+            //patientProfile.followUp.HasValue
             if (result == null)
             {
                 var appointment = await _appointmentService.Get(id);
@@ -100,6 +101,13 @@ namespace PiHealth.Web.Controllers.API
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             return Ok(patientProfiles);
         }
+        [HttpGet]
+        [Route("GetAllComplaints")]
+        public IActionResult GetAllComplaints()
+        {
+            var complaints = _patientProfileService.GetComplaints();
+            return Ok(complaints);
+        }
 
         [HttpPost]
         [Route("Create")]
@@ -122,7 +130,7 @@ namespace PiHealth.Web.Controllers.API
                 return BadRequest();
 
             var patientProfile = await _patientProfileService.Get(model.appointmentId);
-
+            var _appoinment = await _appointmentService.Get(model.appointmentId);
             try
             {
                 if (patientProfile == null)
@@ -132,7 +140,6 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.CreatedBy = ActiveUser.Id;
                     if (!model.appointment.isActive)
                     {
-                        var _appoinment = await _appointmentService.Get(model.appointmentId);
                         _appoinment.IsActive = false;
                         _appoinment.UpdatedBy = ActiveUser.Id;
                         _appoinment.UpdatedDate = DateTime.Now;
@@ -149,7 +156,6 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.ModifiedBy = ActiveUser.Id;
                       if (!model.appointment.isActive)
                     {
-                        var _appoinment = await _appointmentService.Get(model.appointmentId);
                         _appoinment.IsActive = false;
                         _appoinment.UpdatedBy = ActiveUser.Id;
                         _appoinment.UpdatedDate = DateTime.Now;
@@ -165,6 +171,21 @@ namespace PiHealth.Web.Controllers.API
             {
 
                 throw;
+            }
+            try
+            {
+                if (model.isfollowUpNeed)
+                {
+                    _appoinment.Id = 0;
+                    _appoinment.AppUserId = ActiveUser.Id;
+                    _appoinment.AppointmentDateTime = model.followUp.Value;
+                    _appoinment.IsActive = true;
+                    await _appointmentService.Create(_appoinment);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw ex;
             }
             return Ok(model);
 

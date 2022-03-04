@@ -87,27 +87,27 @@ namespace PiHealth.Web.Controllers
             return Ok(new { token = accessToken, role = user.UserType });
         }
 
-        [AllowAnonymous]
-        [HttpPost]
-        [Route("RefreshToken")]
-        public async Task<IActionResult> RefreshToken([FromBody]JToken jsonBody)
-        {
-            var refreshToken = jsonBody.Value<string>("refreshToken");
-            if (string.IsNullOrWhiteSpace(refreshToken))
-            {
-                return BadRequest("refreshToken is not set.");
-            }
+        //[AllowAnonymous]
+        //[HttpPost]
+        //[Route("RefreshToken")]
+        //public async Task<IActionResult> RefreshToken([FromBody]JToken jsonBody)
+        //{
+        //    var refreshToken = jsonBody.Value<string>("refreshToken");
+        //    if (string.IsNullOrWhiteSpace(refreshToken))
+        //    {
+        //        return BadRequest("refreshToken is not set.");
+        //    }
 
-            var token = await _tokenStoreService.FindTokenAsync(refreshToken);
-            if (token == null)
-            {
-                return Unauthorized();
-            }
+        //    var token = await _tokenStoreService.FindTokenAsync(refreshToken);
+        //    if (token == null)
+        //    {
+        //        return Unauthorized();
+        //    }
 
-            var (accessToken, newRefreshToken) = await _tokenStoreService.CreateJwtTokens(token.AppUser).ConfigureAwait(false);
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success", value2: "Token Refreshed for the user " + token.AppUser.Name + ". New Token: " + refreshToken);
-            return Ok(new { access_token = accessToken, refresh_token = newRefreshToken, username = token.AppUser.Name });
-        }
+        //    var (accessToken, newRefreshToken) = await _tokenStoreService.CreateJwtTokens(token.AppUser).ConfigureAwait(false);
+        //    _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success", value2: "Token Refreshed for the user " + token.AppUser.Name + ". New Token: " + refreshToken);
+        //    return Ok(new { access_token = accessToken, refresh_token = newRefreshToken, username = token.AppUser.Name });
+        //}
 
         [AllowAnonymous]
         [HttpGet]

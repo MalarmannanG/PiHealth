@@ -19,10 +19,13 @@ namespace PiHealth.DataModel.Entity
         public long AppointmentId { get; set; }
         public string Compliants { get; set; }
         public string Examination { get; set; }
+        public string PastHistory { get; set; }
+        public string InvestigationResults { get; set; }
         public string Impression { get; set; }
         public string Advice { get; set; }
         public string Plan { get; set; }
-        public string FollowUp { get; set; }
+        public bool IsfollowUpNeed { get; set; }
+        public DateTime? FollowUp { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }

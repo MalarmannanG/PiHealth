@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220302153831_PatientProfile table update")]
+    partial class PatientProfiletableupdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -579,8 +581,8 @@ namespace PiHealth.Migrations
                     b.Property<string>("Examination")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("FollowUp")
-                        .HasColumnType("datetime2");
+                    b.Property<string>("FollowUp")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Impression")
                         .HasColumnType("nvarchar(max)");
@@ -589,9 +591,6 @@ namespace PiHealth.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsfollowUpNeed")
                         .HasColumnType("bit");
 
                     b.Property<long?>("ModifiedBy")
@@ -608,6 +607,12 @@ namespace PiHealth.Migrations
 
                     b.Property<string>("Plan")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Sos")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("Stat")
+                        .HasColumnType("bit");
 
                     b.Property<long?>("TemplateMasterId")
                         .HasColumnType("bigint");
@@ -715,12 +720,6 @@ namespace PiHealth.Migrations
 
                     b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Sos")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("Stat")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Strength")
                         .HasColumnType("nvarchar(max)");

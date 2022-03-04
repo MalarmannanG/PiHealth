@@ -43,7 +43,11 @@ namespace PiHealth.Services.PatientProfileService
             
             return data;
         }
-
+        public virtual IQueryable<string> GetComplaints(string name = null)
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted && !string.IsNullOrEmpty(a.Compliants)).Select(a=>a.Compliants).Distinct();
+            return data;
+        }
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {
             return await _repository.UpdateAsync(entity);

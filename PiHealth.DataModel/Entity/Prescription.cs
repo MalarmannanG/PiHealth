@@ -27,6 +27,8 @@ namespace PiHealth.DataModel.Entity
         public long CreatedBy { get; set; }
         public long? ModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
+        public bool Sos { get; set; }
+        public bool Stat { get; set; }
         public virtual PatientProfile PatientProfile { get; set; }
 
     }

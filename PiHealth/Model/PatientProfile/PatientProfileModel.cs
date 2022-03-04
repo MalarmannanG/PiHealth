@@ -20,10 +20,13 @@ namespace PiHealth.Web.Model.PatientProfile
         public long appointmentId { get; set; }
         public string compliants { get; set; }
         public string examination { get; set; }
+        public string pastHistory { get; set; }
+        public string investigationResults { get; set; }
         public string impression { get; set; }
         public string advice { get; set; }
         public string plan { get; set; }
-        public string followUp { get; set; }
+        public bool isfollowUpNeed { get; set; }
+        public DateTime? followUp { get; set; }
         public bool isDeleted { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
@@ -101,6 +104,8 @@ namespace PiHealth.Web.Model.PatientProfile
         public bool night { get; set; }
         public int noOfDays { get; set; }
         public bool isDeleted { get; set; }
+        public bool sos { get; set; }
+        public bool stat { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }

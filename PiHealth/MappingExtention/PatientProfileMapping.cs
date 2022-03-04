@@ -21,7 +21,10 @@ namespace PiHealth.Web.MappingExtention
             model.impression = entity.Impression;
             model.advice = entity.Advice;
             model.templateMasterId = entity.TemplateMasterId;
+            model.pastHistory = entity.PastHistory;
+            model.investigationResults = entity.InvestigationResults;
             model.plan = entity.Plan;
+            model.isfollowUpNeed = entity.IsfollowUpNeed;
             model.followUp = entity.FollowUp;
             model.isDeleted = entity.IsDeleted;
             model.createdBy = entity.CreatedBy;
@@ -40,10 +43,13 @@ namespace PiHealth.Web.MappingExtention
         {
             entity.Compliants = model.compliants;
             entity.Examination = model.examination;
+            entity.PastHistory = model.pastHistory;
+            entity.InvestigationResults = model.investigationResults;
             entity.Impression = model.impression;
             entity.TemplateMasterId = model.templateMasterId;
             entity.Advice = model.advice;
             entity.Plan = model.plan;
+            entity.IsfollowUpNeed = model.isfollowUpNeed;
             entity.FollowUp = model.followUp;
             entity.IsDeleted = model.isDeleted;
             entity.CreatedBy =model.createdBy;            
@@ -79,6 +85,8 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
+            model.sos = entity.Sos;
+            model.stat = entity.Stat;
             return model;
         }
 
@@ -101,6 +109,8 @@ namespace PiHealth.Web.MappingExtention
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;
             entity.ModifiedDate = model.modifiedDate;
+            entity.Sos = model.sos;
+            entity.Stat = model.stat;
             return entity;
         }
 
