@@ -45,9 +45,11 @@ namespace PiHealth.Web.Controllers.API
         [Route("Dashboard")]
         public async Task<IActionResult> Dasboard(long id)
         {
-            DateTime today = DateTime.Now.Date;
-            DateTime fromDate = today.ToLocalTime();
-            DateTime toDate = today.ToLocalTime().AddDays(1).AddMilliseconds(-1);
+            DateTime date = DateTime.Now.Date;
+            TimeSpan frtime = new TimeSpan(0, 0, 0, 0);
+            DateTime fromDate = date.Add(frtime);
+            TimeSpan totime = new TimeSpan(0, 23, 59, 59);
+            DateTime toDate = date.Add(totime);
             var todaysPatients = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate).Count();
             var todaysProcedures = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:true).Count();
             var todaysAppointments = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:false).Count();
@@ -71,7 +73,7 @@ namespace PiHealth.Web.Controllers.API
             var patients2 = new List<long>();
             long[] patientIds = null;
             long[] doctorIds = null;
-
+            
             if (model.todayPatients)
             {
                 patients1 = _patientService.GetAll(isTodayPatients: model.todayPatients).Select(a => a.Id).ToList();
@@ -104,8 +106,9 @@ namespace PiHealth.Web.Controllers.API
             {
                 patientIds = patients2.ToArray();
             }
-
-            var appointments = _appointmentService.GetAll(patientIds: patientIds, doctorIds: doctorIds, isProcedure: model?.isProcedure, fromDate: model.fromDate, toDate: model.toDate);            
+            DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
+            DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
+            var appointments = _appointmentService.GetAll(patientIds: patientIds, doctorIds: doctorIds, isProcedure: model?.isProcedure, fromDate: fromDate, toDate: toDate);            
             var total = appointments?.Count();
             var orderBy = string.IsNullOrEmpty(model?.order_by) ? "CreatedDate" : model.order_by;
             appointments = appointments?.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
@@ -145,7 +148,7 @@ namespace PiHealth.Web.Controllers.API
 
             if (appointment == null)
                 return BadRequest();
-
+            model.appointmentDateTime = DateTime.Parse(model.appointmentISOString);
             var updated = model.ToEntity(appointment);
             appointment = await _appointmentService.Update(appointment);
 

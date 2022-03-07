@@ -111,7 +111,7 @@ namespace PiHealth.Web.Controllers.API.Masters
             entity.PhoneNo1 = model.phoneNo1;
             entity.PhoneNo2 = model.phoneNo2;
             entity.Qualification = model.qualification;
-
+            entity.PinCode = model.pinCode;
             await _doctorMasterService.Update(entity);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");

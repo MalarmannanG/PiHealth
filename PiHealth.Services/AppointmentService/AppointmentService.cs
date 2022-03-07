@@ -45,13 +45,19 @@ namespace PiHealth.Services.Master
 
             if (fromDate != null)
             {
-                data = data.Where(a => a.AppointmentDateTime.Date >= fromDate.Value.ToUniversalTime().Date);
+                var date = fromDate.Value;
+                TimeSpan time = new TimeSpan(0, 0, 0, 0);
+                DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime >= combined);
             }
 
 
             if (toDate != null)
             {
-                data = data.Where(a => a.AppointmentDateTime.Date <= toDate.Value.ToUniversalTime().Date);
+                var date = toDate.Value;
+                TimeSpan time = new TimeSpan(0, 23, 59, 59);
+                DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime <= combined);
             }
 
             return data.Include(a => a.AppUser);

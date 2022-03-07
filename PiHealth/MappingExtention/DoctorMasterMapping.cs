@@ -24,6 +24,7 @@ namespace PiHealth.Web.MappingExtention
             entity.ModifiedBy = model.modifiedBy;
             entity.ModifiedDate = model.modifiedDate;
             entity.Name = model.name;
+            entity.PinCode = model.pinCode;
             entity.Notes = model.notes;
             entity.Percentage = model.percentage;
             entity.PhoneNo1 = model.phoneNo1;
@@ -48,6 +49,7 @@ namespace PiHealth.Web.MappingExtention
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
             model.name = entity.Name;
+            model.pinCode = entity.PinCode;
             model.notes = entity.Notes;
             model.percentage = entity.Percentage;
             model.phoneNo1 = entity.PhoneNo1;

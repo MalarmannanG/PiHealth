@@ -58,7 +58,6 @@ namespace PiHealth
                 {
                     setup.SerializerSettings.ContractResolver = new DefaultContractResolver();
                     setup.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                    setup.SerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Utc;
                 });
             }
             services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));

@@ -60,7 +60,8 @@ namespace PiHealth.Services.PiHealthPatients
 
             if (!string.IsNullOrEmpty(name))
             {
-                data = data.Where(a => a.PatientName.Contains(name));
+                //data = data.Where(a => a.PatientName.Contains(name));
+                data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.PatientName.Contains(name) || e.Age.ToString() == name || e.Gender.ToString() == name || e.Address.Contains(name) || e.MobileNumber.Contains(name) || e.DoctorMaster.Name.Contains(name));
             }
 
             data = data.AsQueryable();

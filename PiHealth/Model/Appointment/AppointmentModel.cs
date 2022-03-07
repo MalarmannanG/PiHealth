@@ -25,6 +25,7 @@ namespace PiHealth.Web.Model.Appointment
         public string timeOfAppintment { get; set; }
         public bool isActive { get; set; }
         public DateTime appointmentDateTime { get; set; }
+        public string appointmentISOString  { get; set; }
         public DateTime createdDate { get; set; }
         public long createdBy { get; set; }
         public DateTime? updatedDate { get; set; }
@@ -40,8 +41,8 @@ namespace PiHealth.Web.Model.Appointment
         public string patientName { get; set; }
         public bool? isProcedure { get; set; }
         public string doctorName { get; set; }
-        public DateTime? fromDate { get; set; }
-        public DateTime? toDate { get; set; }
+        public string fromDate { get; set; }
+        public string toDate { get; set; }
 
         public bool todayPatients { get; set; }
     }

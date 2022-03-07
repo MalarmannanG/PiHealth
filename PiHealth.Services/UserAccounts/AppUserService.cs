@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using PiHealth.DataModel;
 using PiHealth.DataModel.Entity;
+using PiHealth.Services;
 using PiHealth.Services.UserAccounts;
 using System;
 using System.Collections.Generic;
@@ -48,7 +49,8 @@ namespace PiHealth.Service.UserAccounts
 
             if (!string.IsNullOrEmpty(name))
             {
-                data = data.Where(a => a.Name != null && a.Name.Contains(name));
+                //data = data.Where(a => a.Name != null && a.Name.Contains(name));
+                data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
             }
 
             return data;
