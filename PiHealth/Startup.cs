@@ -48,6 +48,7 @@ namespace PiHealth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+           
             GlobalConfiguration.WebRootPath = _webHostEnvironment.WebRootPath;
             GlobalConfiguration.ContentRootPath = _webHostEnvironment.ContentRootPath;
 
@@ -109,6 +110,7 @@ namespace PiHealth
 
             services.AddMvc(option =>
             {
+                option.Filters.Add(new ExceptionLogFilter());
                 option.Filters.Add(typeof(ExceptionHandlingFilter)); // by type                
             })
                .AddJsonOptions(
@@ -125,7 +127,7 @@ namespace PiHealth
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-
+            loggerFactory.AddLog4Net();
             app.UseSwagger();
 
             app.UseSwaggerUI(options =>

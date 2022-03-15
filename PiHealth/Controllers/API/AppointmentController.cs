@@ -14,6 +14,7 @@ using PiHealth.Services.PiHealthPatients;
 using PiHealth.Web.MappingExtention;
 using PiHealth.Web.Model.Appointment;
 using PiHealth.Controllers;
+using System.Globalization;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -130,6 +131,8 @@ namespace PiHealth.Web.Controllers.API
             appointment.CreatedDate = DateTime.Now;
             appointment.CreatedBy = ActiveUser.Id;
             appointment.IsActive = true;
+            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss ", CultureInfo.InvariantCulture);
+            appointment.AppointmentDateTime = FormattedDate;
             await _appointmentService.Create(appointment);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
@@ -148,8 +151,9 @@ namespace PiHealth.Web.Controllers.API
 
             if (appointment == null)
                 return BadRequest();
-            model.appointmentDateTime = DateTime.Parse(model.appointmentISOString);
             var updated = model.ToEntity(appointment);
+            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss",CultureInfo.InvariantCulture);
+            appointment.AppointmentDateTime = FormattedDate;
             appointment = await _appointmentService.Update(appointment);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");

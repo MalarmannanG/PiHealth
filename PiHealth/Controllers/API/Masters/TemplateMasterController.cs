@@ -63,13 +63,20 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] TemplateMasterModel model)
         {
+            long templateId = -1;
             var templateMaster = model.ToEntity(new TemplateMaster());
             templateMaster.CreatedDate = DateTime.Now;
             templateMaster.CreatedBy = ActiveUser.Id;
-            await _templateMasterService.Create(templateMaster);
+
+            var _templates = await _templateMasterService.GetByName(templateMaster.Name);
+            if (_templates == null)
+            {
+                await _templateMasterService.Create(templateMaster);
+                templateId = templateMaster.Id;
+            }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
-            return Ok(templateMaster.Id);
+            return Ok(templateId);
         }
 
         [HttpPut]
