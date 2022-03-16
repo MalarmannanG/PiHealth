@@ -131,7 +131,7 @@ namespace PiHealth.Web.Controllers.API
             appointment.CreatedDate = DateTime.Now;
             appointment.CreatedBy = ActiveUser.Id;
             appointment.IsActive = true;
-            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss ", CultureInfo.InvariantCulture);
+            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             appointment.AppointmentDateTime = FormattedDate;
             await _appointmentService.Create(appointment);
 

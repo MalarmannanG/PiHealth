@@ -61,5 +61,9 @@ namespace PiHealth.Services.Master
         {
             return await _repository.GetByIdAsync(id);
         }
+        public virtual async Task<DiagnosisMaster> GetByName(string diagName, long Id)
+        {
+            return _repository.Table.Where(a => a.Name.ToLower() == diagName.ToLower() && !a.IsDeleted && a.Id != Id).FirstOrDefault();
+        }
     }
 }

@@ -64,36 +64,46 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] TestMasterModel model)
         {
+            long testId = -1;
             var test = model.ToEntity(new TestMaster());
             test.CreatedDate = DateTime.Now;
             test.CreatedBy = ActiveUser.Id;
-            await _testMasterService.Create(test);
+            var _templates = await _testMasterService.GetByName(test.Name, 0);
+            if (_templates == null)
+            {
+                await _testMasterService.Create(test);
+                testId = test.Id;
+            }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
-            return Ok(test);
+            return Ok(testId);
         }
 
         [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] TestMasterModel model)
         {
+            long templateId = -1;
             if (model == null)
                 return BadRequest();
+            var _templates = await _testMasterService.GetByName(model.name, model.id.Value);
+            if (_templates == null)
+            {
+                var test = await _testMasterService.Get(model.id.Value);
 
-            var test = await _testMasterService.Get(model.id.Value);
+                if (test == null)
+                    return BadRequest();
 
-            if (test == null)
-                return BadRequest();
+                test.Name = model.name;
+                test.Remarks = model.remarks;
+                test.IsDeleted = model.isDeleted;
+                test.ModifiedDate = DateTime.Now;
+                test.ModifiedBy = ActiveUser.Id;
+                await _testMasterService.Update(test);
 
-            test.Name = model.name;
-            test.Remarks = model.remarks;
-            test.IsDeleted = model.isDeleted;
-            test.ModifiedDate = DateTime.Now;
-            test.ModifiedBy = ActiveUser.Id;
-            await _testMasterService.Update(test);
-
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
+                _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            }
+            else
+                model.id = templateId;
             return Ok(model);
 
         }

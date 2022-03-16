@@ -66,20 +66,29 @@ namespace PiHealth.Web.Controllers.API.Masters
             var diagnosis = model.ToEntity(new DiagnosisMaster());
             diagnosis.CreatedDate = DateTime.Now;
             diagnosis.CreatedBy = ActiveUser.Id;
-            await _diagnosisMasterService.Create(diagnosis);
+            long templateId = -1;
+            var _templates = await _diagnosisMasterService.GetByName(model.name, 0);
+            if (_templates == null)
+            {
+                await _diagnosisMasterService.Create(diagnosis);
+                templateId = diagnosis.Id;
+            }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
-            return Ok(diagnosis);
+            return Ok(templateId);
         }
 
         [HttpPut]
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] DiagnosisMasterModel model)
         {
+            long templateId = -1;
             if (model == null)
                 return BadRequest();
-
-            var diagnosis = await _diagnosisMasterService.Get(model.id.Value);
+            var _templates = await _diagnosisMasterService.GetByName(model.name, model.id.Value);
+            if (_templates == null)
+            {
+                var diagnosis = await _diagnosisMasterService.Get(model.id.Value);
 
             if (diagnosis == null)
                 return BadRequest();
@@ -92,7 +101,9 @@ namespace PiHealth.Web.Controllers.API.Masters
             await _diagnosisMasterService.Update(diagnosis);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
+            }
+            else
+                model.id = templateId;
             return Ok(model);
 
         }

@@ -67,15 +67,13 @@ namespace PiHealth.Web.Controllers.API.Masters
             var templateMaster = model.ToEntity(new TemplateMaster());
             templateMaster.CreatedDate = DateTime.Now;
             templateMaster.CreatedBy = ActiveUser.Id;
-
-            var _templates = await _templateMasterService.GetByName(templateMaster.Name);
+            var _templates = await _templateMasterService.GetByName(templateMaster.Name, 0);
             if (_templates == null)
             {
                 await _templateMasterService.Create(templateMaster);
                 templateId = templateMaster.Id;
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
             return Ok(templateId);
         }
 
@@ -83,22 +81,29 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] TemplateMasterModel model)
         {
-            if (model == null)
-                return BadRequest();
+            long templateId = -1;
+            var _templates = await _templateMasterService.GetByName(model.name, model.id);
+            if (_templates == null)
+            {
+                if (model == null)
+                    return BadRequest();
 
-            var templateMaster = await _templateMasterService.UpdateGet(model.id);
+                var templateMaster = await _templateMasterService.UpdateGet(model.id);
 
-            if (templateMaster == null)
-                return BadRequest();
+                if (templateMaster == null)
+                    return BadRequest();
 
-            templateMaster = model.ToEntity(templateMaster);
-            templateMaster.IsDeleted = model.isDeleted;
-            templateMaster.ModifiedDate = DateTime.Now;
-            templateMaster.ModifiedBy = ActiveUser.Id;
-            await _templateMasterService.Update(templateMaster);
+                templateMaster = model.ToEntity(templateMaster);
+                templateMaster.IsDeleted = model.isDeleted;
+                templateMaster.ModifiedDate = DateTime.Now;
+                templateMaster.ModifiedBy = ActiveUser.Id;
 
+                await _templateMasterService.Update(templateMaster);
+            }
+            else
+                model.id = templateId;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
+            
             return Ok(model);
 
         }
@@ -107,7 +112,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(long id)
         {
-            var templateMaster = await _templateMasterService.Get(id);
+            var templateMaster = await _templateMasterService.UpdateGet(id);
 
             if (templateMaster == null)
                 return BadRequest();

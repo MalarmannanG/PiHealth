@@ -52,19 +52,20 @@ namespace PiHealth.Services.Master
            return await _repository.InsertAsync(entity);
         }
 
-        public virtual async Task<TemplateMaster> Delete(TemplateMaster entity)
+        public virtual async Task Delete(TemplateMaster entity)
         {
             entity.IsDeleted = true;
-            return await _repository.UpdateAsync(entity);
+            //return await _repository.UpdateAsync(entity);
+            _repository.Delete(entity);
         }
 
         public virtual async Task<TemplateMaster> Get(long id)
         {
             return await _repository.TableNoTracking.Where(a => a.Id == id).Include(a => a.TemplatePrescriptions).FirstOrDefaultAsync();
         }
-        public virtual async Task<TemplateMaster> GetByName(string TemplateName)
+        public virtual async Task<TemplateMaster> GetByName(string TemplateName, long id)
         {
-            return await _repository.TableNoTracking.Where(a => a.Name.ToLower() == TemplateName.ToLower()).Include(a => a.TemplatePrescriptions).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.Name.ToLower() == TemplateName.ToLower() && !a.IsDeleted && a.Id != id).FirstOrDefaultAsync();
         }
         public virtual async Task<TemplateMaster> UpdateGet(long id)
         {
