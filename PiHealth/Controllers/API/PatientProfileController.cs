@@ -174,7 +174,7 @@ namespace PiHealth.Web.Controllers.API
             }
             try
             {
-                if (model.isfollowUpNeed)
+                if (model.isfollowUpNeed && !model.appointment.isActive)
                 {
                     _appoinment.Id = 0;
                     _appoinment.AppUserId = ActiveUser.Id;

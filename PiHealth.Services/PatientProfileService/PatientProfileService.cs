@@ -76,7 +76,7 @@ namespace PiHealth.Services.PatientProfileService
 
         public virtual async Task<PatientProfile> GetPrescriptions(long id)
         {
-            return await _repository.Table.Where(a => a.Id == id).Include(a => a.Prescriptions).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.Id == id && !a.IsDeleted).Include(a => a.Prescriptions).FirstOrDefaultAsync();
         }
     }
 }

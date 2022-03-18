@@ -78,6 +78,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] PatientModel model)
         {
+            
             if (model == null)
                 return BadRequest();
 
@@ -87,12 +88,14 @@ namespace PiHealth.Web.Controllers.API.Masters
             entity.HrNo = ulIdPrefix + entity.HrNo;
             entity.CreatedBy = ActiveUser.Id;
             entity.CreatedDate = DateTime.Now;
-
-            var patient = _patientService.Create(entity);
-          
-
-            model = patient?.ToModel(new PatientModel());
-
+            var _templates = await _patientService.GetByName(model.patientName, 0, model.ulId);
+            if (_templates == null)
+            {
+                var patient = _patientService.Create(entity);
+                model = patient?.ToModel(new PatientModel());
+            }
+            else
+                model.id = -1;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success");
 
             return Ok(model);
@@ -102,6 +105,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] PatientModel model)
         {
+            long templateId = -1;
             if (model == null)
                 return BadRequest();
 
@@ -111,12 +115,15 @@ namespace PiHealth.Web.Controllers.API.Masters
                 return BadRequest();
 
             entity = model.ToEntity(entity);
-
-            _patientService.Update(entity);
-
+            var _templates = await _patientService.GetByName(model.patientName, model.id, model.ulId);
+            if (_templates == null)
+            {
+                _patientService.Update(entity);
+                templateId = entity.Id;
+            }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success");
 
-            return Ok(model);
+            return Ok(templateId);
         }
 
         [HttpDelete]

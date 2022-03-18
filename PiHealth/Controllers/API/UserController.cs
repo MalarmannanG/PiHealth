@@ -106,11 +106,11 @@ namespace PiHealth.Web.Controllers.API
             if (model == null)
                 return BadRequest();
 
-            var emailExist = _userService.EmailAlreadyExit(model.email);
+            var emailExist = _userService.EmailAlreadyExit(model.userName);
 
             if (emailExist)
             {
-                return BadRequest("Email");
+                return BadRequest("UserName");
             }
 
             var user = model.ToEntity(new AppUser());
@@ -132,7 +132,7 @@ namespace PiHealth.Web.Controllers.API
             if (model == null)
                 return BadRequest();
 
-            var emailExist = _userService.EmailAlreadyExit(model.email, model.id);
+            var emailExist = _userService.EmailAlreadyExit(model.userName, model.id);
 
             if (emailExist)
             {

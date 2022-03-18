@@ -80,12 +80,18 @@ namespace PiHealth.Web.Controllers.API.Masters
             var entity = model.ToEntity(new DoctorMaster());
             entity.CreatedBy = ActiveUser.Id;
             entity.CreatedDate = DateTime.Now;
-
-            await _doctorMasterService.Create(entity);
-
+            long templateId = -1;
+            var _templates = await _doctorMasterService.GetByName(model.name, 0, model.clinicName);
+            if (_templates == null)
+            {
+                await _doctorMasterService.Create(entity);
+                templateId = entity.Id;
+            }
+            else
+                model.id = -1;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
-            return Ok(new { status = true, msg = "Doctor Info added successfully" });
+            return Ok(model);
         }
 
         [HttpPut]
@@ -99,24 +105,29 @@ namespace PiHealth.Web.Controllers.API.Masters
 
             if (entity == null)
                 return BadRequest();
-
-            entity.ModifiedBy = ActiveUser.Id;
-            entity.ModifiedDate = DateTime.Now;
-            entity.Name = model.name;
-            entity.Address = model.address;
-            entity.ClinicName = model.clinicName;
-            entity.Email = model.email;
-            entity.Percentage = model.percentage;
-            entity.TelNo = model.telNo;
-            entity.PhoneNo1 = model.phoneNo1;
-            entity.PhoneNo2 = model.phoneNo2;
-            entity.Qualification = model.qualification;
-            entity.PinCode = model.pinCode;
-            await _doctorMasterService.Update(entity);
-
+            long templateId = -1;
+            var _templates = await _doctorMasterService.GetByName(model.name, model.id, model.clinicName);
+            if (_templates == null)
+            {
+                entity.ModifiedBy = ActiveUser.Id;
+                entity.ModifiedDate = DateTime.Now;
+                entity.Name = model.name;
+                entity.Address = model.address;
+                entity.ClinicName = model.clinicName;
+                entity.Email = model.email;
+                entity.Percentage = model.percentage;
+                entity.TelNo = model.telNo;
+                entity.PhoneNo1 = model.phoneNo1;
+                entity.PhoneNo2 = model.phoneNo2;
+                entity.Qualification = model.qualification;
+                entity.PinCode = model.pinCode;
+                await _doctorMasterService.Update(entity);
+            }
+            else
+                model.id = templateId;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
-            return Ok(new { status = true, msg = "Doctor Info updated successfully" });
+            return Ok(model);
         }
         
         [HttpDelete]

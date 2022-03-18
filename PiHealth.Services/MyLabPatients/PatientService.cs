@@ -107,6 +107,11 @@ namespace PiHealth.Services.PiHealthPatients
             
             return data.Count();
         }
+        
+        public virtual async Task<Patient> GetByName(string patientName, long Id, string UHID)
+        {
+            return _repository.Table.Where(a => a.PatientName.ToLower() == patientName.ToLower() && a.UlID == UHID && !a.IsDeleted && a.Id != Id).FirstOrDefault();
+        }
 
         public string NewULID()
         {
