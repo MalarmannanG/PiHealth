@@ -83,7 +83,7 @@ namespace PiHealth
             services.AddScoped<TestMasterService>();
             services.AddScoped<TemplateMasterService>();
             services.AddScoped<PatientProfileService>();
-
+            services.AddScoped<PatientProcedureService>();
             services.AddScoped<AuditLogServices>();
             services.AddScoped<AccessModuleService>();
             services.AddScoped<AccessFunctionService>();

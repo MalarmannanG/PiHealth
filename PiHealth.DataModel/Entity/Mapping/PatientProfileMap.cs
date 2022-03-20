@@ -21,6 +21,8 @@ namespace PiHealth.DataModel.Entity.Mapping
             builder.HasOne(t => t.TemplateMaster)
            .WithMany(t => t.PatientProfile)
            .HasForeignKey(d => d.TemplateMasterId);
+
+
         }
     }
 }

@@ -12,10 +12,12 @@ namespace PiHealth.Services.PatientProfileService
 {   
     public class PatientProfileService
     {
-        public readonly IRepository<PatientProfile> _repository;     
-        public PatientProfileService(IRepository<PatientProfile> repository)
+        public readonly IRepository<PatientProfile> _repository;
+        public readonly IRepository<PatientProcedure> _repositoryProcedure;
+        public PatientProfileService(IRepository<PatientProfile> repository, IRepository<PatientProcedure> repositoryProcedure)
         {
-            _repository = repository;           
+            _repository = repository;
+            _repositoryProcedure = repositoryProcedure;
         }      
 
         public virtual IQueryable<PatientProfile> GetAll(string name = null, long? patientId = null, long[] appointmentIds = null)

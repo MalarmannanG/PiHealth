@@ -34,6 +34,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public long? modifiedBy { get; set; }
         public PatientModel patientModel { get; set; }
         public AppointmentModel appointment { get; set; }
+        public ProcedureModel procedureModel { get; set; }
         public List<PatientDiagnosisModel> patientDiagnosisModel { get; set; }
         public List<PrescriptionModel> prescriptionModel { get; set; }
         public List<PatientTestModel> patientTestModel { get; set; }
@@ -106,6 +107,29 @@ namespace PiHealth.Web.Model.PatientProfile
         public bool isDeleted { get; set; }
         public bool sos { get; set; }
         public bool stat { get; set; }
+        public DateTime createdDate { get; set; }
+        public DateTime? modifiedDate { get; set; }
+        public long createdBy { get; set; }
+        public long? modifiedBy { get; set; }
+    }
+
+    public class ProcedureModel
+    {
+        public ProcedureModel()
+        {
+
+        }
+        public long id { get; set; }
+        public string diagnosis { get; set; }
+        public string date { get; set; }
+        public string procedurename { get; set; }
+        public long? referedBy { get; set; }
+        public string referedByName { get; set; }
+        public string anesthesia { get; set; }
+        public string description { get; set; }
+        public string complication { get; set; }
+        public string others { get; set; }
+        public double? actualCost { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }

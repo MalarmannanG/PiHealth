@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace PiHealth.DataModel.Entity
@@ -12,7 +13,6 @@ namespace PiHealth.DataModel.Entity
             PatientTests = new List<PatientTest>();
             PatientDiagnosis = new List<PatientDiagnosis>();            
         }
-
         public long PatientId { get; set; }
         public long DoctorId { get; set; }
         public long? TemplateMasterId { get; set; }

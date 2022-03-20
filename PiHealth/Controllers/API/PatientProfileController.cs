@@ -14,6 +14,7 @@ using PiHealth.Web.Model.Appointment;
 using PiHealth.Web.Model.PatientProfile;
 using PiHealth.Web.Model.VitalsReport;
 using PiHealth.Controllers;
+using PiHealth.Web.Model.PatientProcedureModel;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -26,17 +27,20 @@ namespace PiHealth.Web.Controllers.API
         private readonly IAppUserService _appUserService;
         private readonly AuditLogServices _auditLogService;
         private readonly AppointmentService _appointmentService;
+        private readonly PatientProcedureService _patientProcedureService;
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
             IAppUserService appUserService,
             AppointmentService appointmentService,
+            PatientProcedureService patientProcedureService,
             AuditLogServices auditLogServices)
         {
             _patientProfileService = patientProfileService;
             _appUserService = appUserService;
             _appointmentService = appointmentService;
             _auditLogService = auditLogServices;
+            _patientProcedureService = patientProcedureService;
         }
 
         #region  PatientProfile Master
@@ -56,6 +60,47 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();                
                 patientProfile.appointmentId = appointment.Id;
                 patientProfile.patientId = appointment.PatientId ?? 0;
+                patientProfile.procedureModel = new ProcedureModel();
+                var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
+                if (entity != null)
+                {
+                    patientProfile.procedureModel.id = entity.Id;
+                    patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
+                    patientProfile.procedureModel.referedByName = entity.DoctorMaster.Name;
+                    patientProfile.procedureModel.date = entity.Date;
+                    patientProfile.procedureModel.description = entity.Description;
+                    patientProfile.procedureModel.diagnosis = entity.Diagnosis;
+                    patientProfile.procedureModel.others = entity.Others;
+                    patientProfile.procedureModel.procedurename = entity.Procedurename;
+                    patientProfile.procedureModel.actualCost = entity.ActualCost;
+                    patientProfile.procedureModel.anesthesia = entity.Anesthesia;
+                    patientProfile.procedureModel.complication = entity.Complication;
+                    patientProfile.procedureModel.createdBy = entity.CreatedBy;
+                    patientProfile.procedureModel.createdDate = entity.CreatedDate;
+                }
+
+            }
+            else
+            {
+                patientProfile.procedureModel = new ProcedureModel();
+                var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
+                if (entity != null)
+                {
+                    patientProfile.procedureModel.id = entity.Id;
+                    patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
+                    patientProfile.procedureModel.referedByName = entity.DoctorMaster.Name;
+                    patientProfile.procedureModel.date = entity.Date;
+                    patientProfile.procedureModel.description = entity.Description;
+                    patientProfile.procedureModel.diagnosis = entity.Diagnosis;
+                    patientProfile.procedureModel.others = entity.Others;
+                    patientProfile.procedureModel.procedurename = entity.Procedurename;
+                    patientProfile.procedureModel.actualCost = entity.ActualCost;
+                    patientProfile.procedureModel.anesthesia = entity.Anesthesia;
+                    patientProfile.procedureModel.complication = entity.Complication;
+                    patientProfile.procedureModel.createdBy = entity.CreatedBy;
+                    patientProfile.procedureModel.createdDate = entity.CreatedDate;
+                }
+
             }
             return Ok(patientProfile);
         }
@@ -145,6 +190,7 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.UpdatedDate = DateTime.Now;
                         await _appointmentService.Update(_appoinment);
                     }
+                    
                     await _patientProfileService.Create(patientProfile);
                 }
                 else
@@ -164,6 +210,32 @@ namespace PiHealth.Web.Controllers.API
                     await _patientProfileService.Update(patientProfile);
                     _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
+                }
+                if(model.procedureModel != null)
+                {
+                    if (model.procedureModel.id > 0)
+                    {
+                        var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                        var entity = model.procedureModel.ToEntity(patientProcedure);
+                        await _patientProcedureService.Update(entity);
+
+                    }
+                    else
+                    {
+                        var entity = model.procedureModel.ToEntity(new PatientProcedure());
+                        var _model = model.procedureModel;
+                        entity.DoctorMasterId = _model.referedBy;
+                        entity.Date = _model.date;
+                        entity.Description = _model.description;
+                        entity.Diagnosis = _model.diagnosis;
+                        entity.Others = _model.others;
+                        entity.Procedurename = _model.procedurename;
+                        entity.ActualCost = _model.actualCost;
+                        entity.Anesthesia = _model.anesthesia;
+                        entity.Complication = _model.complication;
+                        entity.PatientProfileId = patientProfile.Id;
+                        await _patientProcedureService.Create(entity);
+                    }
                 }
 
             }

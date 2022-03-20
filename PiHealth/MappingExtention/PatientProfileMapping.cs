@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using PiHealth.DataModel;
 using PiHealth.DataModel.Entity;
 using PiHealth.Web.Model.Appointment;
 using PiHealth.Web.Model.PatientProfile;
@@ -163,6 +164,23 @@ namespace PiHealth.Web.MappingExtention
             entity.DiagnosisMasterId = model.diagnosisMasterId;
             entity.Description = model.description;
             entity.IsDeleted = model.isDeleted;
+            entity.CreatedBy = model.createdBy;
+            entity.CreatedDate = model.createdDate;
+            entity.ModifiedBy = model.modifiedBy;
+            entity.ModifiedDate = model.modifiedDate;
+            return entity;
+        }
+
+        public static PatientProcedure ToEntity(this ProcedureModel model, PatientProcedure entity)
+        {
+            entity.ActualCost = model.actualCost;
+            entity.Description = model.description;
+            entity.Anesthesia = model.anesthesia;
+            entity.Complication = model.complication;
+            entity.Date = model.date;
+            entity.Diagnosis = model.diagnosis;
+            entity.Procedurename = model.procedurename;
+            entity.Others = model.others;
             entity.CreatedBy = model.createdBy;
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;
