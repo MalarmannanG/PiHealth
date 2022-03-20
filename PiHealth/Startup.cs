@@ -227,7 +227,10 @@ namespace PiHealth
             }
             app.UseMiddleware<ErrorHandlingMiddleware>();
             //app.UseCors("CorsPolicy");
-
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
