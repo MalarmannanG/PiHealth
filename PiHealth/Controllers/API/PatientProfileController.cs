@@ -15,6 +15,7 @@ using PiHealth.Web.Model.PatientProfile;
 using PiHealth.Web.Model.VitalsReport;
 using PiHealth.Controllers;
 using PiHealth.Web.Model.PatientProcedureModel;
+using PiHealth.Services.PiHealthPatients;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -28,12 +29,14 @@ namespace PiHealth.Web.Controllers.API
         private readonly AuditLogServices _auditLogService;
         private readonly AppointmentService _appointmentService;
         private readonly PatientProcedureService _patientProcedureService;
+        private readonly PatientService _patientService;
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
             IAppUserService appUserService,
             AppointmentService appointmentService,
             PatientProcedureService patientProcedureService,
+            PatientService patientService,
             AuditLogServices auditLogServices)
         {
             _patientProfileService = patientProfileService;
@@ -41,6 +44,7 @@ namespace PiHealth.Web.Controllers.API
             _appointmentService = appointmentService;
             _auditLogService = auditLogServices;
             _patientProcedureService = patientProcedureService;
+            _patientService = patientService;
         }
 
         #region  PatientProfile Master
@@ -57,7 +61,7 @@ namespace PiHealth.Web.Controllers.API
                 var appointment = await _appointmentService.Get(id);
                 patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
                 patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
-                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();                
+                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
                 patientProfile.appointmentId = appointment.Id;
                 patientProfile.patientId = appointment.PatientId ?? 0;
                 patientProfile.procedureModel = new ProcedureModel();
@@ -77,6 +81,12 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.procedureModel.complication = entity.Complication;
                     patientProfile.procedureModel.createdBy = entity.CreatedBy;
                     patientProfile.procedureModel.createdDate = entity.CreatedDate;
+                }
+                else
+                {
+                    var patient =await _patientService.Get(result.Patient.Id);
+                    patientProfile.procedureModel.referedByName = patient.DoctorMaster.Name;
+                    patientProfile.procedureModel.referedBy = result.Patient.DoctorMasterId;
                 }
 
             }
@@ -100,6 +110,12 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.procedureModel.createdBy = entity.CreatedBy;
                     patientProfile.procedureModel.createdDate = entity.CreatedDate;
                 }
+                else
+                {
+                    var patient = await _patientService.Get(result.Patient.Id);
+                    patientProfile.procedureModel.referedByName = patient.DoctorMaster.Name;
+                    patientProfile.procedureModel.referedBy = result.Patient.DoctorMasterId;
+                }
 
             }
             return Ok(patientProfile);
@@ -112,8 +128,20 @@ namespace PiHealth.Web.Controllers.API
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
-            patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel() { beforeFood = a.BeforeFood, categoryName = a.CategoryName, genericName=a.GenericName,
-             medicineName = a.MedicineName, morning=a.Morning, night=a.Night, noOfDays=a.NoOfDays, noon=a.Noon, remarks=a.Remarks, strength=a.Strength,units=a.Units }).ToList();
+            patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
+            {
+                beforeFood = a.BeforeFood,
+                categoryName = a.CategoryName,
+                genericName = a.GenericName,
+                medicineName = a.MedicineName,
+                morning = a.Morning,
+                night = a.Night,
+                noOfDays = a.NoOfDays,
+                noon = a.Noon,
+                remarks = a.Remarks,
+                strength = a.Strength,
+                units = a.Units
+            }).ToList();
             if (result == null)
             {
                 var appointment = await _appointmentService.Get(result.AppointmentId);
@@ -122,7 +150,7 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
                 patientProfile.appointmentId = appointment.Id;
                 patientProfile.patientId = appointment.PatientId ?? 0;
-                
+
             }
             return Ok(patientProfile);
         }
@@ -179,7 +207,7 @@ namespace PiHealth.Web.Controllers.API
             try
             {
                 if (patientProfile == null)
-                {                    
+                {
                     patientProfile = model.ToEntity(new PatientProfile());
                     patientProfile.CreatedDate = DateTime.Now;
                     patientProfile.CreatedBy = ActiveUser.Id;
@@ -190,7 +218,7 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.UpdatedDate = DateTime.Now;
                         await _appointmentService.Update(_appoinment);
                     }
-                    
+
                     await _patientProfileService.Create(patientProfile);
                 }
                 else
@@ -200,7 +228,7 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.IsDeleted = model.isDeleted;
                     patientProfile.ModifiedDate = DateTime.Now;
                     patientProfile.ModifiedBy = ActiveUser.Id;
-                      if (!model.appointment.isActive)
+                    if (!model.appointment.isActive)
                     {
                         _appoinment.IsActive = false;
                         _appoinment.UpdatedBy = ActiveUser.Id;
@@ -211,7 +239,7 @@ namespace PiHealth.Web.Controllers.API
                     _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
                 }
-                if(model.procedureModel != null)
+                if (model.procedureModel != null)
                 {
                     if (model.procedureModel.id > 0)
                     {
