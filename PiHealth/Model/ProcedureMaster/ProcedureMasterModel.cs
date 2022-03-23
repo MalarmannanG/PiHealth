@@ -12,7 +12,7 @@ namespace PiHealth.Model.ProcedureMaster
         public string description { get; set; }
         public string complication { get; set; }
         public string others { get; set; }
-        public double? actualCost { get; set; }
+        public long? actualCost { get; set; }
         public bool isDeleted { get; set; }
         public DateTime createdDate { get; set; }
         public long createdBy { get; set; }
