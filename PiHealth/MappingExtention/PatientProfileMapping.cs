@@ -180,11 +180,29 @@ namespace PiHealth.Web.MappingExtention
             entity.Date = model.date;
             entity.Diagnosis = model.diagnosis;
             entity.Procedurename = model.procedurename;
+            entity.DoctorMasterId = model.referedBy;
             entity.Others = model.others;
             entity.CreatedBy = model.createdBy;
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;
             entity.ModifiedDate = model.modifiedDate;
+            return entity;
+        }
+        public static PatientProcedure ToModel(this PatientProcedure entity, ProcedureModel model)
+        {
+            model.actualCost = entity.ActualCost;
+             model.description = entity.Description;
+            model.anesthesia = entity.Anesthesia;
+            model.complication = entity.Complication;
+            model.date = entity.Date ;
+            model.diagnosis = entity.Diagnosis;
+            model.procedurename = entity.Procedurename ;
+            model.referedBy = entity.DoctorMasterId;
+            model.others = entity.Others ;
+            model.createdBy = entity.CreatedBy;
+            model.createdDate = entity.CreatedDate ;
+            model.modifiedBy = entity.ModifiedBy;
+            model.modifiedDate = entity.ModifiedDate;
             return entity;
         }
     }

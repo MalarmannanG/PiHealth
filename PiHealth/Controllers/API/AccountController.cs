@@ -84,7 +84,7 @@ namespace PiHealth.Web.Controllers
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: user.Id, RequestIP: RequestIP, value1: $"Email-{loginUser.Email}", value2: "Success");
 
-            return Ok(new { token = accessToken, role = user.UserType, username = user.Name, id = user.Id });
+            return Ok(new { token = accessToken, role = user.UserType, username = user.Name, id = user.Id, name = user.Name, registrationNo = user.RegistrationNo });
         }
 
         //[AllowAnonymous]

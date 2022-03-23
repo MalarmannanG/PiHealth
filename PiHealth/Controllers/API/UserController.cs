@@ -118,6 +118,8 @@ namespace PiHealth.Web.Controllers.API
             user.CreatedDate = DateTime.UtcNow;
             user.Password = _securityService.GetSha256Hash(model.password);
             user.Username = user.Name;
+            user.SpecializationId = model.specializationId;
+            user.RegistrationNo = model.registrationNo;
             user = await _userService.Create(user);
             user.IsActive = true;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success", value2: "Create");
@@ -154,11 +156,21 @@ namespace PiHealth.Web.Controllers.API
             user.Gender = model.gender;
             user.Username = model.name;
             user.Address = model.address;
+            user.SpecializationId = model.specializationId;
+            user.RegistrationNo = model.registrationNo;
             user.IsActive = true;
             await _userService.Update(user);
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success", value2: "Update");
             return Ok(model);
         }
 
+        [HttpGet]
+        [Route("GeAllSpecialization")]
+        public IActionResult GeAllSpecialization([FromQuery] string name = null)
+        {
+            var user = _userService.GetAllSpecialition(name: name);
+            var result = user.Select(a => a).ToList();
+            return Ok( result );
+        }
     }
 }

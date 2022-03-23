@@ -30,6 +30,7 @@ using PiHealth.WebInfra;
 using PiHealth.Extention;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace PiHealth
 {
@@ -87,6 +88,7 @@ namespace PiHealth
             services.AddScoped<AuditLogServices>();
             services.AddScoped<AccessModuleService>();
             services.AddScoped<AccessFunctionService>();
+            services.AddScoped<ProcedureMasterService>(); 
             services.AddScoped<AccessRoleFunctionService>();
             services.Configure<BearerTokensOptions>(options => Configuration.GetSection("BearerTokens").Bind(options));
             services.Configure<PrefixOption>(options => Configuration.GetSection("PrefixOption").Bind(options));
@@ -227,7 +229,10 @@ namespace PiHealth
             }
             app.UseMiddleware<ErrorHandlingMiddleware>();
             //app.UseCors("CorsPolicy");
-
+            app.UseForwardedHeaders(new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            });
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(

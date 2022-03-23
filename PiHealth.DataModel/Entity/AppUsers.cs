@@ -21,12 +21,15 @@ namespace PiHealth.DataModel.Entity
         public string Address { get; set; }
         public bool IsActive { get; set; }
         public string SerialNumber { get; set; }
+        public long? SpecializationId { get; set; }
+        public string RegistrationNo { get; set; }
         public Nullable<System.DateTime> CreatedDate { get; set; }   
 
         public DateTimeOffset? LastLoggedIn { get; set; }
 
         public virtual ICollection<UserToken> Tokens { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
+
 
 
     }

@@ -50,6 +50,11 @@ namespace PiHealth.Services.PatientProfileService
             var data = _repository.Table.Where(a => !string.IsNullOrEmpty(a.Compliants)).Select(a=>a.Compliants).Distinct();
             return data;
         }
+        public virtual IQueryable<string> GetAdvice(string name = null)
+        {
+            var data = _repository.Table.Where(a => !string.IsNullOrEmpty(a.Advice)).Select(a => a.Advice).Distinct();
+            return data;
+        }
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {
             return await _repository.UpdateAsync(entity);
@@ -65,7 +70,7 @@ namespace PiHealth.Services.PatientProfileService
             entity.IsDeleted = true;
             await _repository.UpdateAsync(entity);
         }
-
+        
         public virtual async Task<PatientProfile> Get(long id)
         {
             return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient).Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests).ThenInclude(a => a.TestMaster).Include(a => a.Prescriptions).Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a=>a.Appointment.PatientFiles).Include(a => a.Appointment.VitalsReport).FirstOrDefaultAsync();

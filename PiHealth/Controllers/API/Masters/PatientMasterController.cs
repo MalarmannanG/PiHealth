@@ -88,7 +88,7 @@ namespace PiHealth.Web.Controllers.API.Masters
             entity.HrNo = ulIdPrefix + entity.HrNo;
             entity.CreatedBy = ActiveUser.Id;
             entity.CreatedDate = DateTime.Now;
-            var _templates = await _patientService.GetByName(model.patientName, 0, model.ulId);
+            var _templates = await _patientService.GetByName(model.patientName, 0, model.mobileNumber);
             if (_templates == null)
             {
                 var patient = _patientService.Create(entity);
@@ -115,7 +115,7 @@ namespace PiHealth.Web.Controllers.API.Masters
                 return BadRequest();
 
             entity = model.ToEntity(entity);
-            var _templates = await _patientService.GetByName(model.patientName, model.id, model.ulId);
+            var _templates = await _patientService.GetByName(model.patientName, model.id, model.mobileNumber);
             if (_templates == null)
             {
                 _patientService.Update(entity);

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Threading;
 
 namespace PiHealth.Services.Master
 {   
@@ -20,6 +21,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<Appointment> GetAll(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
+            
             var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
 
             if(patientIds?.Count() > 0)
@@ -60,7 +62,7 @@ namespace PiHealth.Services.Master
                 data = data.Where(a => a.AppointmentDateTime <= combined);
             }
 
-            return data.Include(a => a.AppUser);
+            return data.Include(a => a.VitalsReport).Include(a => a.AppUser);
         }
 
           public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
@@ -99,7 +101,7 @@ namespace PiHealth.Services.Master
                 data = data.Where(a => a.AppointmentDateTime.Date <= toDate.Value.Date);
             }
 
-            return data.Include(a => a.AppUser);
+            return data.Include(a => a.VitalsReport).Include(a => a.AppUser);
         }
 
         public virtual async Task<Appointment> Update(Appointment entity)

@@ -27,6 +27,7 @@ namespace PiHealth.Service.UserAccounts
         AppUser GetByID(long id);
 
         AppUser ActiveUser { get; }
+        IQueryable<Specialization> GetAllSpecialition(string name = null);
 
     }
     public class AppUserService : IAppUserService
@@ -34,13 +35,16 @@ namespace PiHealth.Service.UserAccounts
         public readonly IRepository<AppUser> _repository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly SecurityService _securityService;
+        public readonly IRepository<Specialization> _repositorySpecialization;
         public AppUserService(IRepository<AppUser> repository,
             SecurityService securityService,
+            IRepository<Specialization> repositorySpecialization,
             IHttpContextAccessor httpContextAccessor)
         {
             _repository = repository;
             _securityService = securityService;
             _httpContextAccessor = httpContextAccessor;
+            _repositorySpecialization = repositorySpecialization;
         }
 
         public virtual IQueryable<AppUser> GetAll(string name = null)   
@@ -108,6 +112,12 @@ namespace PiHealth.Service.UserAccounts
         public virtual AppUser GetByID(long id)
         {
             return _repository.Table.FirstOrDefault(a => a.Id == id);
+        }
+
+        public IQueryable<Specialization> GetAllSpecialition(string name)
+        {
+            var data = _repositorySpecialization.Table.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) );
+            return data;
         }
 
         public virtual AppUser ActiveUser

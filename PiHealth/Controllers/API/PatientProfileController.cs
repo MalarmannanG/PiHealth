@@ -53,6 +53,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("Get/{id}")]
         public async Task<IActionResult> Get(long id)
         {
+           
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             //patientProfile.followUp.HasValue
@@ -65,12 +66,16 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.appointmentId = appointment.Id;
                 patientProfile.patientId = appointment.PatientId ?? 0;
                 patientProfile.procedureModel = new ProcedureModel();
+            }
+            else
+            {
+                patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
                 if (entity != null)
                 {
                     patientProfile.procedureModel.id = entity.Id;
                     patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
-                    patientProfile.procedureModel.referedByName = entity.DoctorMaster.Name;
+                    patientProfile.procedureModel.referedByName = entity.DoctorMaster?.Name;
                     patientProfile.procedureModel.date = entity.Date;
                     patientProfile.procedureModel.description = entity.Description;
                     patientProfile.procedureModel.diagnosis = entity.Diagnosis;
@@ -82,23 +87,55 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.procedureModel.createdBy = entity.CreatedBy;
                     patientProfile.procedureModel.createdDate = entity.CreatedDate;
                 }
-                else
-                {
-                    var patient =await _patientService.Get(result.Patient.Id);
-                    patientProfile.procedureModel.referedByName = patient.DoctorMaster.Name;
-                    patientProfile.procedureModel.referedBy = result.Patient.DoctorMasterId;
-                }
+               
 
+            }
+            return Ok(patientProfile);
+        }
+
+        [HttpGet]
+        [Route("GetByPatient/{id}")]
+        public async Task<IActionResult> GetByPatient(long id)
+        {
+            var result = await _patientProfileService.GetByPatient(id);
+            var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
+           
+            //patientProfile.followUp.HasValue
+            if (result == null)
+            {
+                var appointment = await _appointmentService.Get(id);
+                patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
+                patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
+                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
+                patientProfile.appointmentId = appointment.Id;
+                patientProfile.patientId = appointment.PatientId ?? 0;
+                patientProfile.procedureModel = new ProcedureModel();
             }
             else
             {
+                var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
+                patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
+                {
+                    beforeFood = a.BeforeFood,
+                    categoryName = a.CategoryName,
+                    genericName = a.GenericName,
+                    medicineName = a.MedicineName,
+                    morning = a.Morning,
+                    night = a.Night,
+                    noOfDays = a.NoOfDays,
+                    noon = a.Noon,
+                    remarks = a.Remarks,
+                    strength = a.Strength,
+                    units = a.Units
+                }).ToList();
+
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
                 if (entity != null)
                 {
                     patientProfile.procedureModel.id = entity.Id;
                     patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
-                    patientProfile.procedureModel.referedByName = entity.DoctorMaster.Name;
+                    patientProfile.procedureModel.referedByName = entity.DoctorMaster?.Name;
                     patientProfile.procedureModel.date = entity.Date;
                     patientProfile.procedureModel.description = entity.Description;
                     patientProfile.procedureModel.diagnosis = entity.Diagnosis;
@@ -116,40 +153,6 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.procedureModel.referedByName = patient.DoctorMaster.Name;
                     patientProfile.procedureModel.referedBy = result.Patient.DoctorMasterId;
                 }
-
-            }
-            return Ok(patientProfile);
-        }
-
-        [HttpGet]
-        [Route("GetByPatient/{id}")]
-        public async Task<IActionResult> GetByPatient(long id)
-        {
-            var result = await _patientProfileService.GetByPatient(id);
-            var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
-            var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
-            patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
-            {
-                beforeFood = a.BeforeFood,
-                categoryName = a.CategoryName,
-                genericName = a.GenericName,
-                medicineName = a.MedicineName,
-                morning = a.Morning,
-                night = a.Night,
-                noOfDays = a.NoOfDays,
-                noon = a.Noon,
-                remarks = a.Remarks,
-                strength = a.Strength,
-                units = a.Units
-            }).ToList();
-            if (result == null)
-            {
-                var appointment = await _appointmentService.Get(result.AppointmentId);
-                patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
-                patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
-                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
-                patientProfile.appointmentId = appointment.Id;
-                patientProfile.patientId = appointment.PatientId ?? 0;
 
             }
             return Ok(patientProfile);
@@ -178,8 +181,9 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetAllComplaints")]
         public IActionResult GetAllComplaints()
         {
-            var complaints = _patientProfileService.GetComplaints();
-            return Ok(complaints);
+            var _complaints = _patientProfileService.GetComplaints();
+            var _advices = _patientProfileService.GetAdvice();
+            return Ok(new { complaints = _complaints, advices = _advices });
         }
 
         [HttpPost]
@@ -187,8 +191,48 @@ namespace PiHealth.Web.Controllers.API
         public async Task<IActionResult> Create([FromBody] PatientProfileModel model)
         {
             var patientProfile = model.ToEntity(new PatientProfile());
+            var _appoinment = await _appointmentService.Get(model.appointmentId);
             patientProfile.CreatedDate = DateTime.Now;
             patientProfile.CreatedBy = ActiveUser.Id;
+            patientProfile = model.ToEntity(new PatientProfile());
+            patientProfile.CreatedDate = DateTime.Now;
+            patientProfile.CreatedBy = ActiveUser.Id;
+            if (!model.appointment.isActive)
+            {
+                _appoinment.IsActive = false;
+                _appoinment.UpdatedBy = ActiveUser.Id;
+                _appoinment.UpdatedDate = DateTime.Now;
+                await _appointmentService.Update(_appoinment);
+            }
+            if (model.procedureModel != null)
+            {
+                if (model.procedureModel.id > 0)
+                {
+                    var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                    var entity = model.procedureModel.ToEntity(patientProcedure);
+                    await _patientProcedureService.Update(entity);
+
+                }
+                else
+                {
+                    var entity = model.procedureModel.ToEntity(new PatientProcedure());
+                    //var _model = model.procedureModel;
+                    entity.PatientProfileId = patientProfile.Id;
+                    var _model = entity.ToModel(model.procedureModel);
+                    //entity.DoctorMasterId = _model.referedBy;
+                    //entity.Date = _model.date;
+                    //entity.Description = _model.description;
+                    //entity.Diagnosis = _model.diagnosis;
+                    //entity.Others = _model.others;
+                    //entity.Procedurename = _model.procedurename;
+                    //entity.ActualCost = _model.actualCost;
+                    //entity.Anesthesia = _model.anesthesia;
+                    //entity.Complication = _model.complication;
+                    //entity.PatientProfileId = patientProfile.Id;
+                    if (entity.DoctorMasterId > 0)
+                        await _patientProcedureService.Create(_model);
+                }
+            }
             await _patientProfileService.Create(patientProfile);
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
@@ -251,17 +295,20 @@ namespace PiHealth.Web.Controllers.API
                     else
                     {
                         var entity = model.procedureModel.ToEntity(new PatientProcedure());
-                        var _model = model.procedureModel;
-                        entity.DoctorMasterId = _model.referedBy;
-                        entity.Date = _model.date;
-                        entity.Description = _model.description;
-                        entity.Diagnosis = _model.diagnosis;
-                        entity.Others = _model.others;
-                        entity.Procedurename = _model.procedurename;
-                        entity.ActualCost = _model.actualCost;
-                        entity.Anesthesia = _model.anesthesia;
-                        entity.Complication = _model.complication;
                         entity.PatientProfileId = patientProfile.Id;
+                        //var _model = entity.ToModel(model.procedureModel);
+                        //entity.DoctorMasterId = _model.referedBy;
+                        //entity.Date = _model.date;
+                        //entity.Description = _model.description;
+                        //entity.Diagnosis = _model.diagnosis;
+                        //entity.Others = _model.others;
+                        //entity.Procedurename = _model.procedurename;
+                        //entity.ActualCost = _model.actualCost;
+                        //entity.Anesthesia = _model.anesthesia;
+                        //entity.Complication = _model.complication;
+                        //entity.PatientProfileId = patientProfile.Id;
+                        //ENT
+                        if(entity.DoctorMasterId > 0)
                         await _patientProcedureService.Create(entity);
                     }
                 }

@@ -16,8 +16,6 @@ namespace PiHealth.DataModel.Entity.Mapping
 
             builder.ToTable("PatientProcedure");
  
-
-           
         }
     }
 }

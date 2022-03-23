@@ -19,6 +19,9 @@ namespace PiHealth.Web.Model
         public string serialNo { get; set; }
         public string userType { get; set; }
         public string userName { get; set; }
+        public long? specializationId { get; set; }
+        public string specializationName { get; set; }
+        public string registrationNo { get; set; }
         public DateTime? createdDate { get; set; }
     }
 
