@@ -19,7 +19,7 @@ namespace PiHealth.DataModel.Entity
         public string Description { get; set; }
         public string Complication { get; set; }
         public string Others { get; set; }
-        public long? ActualCost { get; set; }
+        public long ActualCost { get; set; }
         public bool IsDeleted { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
