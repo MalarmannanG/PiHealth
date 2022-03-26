@@ -15,6 +15,7 @@ namespace PiHealth.Web.Model.PatientProfile
         }
         public long id { get; set; }
         public long? templateMasterId { get; set; }
+        public long? procedureMasterId { get; set; }
         public long patientId { get; set; }
         public long doctorId { get; set; }
         public long appointmentId { get; set; }
@@ -28,6 +29,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public bool isfollowUpNeed { get; set; }
         public DateTime? followUp { get; set; }
         public bool isDeleted { get; set; }
+        public string referredBy { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
@@ -104,7 +106,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public bool noon { get; set; }
         public bool night { get; set; }
         public int noOfDays { get; set; }
-        public bool isDeleted { get; set; }
+        public bool isDeleted { get; set; } 
         public bool sos { get; set; }
         public bool stat { get; set; }
         public DateTime createdDate { get; set; }

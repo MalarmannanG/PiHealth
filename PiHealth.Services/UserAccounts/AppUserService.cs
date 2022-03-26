@@ -22,12 +22,14 @@ namespace PiHealth.Service.UserAccounts
         Task<AppUser> Create(AppUser user);
         Task<AppUser> FindUserAsync(string email, string password);
         bool EmailAlreadyExit(string email, long? userId = null);
-        Task UpdateUserLastActivityDateAsync(long userId);      
+        Task UpdateUserLastActivityDateAsync(long userId);
 
         AppUser GetByID(long id);
 
         AppUser ActiveUser { get; }
-        IQueryable<Specialization> GetAllSpecialition(string name = null);
+        IQueryable<Specialization> GetAllSpecialition(string name);
+        IQueryable<AppUser> GetIdByDoctorName(string name);
+ 
 
     }
     public class AppUserService : IAppUserService
@@ -47,19 +49,18 @@ namespace PiHealth.Service.UserAccounts
             _repositorySpecialization = repositorySpecialization;
         }
 
-        public virtual IQueryable<AppUser> GetAll(string name = null)   
+        public virtual IQueryable<AppUser> GetAll(string name = null)
         {
             var data = _repository.Table.Where(a => a.IsActive);
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                //data = data.Where(a => a.Name != null && a.Name.Contains(name));
-                data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
-            }
-
+            data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
             return data;
         }
-
+        public virtual IQueryable<AppUser> GetIdByDoctorName(string name)
+        {
+            var data = _repository.Table.Where(a => a.IsActive);
+            data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name));
+            return data;
+        }
         public virtual Task<AppUser> Update(AppUser user)
         {
             return _repository.UpdateAsync(user);
@@ -73,7 +74,7 @@ namespace PiHealth.Service.UserAccounts
 
         public virtual Task<AppUser> FindUserAsync(long userId)
         {
-            return  _repository.Table.FirstOrDefaultAsync(a=> a.Id == userId);
+            return _repository.Table.FirstOrDefaultAsync(a => a.Id == userId);
         }
 
         public Task<AppUser> FindUserAsync(string email, string password)
@@ -116,7 +117,7 @@ namespace PiHealth.Service.UserAccounts
 
         public IQueryable<Specialization> GetAllSpecialition(string name)
         {
-            var data = _repositorySpecialization.Table.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) );
+            var data = _repositorySpecialization.Table.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name));
             return data;
         }
 
@@ -129,7 +130,7 @@ namespace PiHealth.Service.UserAccounts
                 return GetByID(Int32.Parse(userIdValue));
             }
         }
-        
+
 
     }
 }

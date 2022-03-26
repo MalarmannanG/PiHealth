@@ -93,16 +93,18 @@ namespace PiHealth.Controllers.API.Masters
 
                 if (procedure == null)
                     return BadRequest();
-
-                model.ToEntity(procedure);
-
                 procedure.Procedurename = model.procedurename;
                 procedure.Description = model.description;
                 procedure.IsDeleted = model.isDeleted;
                 procedure.ModifiedDate = DateTime.Now;
                 procedure.ModifiedBy = ActiveUser.Id;
+                procedure.ActualCost = model.actualCost;
+                procedure.Anesthesia = model.anesthesia;
+                procedure.Complication = model.complication;
+                procedure.Others = model.others;
+                procedure.Diagnosis = model.diagnosis;
+                procedure.Description = procedure.Description;
                 await _procedureMasterService.Update(procedure);
-
                 _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             }
             else
@@ -122,7 +124,6 @@ namespace PiHealth.Controllers.API.Masters
                 return BadRequest();
 
             procedure.IsDeleted = true;
-
             procedure.ModifiedDate = DateTime.Now;
             procedure.ModifiedBy = ActiveUser.Id;
 

@@ -51,7 +51,7 @@ namespace PiHealth.Web.Controllers.API
             DateTime fromDate = date.Add(frtime);
             TimeSpan totime = new TimeSpan(0, 23, 59, 59);
             DateTime toDate = date.Add(totime);
-            var todaysPatients = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate).Count();
+            var todaysPatients = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate).Distinct().Count();
             var todaysProcedures = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:true).Count();
             var todaysAppointments = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:false).Count();
             return Ok(new { todaysPatients, todaysAppointments, todaysProcedures });
@@ -91,7 +91,7 @@ namespace PiHealth.Web.Controllers.API
 
             if (!string.IsNullOrEmpty(model.doctorName))
             {
-                doctorIds = _appUserService.GetAll(name: model.doctorName).Select(a => a.Id).ToArray();
+                doctorIds = _appUserService.GetIdByDoctorName(name: model.doctorName).Select(a => a.Id).ToArray();
             }
 
             if (patients1?.Count() > 0 && patients2?.Count() > 0)

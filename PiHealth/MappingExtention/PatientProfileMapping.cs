@@ -22,6 +22,7 @@ namespace PiHealth.Web.MappingExtention
             model.impression = entity.Impression;
             model.advice = entity.Advice;
             model.templateMasterId = entity.TemplateMasterId;
+            model.procedureMasterId = entity.ProcedureMasterId;
             model.pastHistory = entity.PastHistory;
             model.investigationResults = entity.InvestigationResults;
             model.plan = entity.Plan;
@@ -32,6 +33,7 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
+            model.referredBy = entity.ReferredBy;
             model.patientModel = entity.Patient?.ToModel(new Model.Patient.PatientModel());
             model.appointment = entity.Appointment?.ToModel(new AppointmentModel());
             model.prescriptionModel = entity.Prescriptions?.ToList()?.Select(a => a.ToModel(new PrescriptionModel())).ToList() ?? new List<PrescriptionModel>();
@@ -48,6 +50,7 @@ namespace PiHealth.Web.MappingExtention
             entity.InvestigationResults = model.investigationResults;
             entity.Impression = model.impression;
             entity.TemplateMasterId = model.templateMasterId;
+            entity.ProcedureMasterId = model.procedureMasterId;
             entity.Advice = model.advice;
             entity.Plan = model.plan;
             entity.IsfollowUpNeed = model.isfollowUpNeed;
@@ -59,6 +62,7 @@ namespace PiHealth.Web.MappingExtention
             entity.ModifiedDate = model.modifiedDate;
             entity.PatientId = model.patientId;
             entity.AppointmentId = model.appointmentId;
+            entity.ReferredBy = model.referredBy;   
             entity.Prescriptions = model.prescriptionModel?.ToList()?.Select(a => a.ToEntity(new Prescription())).ToList() ?? new List<Prescription>();
             entity.PatientDiagnosis = model.patientDiagnosisModel?.ToList()?.Select(a => a.ToEntity(new PatientDiagnosis())).ToList() ?? new List<PatientDiagnosis>();
             entity.PatientTests = model.patientTestModel?.ToList()?.Select(a => a.ToEntity(new PatientTest())).ToList() ?? new List<PatientTest>();

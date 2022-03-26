@@ -216,19 +216,8 @@ namespace PiHealth.Web.Controllers.API
                 else
                 {
                     var entity = model.procedureModel.ToEntity(new PatientProcedure());
-                    //var _model = model.procedureModel;
                     entity.PatientProfileId = patientProfile.Id;
                     var _model = entity.ToModel(model.procedureModel);
-                    //entity.DoctorMasterId = _model.referedBy;
-                    //entity.Date = _model.date;
-                    //entity.Description = _model.description;
-                    //entity.Diagnosis = _model.diagnosis;
-                    //entity.Others = _model.others;
-                    //entity.Procedurename = _model.procedurename;
-                    //entity.ActualCost = _model.actualCost;
-                    //entity.Anesthesia = _model.anesthesia;
-                    //entity.Complication = _model.complication;
-                    //entity.PatientProfileId = patientProfile.Id;
                     if (entity.DoctorMasterId > 0)
                         await _patientProcedureService.Create(_model);
                 }
@@ -296,18 +285,6 @@ namespace PiHealth.Web.Controllers.API
                     {
                         var entity = model.procedureModel.ToEntity(new PatientProcedure());
                         entity.PatientProfileId = patientProfile.Id;
-                        //var _model = entity.ToModel(model.procedureModel);
-                        //entity.DoctorMasterId = _model.referedBy;
-                        //entity.Date = _model.date;
-                        //entity.Description = _model.description;
-                        //entity.Diagnosis = _model.diagnosis;
-                        //entity.Others = _model.others;
-                        //entity.Procedurename = _model.procedurename;
-                        //entity.ActualCost = _model.actualCost;
-                        //entity.Anesthesia = _model.anesthesia;
-                        //entity.Complication = _model.complication;
-                        //entity.PatientProfileId = patientProfile.Id;
-                        //ENT
                         if(entity.DoctorMasterId > 0)
                         await _patientProcedureService.Create(entity);
                     }

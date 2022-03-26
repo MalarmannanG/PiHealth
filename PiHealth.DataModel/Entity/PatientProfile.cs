@@ -16,6 +16,7 @@ namespace PiHealth.DataModel.Entity
         public long PatientId { get; set; }
         public long DoctorId { get; set; }
         public long? TemplateMasterId { get; set; }
+        public long? ProcedureMasterId { get; set; }
         public long AppointmentId { get; set; }
         public string Compliants { get; set; }
         public string Examination { get; set; }
@@ -24,6 +25,7 @@ namespace PiHealth.DataModel.Entity
         public string Impression { get; set; }
         public string Advice { get; set; }
         public string Plan { get; set; }
+        public string ReferredBy { get; set; }
         public bool IsfollowUpNeed { get; set; }
         public DateTime? FollowUp { get; set; }
         public bool IsDeleted { get; set; }
