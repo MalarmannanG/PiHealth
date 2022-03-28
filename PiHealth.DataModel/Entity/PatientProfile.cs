@@ -25,7 +25,7 @@ namespace PiHealth.DataModel.Entity
         public string Impression { get; set; }
         public string Advice { get; set; }
         public string Plan { get; set; }
-        public string ReferredBy { get; set; }
+        public string ReferredDoctor { get; set; }
         public bool IsfollowUpNeed { get; set; }
         public DateTime? FollowUp { get; set; }
         public bool IsDeleted { get; set; }

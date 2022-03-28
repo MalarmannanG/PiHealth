@@ -16,6 +16,7 @@ using PiHealth.Services.UserAccounts;
 using PiHealth.Web.Helper;
 using PiHealth.Services;
 using PiHealth.Web.Filters;
+using PiHealth.Model.Account;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -169,7 +170,7 @@ namespace PiHealth.Web.Controllers.API
         public IActionResult GeAllSpecialization([FromQuery] string name = null)
         {
             var user = _userService.GetAllSpecialition(name: name);
-            var result = user.Select(a => a).ToList();
+            var result = user.Select(a => new SpecializationModel() { name=a.Name, id=a.Id }).ToList();
             return Ok( result );
         }
     }

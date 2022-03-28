@@ -33,7 +33,7 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
-            model.referredBy = entity.ReferredBy;
+            model.referredDoctor = entity.ReferredDoctor;
             model.patientModel = entity.Patient?.ToModel(new Model.Patient.PatientModel());
             model.appointment = entity.Appointment?.ToModel(new AppointmentModel());
             model.prescriptionModel = entity.Prescriptions?.ToList()?.Select(a => a.ToModel(new PrescriptionModel())).ToList() ?? new List<PrescriptionModel>();
@@ -62,7 +62,7 @@ namespace PiHealth.Web.MappingExtention
             entity.ModifiedDate = model.modifiedDate;
             entity.PatientId = model.patientId;
             entity.AppointmentId = model.appointmentId;
-            entity.ReferredBy = model.referredBy;   
+            entity.ReferredDoctor = model.referredDoctor;   
             entity.Prescriptions = model.prescriptionModel?.ToList()?.Select(a => a.ToEntity(new Prescription())).ToList() ?? new List<Prescription>();
             entity.PatientDiagnosis = model.patientDiagnosisModel?.ToList()?.Select(a => a.ToEntity(new PatientDiagnosis())).ToList() ?? new List<PatientDiagnosis>();
             entity.PatientTests = model.patientTestModel?.ToList()?.Select(a => a.ToEntity(new PatientTest())).ToList() ?? new List<PatientTest>();

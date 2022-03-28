@@ -9,7 +9,7 @@ namespace PiHealth.DataModel.Entity
 {
     public class Specialization : BaseEntity
     {
-      
+     
         public string Name { get; set; }
     }
 }

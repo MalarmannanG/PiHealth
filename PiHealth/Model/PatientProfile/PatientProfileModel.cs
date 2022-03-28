@@ -29,7 +29,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public bool isfollowUpNeed { get; set; }
         public DateTime? followUp { get; set; }
         public bool isDeleted { get; set; }
-        public string referredBy { get; set; }
+        public string referredDoctor { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }

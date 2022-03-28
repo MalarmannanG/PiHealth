@@ -119,7 +119,7 @@ namespace PiHealth.Web.Controllers.API
                 appointments = appointments.Take(model.take);
             }
 
-            var result = appointments.ToList().Select(a => a.ToModel(new AppointmentModel())).ToList() ?? new List<AppointmentModel>();
+            var result = appointments.ToList().Select(a => a.ToModel(new AppointmentModel())).OrderByDescending(a => a.appointmentDateTime).ToList() ?? new List<AppointmentModel>();
             return Ok(new { result, total });
         }
 
