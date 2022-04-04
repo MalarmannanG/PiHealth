@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace PiHealth.DataModel.Entity
@@ -21,7 +22,9 @@ namespace PiHealth.DataModel.Entity
         public string Address { get; set; }
         public bool IsActive { get; set; }
         public string SerialNumber { get; set; }
+        [ForeignKey("Specialization")]
         public long? SpecializationId { get; set; }
+        public virtual Specialization Specialization { get; set; }
         public string RegistrationNo { get; set; }
         public Nullable<System.DateTime> CreatedDate { get; set; }   
 

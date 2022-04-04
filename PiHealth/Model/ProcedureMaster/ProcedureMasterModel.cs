@@ -7,7 +7,7 @@ namespace PiHealth.Model.ProcedureMaster
         public long id { get; set; }
         public string diagnosis { get; set; }
         public string date { get; set; }
-        public string procedurename { get; set; }
+        public string name { get; set; }
         public string anesthesia { get; set; }
         public string description { get; set; }
         public string complication { get; set; }

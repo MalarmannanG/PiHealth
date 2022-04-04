@@ -52,8 +52,8 @@ namespace PiHealth.Web.Controllers.API
             TimeSpan totime = new TimeSpan(0, 23, 59, 59);
             DateTime toDate = date.Add(totime);
             var todaysPatients = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate).Distinct().Count();
-            var todaysProcedures = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:true).Count();
-            var todaysAppointments = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure:false).Count();
+            var todaysProcedures = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure: true).Count();
+            var todaysAppointments = _appointmentService.GetAll(fromDate: fromDate, toDate: toDate, isProcedure: false).Count();
             return Ok(new { todaysPatients, todaysAppointments, todaysProcedures });
         }
 
@@ -74,12 +74,12 @@ namespace PiHealth.Web.Controllers.API
             var patients2 = new List<long>();
             long[] patientIds = null;
             long[] doctorIds = null;
-            
+
             if (model.todayPatients)
             {
                 patients1 = _patientService.GetAll(isTodayPatients: model.todayPatients).Select(a => a.Id).ToList();
                 if (patients1?.Count() == 0)
-                {                    
+                {
                     return Ok(new { result = new List<AppointmentModel>(), total = 0 });
                 }
             }
@@ -109,7 +109,7 @@ namespace PiHealth.Web.Controllers.API
             }
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
-            var appointments = _appointmentService.GetAll(patientIds: patientIds, doctorIds: doctorIds, isProcedure: model?.isProcedure, fromDate: fromDate, toDate: toDate);            
+            var appointments = _appointmentService.GetAll(patientIds: patientIds, doctorIds: doctorIds, isProcedure: model?.isProcedure, fromDate: fromDate, toDate: toDate);
             var total = appointments?.Count();
             var orderBy = string.IsNullOrEmpty(model?.order_by) ? "CreatedDate" : model.order_by;
             appointments = appointments?.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
@@ -127,16 +127,25 @@ namespace PiHealth.Web.Controllers.API
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] AppointmentModel model)
         {
-            var appointment = model.ToEntity(new Appointment());            
+            var appointment = model.ToEntity(new Appointment());
             appointment.CreatedDate = DateTime.Now;
             appointment.CreatedBy = ActiveUser.Id;
             appointment.IsActive = true;
             var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             appointment.AppointmentDateTime = FormattedDate;
-            await _appointmentService.Create(appointment);
 
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
+            var appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate,0);
+            if (appts.Count() < 1)
+            {
+                await _appointmentService.Create(appointment);
+                _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            }
+            else
+            {
+                appointment = appts.First();
+                model.appointmentDateTime = appointment.AppointmentDateTime;
+                model.id = -1;
+            }
             return Ok(appointment);
         }
 
@@ -152,12 +161,20 @@ namespace PiHealth.Web.Controllers.API
             if (appointment == null)
                 return BadRequest();
             var updated = model.ToEntity(appointment);
-            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss",CultureInfo.InvariantCulture);
+            var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             appointment.AppointmentDateTime = FormattedDate;
-            appointment = await _appointmentService.Update(appointment);
-
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-
+            var appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate, model.id);
+            if (appts.Count() < 1)
+            {
+                await _appointmentService.Update(appointment);
+                _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            }
+            else
+            {
+                appointment = appts.First();
+                model.appointmentDateTime = appointment.AppointmentDateTime;
+                model.id = -1;
+            }
             return Ok(model);
 
         }

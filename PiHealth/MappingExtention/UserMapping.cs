@@ -22,7 +22,11 @@ namespace PiHealth.Web.MappingExtention
             model.gender = entity.Gender;
             model.address = entity.Address;
             model.lastLoggedIn = entity.LastLoggedIn;
-            model.specializationId = entity.SpecializationId;
+            if (entity.Specialization != null)
+            {
+                model.specializationId = entity.Specialization.Id;
+                model.specializationName = entity.Specialization.Name;
+            }
             model.registrationNo = entity.RegistrationNo;
             return model;
         }
@@ -41,7 +45,11 @@ namespace PiHealth.Web.MappingExtention
             model.gender = entity.Gender;
             model.address = entity.Address;
             model.lastLoggedIn = entity.LastLoggedIn;
-            model.specializationId = entity.SpecializationId;
+            if (entity.Specialization != null)
+            {
+                model.specializationId = entity.Specialization.Id;
+                model.specializationName = entity.Specialization.Name;
+            }
             model.registrationNo = entity.RegistrationNo;
             return model;
         }
@@ -59,7 +67,8 @@ namespace PiHealth.Web.MappingExtention
             entity.LastLoggedIn = model.lastLoggedIn;
             entity.Gender = model.gender;
             entity.Address = model.address;
-            entity.SpecializationId = model.specializationId;
+            if (model.specializationId.HasValue)
+                entity.SpecializationId = model.specializationId.Value;
             entity.RegistrationNo = model.registrationNo;
             return entity;
         }

@@ -10,21 +10,21 @@ using Microsoft.EntityFrameworkCore;
 using System.Threading;
 
 namespace PiHealth.Services.Master
-{   
+{
     public class AppointmentService
     {
-        public readonly IRepository<Appointment> _repository;     
+        public readonly IRepository<Appointment> _repository;
         public AppointmentService(IRepository<Appointment> repository)
         {
-            _repository = repository;           
-        }      
+            _repository = repository;
+        }
 
         public virtual IQueryable<Appointment> GetAll(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
-            
+
             var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
 
-            if(patientIds?.Count() > 0)
+            if (patientIds?.Count() > 0)
             {
                 data = data.Where(a => a.PatientId != null && patientIds.Contains(a.PatientId.Value));
             }
@@ -39,7 +39,8 @@ namespace PiHealth.Services.Master
                 if (isProcedure == true)
                 {
                     data = data.Where(a => a.VisitType == "Procedure");
-                } else
+                }
+                else
                 {
                     data = data.Where(a => a.VisitType != "Procedure");
                 }
@@ -65,37 +66,32 @@ namespace PiHealth.Services.Master
             return data.Include(a => a.VitalsReport).Include(a => a.AppUser);
         }
 
-          public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
+        public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
             var data = _repository.Table.Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
-
-            if(patientIds?.Count() > 0)
+            if (patientIds?.Count() > 0)
             {
                 data = data.Where(a => a.PatientId != null && patientIds.Contains(a.PatientId.Value));
             }
-
             if (doctorIds?.Count() > 0)
             {
                 data = data.Where(a => a.AppUserId != null && doctorIds.Contains(a.AppUserId.Value));
             }
-
             if (isProcedure != null)
             {
                 if (isProcedure == true)
                 {
                     data = data.Where(a => a.VisitType == "Procedure");
-                } else
+                }
+                else
                 {
                     data = data.Where(a => a.VisitType != "Procedure");
                 }
             }
-
             if (fromDate != null)
             {
                 data = data.Where(a => a.AppointmentDateTime.Date >= fromDate.Value.Date);
             }
-
-
             if (toDate != null)
             {
                 data = data.Where(a => a.AppointmentDateTime.Date <= toDate.Value.Date);
@@ -111,7 +107,7 @@ namespace PiHealth.Services.Master
 
         public virtual async Task<Appointment> Create(Appointment entity)
         {
-           return await _repository.InsertAsync(entity);
+            return await _repository.InsertAsync(entity);
         }
 
         public virtual async Task Delete(Appointment entity)
@@ -122,7 +118,14 @@ namespace PiHealth.Services.Master
 
         public virtual async Task<Appointment> Get(long id)
         {
-            return await _repository.Table.Where(a => a.Id == id)?.Include(a => a.VitalsReport).Include(a => a.AppUser).Include(a=> a.PatientFiles).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster)?.FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.Id == id)?.Include(a => a.VitalsReport).Include(a => a.AppUser).Include(a => a.PatientFiles).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster)?.FirstOrDefaultAsync();
+        }
+        public virtual IQueryable<Appointment> AppointmentAlreadyExist(long PatientId, long DoctorId, DateTime appoinmentDate, long? Id)
+        {
+            var data = _repository.Table.Where(a => a.PatientId == PatientId && a.AppUserId == DoctorId).WhereIf(Id>0 ,e=>e.Id != Id).AsQueryable();
+            data = data.Where(a => a.AppointmentDateTime >= appoinmentDate.AddMinutes(-15));
+            data = data.Where(a => a.AppointmentDateTime <= appoinmentDate.AddMinutes(15));
+            return data;
         }
     }
 }

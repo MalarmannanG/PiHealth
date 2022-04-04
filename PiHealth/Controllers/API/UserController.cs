@@ -58,11 +58,11 @@ namespace PiHealth.Web.Controllers.API
             }
 
             var result = user.Select(a => a.ToModel()).ToList();
-            return Ok(new { result, total});
+            return Ok(new { result, total });
         }
 
         [HttpGet]
-        [Route("Get/{id}")]        
+        [Route("Get/{id}")]
         public IActionResult Get(long id)
         {
             var user = _userService.GetByID(id);
@@ -119,7 +119,10 @@ namespace PiHealth.Web.Controllers.API
             user.CreatedDate = DateTime.UtcNow;
             user.Password = _securityService.GetSha256Hash(model.password);
             user.Username = user.Name;
-            user.SpecializationId = model.specializationId;
+            if (model.specializationId.HasValue)
+            {
+                user.SpecializationId = model.specializationId.Value;
+            }
             user.RegistrationNo = model.registrationNo;
             user = await _userService.Create(user);
             user.IsActive = true;
@@ -135,7 +138,7 @@ namespace PiHealth.Web.Controllers.API
             if (model == null)
                 return BadRequest();
 
-            var emailExist = _userService.EmailAlreadyExit(model.userName, model.id);
+            var emailExist = _userService.EmailAlreadyExit(model.email, model.id);
 
             if (emailExist)
             {
@@ -152,12 +155,17 @@ namespace PiHealth.Web.Controllers.API
                 user.Password = _securityService.GetSha256Hash(model.password);
             }
 
+         
+ 
             //user.Username = model.userName;
             user.UserType = model.userType;
             user.Gender = model.gender;
             user.Username = model.name;
             user.Address = model.address;
-            user.SpecializationId = model.specializationId;
+            if (model.specializationId.HasValue)
+            {
+                user.SpecializationId = model.specializationId.Value;
+            }
             user.RegistrationNo = model.registrationNo;
             user.IsActive = true;
             await _userService.Update(user);
@@ -170,8 +178,8 @@ namespace PiHealth.Web.Controllers.API
         public IActionResult GeAllSpecialization([FromQuery] string name = null)
         {
             var user = _userService.GetAllSpecialition(name: name);
-            var result = user.Select(a => new SpecializationModel() { name=a.Name, id=a.Id }).ToList();
-            return Ok( result );
+            var result = user.Select(a => new SpecializationModel() { name = a.Name, id = a.Id }).ToList();
+            return Ok(result);
         }
     }
 }

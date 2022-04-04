@@ -51,8 +51,9 @@ namespace PiHealth.Service.UserAccounts
 
         public virtual IQueryable<AppUser> GetAll(string name = null)
         {
-            var data = _repository.Table.Where(a => a.IsActive);
-            data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
+            var data = _repository.Table.Where(a => a.IsActive).WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name)).Include(a=>a.Specialization);
+            //data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
+            
             return data;
         }
         public virtual IQueryable<AppUser> GetIdByDoctorName(string name)
@@ -112,7 +113,7 @@ namespace PiHealth.Service.UserAccounts
 
         public virtual AppUser GetByID(long id)
         {
-            return _repository.Table.FirstOrDefault(a => a.Id == id);
+            return _repository.Table.Include(a=>a.Specialization).FirstOrDefault(a => a.Id == id);
         }
 
         public IQueryable<Specialization> GetAllSpecialition(string name)

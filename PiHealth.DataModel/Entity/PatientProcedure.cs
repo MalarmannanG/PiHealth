@@ -16,7 +16,6 @@ namespace PiHealth.DataModel.Entity
         public string Date { get; set; }
         public string Procedurename { get; set; }
         public long? DoctorMasterId { get; set; }
-        public DoctorMaster DoctorMaster { get; set; }
         public string Anesthesia { get; set; }
         public string Description { get; set; }
         public string Complication { get; set; }

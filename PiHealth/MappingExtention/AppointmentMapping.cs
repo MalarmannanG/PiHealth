@@ -30,6 +30,7 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.updatedBy = entity.UpdatedBy;
             model.updatedDate = entity.UpdatedDate;
+            model.referredBy = entity.ReferredBy; 
             model.vitalsReportModel = entity.VitalsReport?.ToModel(new VitalsReportModel());
             model.patientFiles = entity.PatientFiles.Select(a => a.ToModel(new PatientFilesModel())).ToList();
             return model;
@@ -49,6 +50,7 @@ namespace PiHealth.Web.MappingExtention
             entity.CreatedBy =model.createdBy;
             entity.CreatedDate = model.createdDate;
             entity.UpdatedBy = model.updatedBy;
+            entity.ReferredBy = model.referredBy;
             entity.UpdatedDate = model.updatedDate;
             return entity;
         }

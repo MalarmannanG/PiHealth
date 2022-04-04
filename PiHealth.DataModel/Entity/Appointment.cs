@@ -23,7 +23,7 @@ namespace PiHealth.DataModel.Entity
         public long CreatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public long? UpdatedBy { get; set; }
-
+        public string ReferredBy { get; set; }
         public VitalsReport VitalsReport { get; set; }
         public virtual ICollection<PatientFiles> PatientFiles { get; set; }
         public PatientProfile PatientProfile { get; set; }

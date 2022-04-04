@@ -16,6 +16,7 @@ using PiHealth.Web.Model.VitalsReport;
 using PiHealth.Controllers;
 using PiHealth.Web.Model.PatientProcedureModel;
 using PiHealth.Services.PiHealthPatients;
+using System.Globalization;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -30,6 +31,7 @@ namespace PiHealth.Web.Controllers.API
         private readonly AppointmentService _appointmentService;
         private readonly PatientProcedureService _patientProcedureService;
         private readonly PatientService _patientService;
+        private readonly DoctorMasterService _doctorService;
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
@@ -37,6 +39,7 @@ namespace PiHealth.Web.Controllers.API
             AppointmentService appointmentService,
             PatientProcedureService patientProcedureService,
             PatientService patientService,
+            DoctorMasterService doctorService,
             AuditLogServices auditLogServices)
         {
             _patientProfileService = patientProfileService;
@@ -45,6 +48,7 @@ namespace PiHealth.Web.Controllers.API
             _auditLogService = auditLogServices;
             _patientProcedureService = patientProcedureService;
             _patientService = patientService;
+            _doctorService = doctorService;
         }
 
         #region  PatientProfile Master
@@ -53,7 +57,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("Get/{id}")]
         public async Task<IActionResult> Get(long id)
         {
-           
+
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             //patientProfile.followUp.HasValue
@@ -75,19 +79,23 @@ namespace PiHealth.Web.Controllers.API
                 {
                     patientProfile.procedureModel.id = entity.Id;
                     patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
-                    patientProfile.procedureModel.referedByName = entity.DoctorMaster?.Name;
+                    if (entity.DoctorMasterId > 0)
+                    {
+                        var doctorentity = await _doctorService.Get(entity.DoctorMasterId.Value);
+                        patientProfile.procedureModel.referedByName = doctorentity.Name;
+                    }
                     patientProfile.procedureModel.date = entity.Date;
                     patientProfile.procedureModel.description = entity.Description;
                     patientProfile.procedureModel.diagnosis = entity.Diagnosis;
                     patientProfile.procedureModel.others = entity.Others;
-                    patientProfile.procedureModel.procedurename = entity.Procedurename;
+                    patientProfile.procedureModel.name = entity.Procedurename;
                     patientProfile.procedureModel.actualCost = entity.ActualCost;
                     patientProfile.procedureModel.anesthesia = entity.Anesthesia;
                     patientProfile.procedureModel.complication = entity.Complication;
                     patientProfile.procedureModel.createdBy = entity.CreatedBy;
                     patientProfile.procedureModel.createdDate = entity.CreatedDate;
                 }
-               
+
 
             }
             return Ok(patientProfile);
@@ -99,7 +107,7 @@ namespace PiHealth.Web.Controllers.API
         {
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
-           
+
             //patientProfile.followUp.HasValue
             if (result == null)
             {
@@ -135,12 +143,16 @@ namespace PiHealth.Web.Controllers.API
                 {
                     patientProfile.procedureModel.id = entity.Id;
                     patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
-                    patientProfile.procedureModel.referedByName = entity.DoctorMaster?.Name;
+                    if (entity.DoctorMasterId > 0)
+                    {
+                        var doctorentity = await _doctorService.Get(entity.DoctorMasterId.Value);
+                        patientProfile.procedureModel.referedByName = doctorentity.Name;
+                    }
                     patientProfile.procedureModel.date = entity.Date;
                     patientProfile.procedureModel.description = entity.Description;
                     patientProfile.procedureModel.diagnosis = entity.Diagnosis;
                     patientProfile.procedureModel.others = entity.Others;
-                    patientProfile.procedureModel.procedurename = entity.Procedurename;
+                    patientProfile.procedureModel.name = entity.Procedurename;
                     patientProfile.procedureModel.actualCost = entity.ActualCost;
                     patientProfile.procedureModel.anesthesia = entity.Anesthesia;
                     patientProfile.procedureModel.complication = entity.Complication;
@@ -285,7 +297,6 @@ namespace PiHealth.Web.Controllers.API
                     {
                         var entity = model.procedureModel.ToEntity(new PatientProcedure());
                         entity.PatientProfileId = patientProfile.Id;
-                        if(entity.DoctorMasterId > 0)
                         await _patientProcedureService.Create(entity);
                     }
                 }
@@ -300,11 +311,17 @@ namespace PiHealth.Web.Controllers.API
             {
                 if (model.isfollowUpNeed && !model.appointment.isActive)
                 {
-                    _appoinment.Id = 0;
-                    _appoinment.AppUserId = ActiveUser.Id;
-                    _appoinment.AppointmentDateTime = model.followUp.Value;
-                    _appoinment.IsActive = true;
-                    await _appointmentService.Create(_appoinment);
+                    Appointment _model = new Appointment();
+                    _model.PatientId = _appoinment.PatientId;
+                    _model.AppUserId = ActiveUser.Id;
+                    _model.VisitType = "Follow Up";
+                    _model.CreatedDate = DateTime.Now;
+                    _model.CreatedBy = ActiveUser.Id;
+                    _model.UpdatedDate = DateTime.Now;
+                    _model.UpdatedBy = ActiveUser.Id;
+                    _model.AppointmentDateTime = DateTime.ParseExact(model.followUpDate, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+                    _model.IsActive = true;
+                    await _appointmentService.Create(_model);
                 }
             }
             catch (Exception ex)

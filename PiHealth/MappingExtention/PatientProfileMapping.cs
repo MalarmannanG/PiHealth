@@ -152,7 +152,7 @@ namespace PiHealth.Web.MappingExtention
             model.id = entity.Id;
             model.patientProfileId = entity.PatientProfileId;
             model.diagnosisMasterId = entity.DiagnosisMasterId;
-            model.diagnosisMasterName = entity.DiagnosisMaster?.Name;            
+            model.name = entity.DiagnosisMaster?.Name;            
             model.description = entity.Description;
             model.isDeleted = entity.IsDeleted;
             model.createdBy = entity.CreatedBy;
@@ -183,7 +183,7 @@ namespace PiHealth.Web.MappingExtention
             entity.Complication = model.complication;
             entity.Date = model.date;
             entity.Diagnosis = model.diagnosis;
-            entity.Procedurename = model.procedurename;
+            entity.Procedurename = model.name;
             entity.DoctorMasterId = model.referedBy;
             entity.Others = model.others;
             entity.CreatedBy = model.createdBy;
@@ -200,7 +200,7 @@ namespace PiHealth.Web.MappingExtention
             model.complication = entity.Complication;
             model.date = entity.Date ;
             model.diagnosis = entity.Diagnosis;
-            model.procedurename = entity.Procedurename ;
+            model.name = entity.Procedurename ;
             model.referedBy = entity.DoctorMasterId;
             model.others = entity.Others ;
             model.createdBy = entity.CreatedBy;

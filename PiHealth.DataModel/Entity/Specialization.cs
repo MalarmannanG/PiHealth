@@ -11,5 +11,6 @@ namespace PiHealth.DataModel.Entity
     {
      
         public string Name { get; set; }
+        public virtual AppUser User { get; set; }
     }
 }

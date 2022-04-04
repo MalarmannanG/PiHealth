@@ -30,6 +30,7 @@ namespace PiHealth.Web.Model.Appointment
         public long createdBy { get; set; }
         public DateTime? updatedDate { get; set; }
         public long? updatedBy { get; set; }
+        public string referredBy { get; set; }
         public VitalsReportModel vitalsReportModel { get; set; }
         public PatientModel patient { get; set; }
         public List<PatientFilesModel> patientFiles { get; set; }

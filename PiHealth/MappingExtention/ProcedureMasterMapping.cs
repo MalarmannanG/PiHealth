@@ -8,7 +8,7 @@ namespace PiHealth.MappingExtention
         public static ProcedureMasterModel ToModel(this ProcedureMaster entity, ProcedureMasterModel model)
         {
             model.actualCost = entity.ActualCost;
-            model.procedurename = entity.Procedurename;
+            model.name = entity.Procedurename;
             model.diagnosis = entity.Diagnosis;
             model.description = entity.Description;
             model.isDeleted = entity.IsDeleted;
@@ -27,7 +27,7 @@ namespace PiHealth.MappingExtention
         public static ProcedureMaster ToEntity(this ProcedureMasterModel model, ProcedureMaster entity)
         {
            entity.ActualCost = model.actualCost;
-            entity.Procedurename = model.procedurename;
+            entity.Procedurename = model.name;
             entity.Diagnosis = model.diagnosis;
             entity.Description = model.description;
             entity.IsDeleted = model.isDeleted;

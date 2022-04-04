@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220331042623_RemovedDoctorForeignKeyfromProcedure")]
+    partial class RemovedDoctorForeignKeyfromProcedure
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -174,10 +176,6 @@ namespace PiHealth.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("SpecializationId")
-                        .IsUnique()
-                        .HasFilter("[SpecializationId] IS NOT NULL");
-
                     b.ToTable("AppUser");
                 });
 
@@ -211,9 +209,6 @@ namespace PiHealth.Migrations
 
                     b.Property<long?>("PatientId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("ReferredBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TimeOfAppintment")
                         .HasColumnType("nvarchar(max)");
@@ -618,7 +613,7 @@ namespace PiHealth.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PatientProfileId");
+                    b.HasIndex("DoctorMasterId");
 
                     b.HasIndex("ProcedureMasterId");
 
@@ -1181,13 +1176,6 @@ namespace PiHealth.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PiHealth.DataModel.Entity.AppUser", b =>
-                {
-                    b.HasOne("PiHealth.DataModel.Entity.Specialization", "Specialization")
-                        .WithOne("User")
-                        .HasForeignKey("PiHealth.DataModel.Entity.AppUser", "SpecializationId");
-                });
-
             modelBuilder.Entity("PiHealth.DataModel.Entity.Appointment", b =>
                 {
                     b.HasOne("PiHealth.DataModel.Entity.AppUser", "AppUser")
@@ -1234,11 +1222,9 @@ namespace PiHealth.Migrations
 
             modelBuilder.Entity("PiHealth.DataModel.Entity.PatientProcedure", b =>
                 {
-                    b.HasOne("PiHealth.DataModel.Entity.PatientProfile", "PatientProfile")
+                    b.HasOne("PiHealth.DataModel.Entity.DoctorMaster", "DoctorMaster")
                         .WithMany()
-                        .HasForeignKey("PatientProfileId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("DoctorMasterId");
 
                     b.HasOne("PiHealth.DataModel.Entity.ProcedureMaster", null)
                         .WithMany("PatientProcedure")

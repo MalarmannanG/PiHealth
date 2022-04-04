@@ -12,6 +12,8 @@ namespace PiHealth.Web.Model.PatientProfile
         public PatientProfileModel()
         {
             prescriptionModel = new List<PrescriptionModel>();
+            patientDiagnosisModel = new List<PatientDiagnosisModel>();
+            patientTestModel = new List<PatientTestModel>();
         }
         public long id { get; set; }
         public long? templateMasterId { get; set; }
@@ -28,6 +30,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public string plan { get; set; }
         public bool isfollowUpNeed { get; set; }
         public DateTime? followUp { get; set; }
+        public string followUpDate { get; set; }
         public bool isDeleted { get; set; }
         public string referredDoctor { get; set; }
         public DateTime createdDate { get; set; }
@@ -76,7 +79,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public long id { get; set; }
         public long patientProfileId { get; set; }
         public long diagnosisMasterId { get; set; }
-        public string diagnosisMasterName { get; set; }
+        public string name { get; set; }
         public string description { get; set; }
         public bool isDeleted { get; set; }
         public DateTime createdDate { get; set; }
@@ -124,7 +127,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public long id { get; set; }
         public string diagnosis { get; set; }
         public string date { get; set; }
-        public string procedurename { get; set; }
+        public string name { get; set; }
         public long? referedBy { get; set; }
         public string referedByName { get; set; }
         public string anesthesia { get; set; }

@@ -69,10 +69,10 @@ namespace PiHealth.Services.DBContext
                     var user = new AppUser()
                     {
                         Address = "",
-                        Email = "admin@pisystems.com",
+                        Email = "admin",
                         Name = "Admin",
                         IsActive = true,
-                        Password = security.GetSha256Hash("123456"),
+                        Password = security.GetSha256Hash("admin"),
                         SerialNumber = "1",
                         Username = "Admin",
                         Gender = "Male",
@@ -85,12 +85,13 @@ namespace PiHealth.Services.DBContext
                     var doctor = new AppUser()
                     {
                         Address = "",
-                        Email = "doctor@pisystems.com",
-                        Name = "Doctor",
+                        Email = "jayaraj",
+                        Name = "Dr.A.K. Jayaraj MS DNB MCh DNB(Uro)",
                         IsActive = true,
-                        Password = security.GetSha256Hash("123456"),
+                        Password = security.GetSha256Hash("admin"),
                         SerialNumber = "2",
-                        Username = "Admin",
+                        Username = "jayaraj",
+                        RegistrationNo = "72435",
                         Gender = "Male",
                         UserType = "Doctor",
                         PhoneNo = ""

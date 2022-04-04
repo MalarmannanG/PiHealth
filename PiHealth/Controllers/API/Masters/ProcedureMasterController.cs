@@ -68,7 +68,7 @@ namespace PiHealth.Controllers.API.Masters
             procedure.CreatedDate = DateTime.Now;
             procedure.CreatedBy = ActiveUser.Id;
             long templateId = -1;
-            var _templates = await _procedureMasterService.GetByName(model.procedurename, 0);
+            var _templates = await _procedureMasterService.GetByName(model.name, 0);
             if (_templates == null)
             {
                 await _procedureMasterService.Create(procedure);
@@ -86,14 +86,14 @@ namespace PiHealth.Controllers.API.Masters
             long templateId = -1;
             if (model == null)
                 return BadRequest();
-            var _templates = await _procedureMasterService.GetByName(model.procedurename, model.id);
+            var _templates = await _procedureMasterService.GetByName(model.name, model.id);
             if (_templates == null)
             {
                 var procedure = await _procedureMasterService.Get(model.id);
 
                 if (procedure == null)
                     return BadRequest();
-                procedure.Procedurename = model.procedurename;
+                procedure.Procedurename = model.name;
                 procedure.Description = model.description;
                 procedure.IsDeleted = model.isDeleted;
                 procedure.ModifiedDate = DateTime.Now;

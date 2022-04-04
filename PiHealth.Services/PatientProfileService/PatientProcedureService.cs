@@ -23,7 +23,7 @@ namespace PiHealth.Services.PatientProfileService
         }
         public virtual async Task<PatientProcedure> GetByProfileId(long id)
         {
-            return await _repository.Table.Where(a => a.PatientProfileId == id).Include(a=>a.DoctorMaster).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.PatientProfileId == id).FirstOrDefaultAsync();
         }
         
         public virtual async Task<PatientProcedure> Update(PatientProcedure entity)
