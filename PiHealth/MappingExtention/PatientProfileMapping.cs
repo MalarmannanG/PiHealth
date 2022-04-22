@@ -26,6 +26,7 @@ namespace PiHealth.Web.MappingExtention
             model.pastHistory = entity.PastHistory;
             model.investigationResults = entity.InvestigationResults;
             model.plan = entity.Plan;
+            model.fees = entity.Fees;
             model.isfollowUpNeed = entity.IsfollowUpNeed;
             model.followUp = entity.FollowUp;
             model.isDeleted = entity.IsDeleted;
@@ -56,6 +57,7 @@ namespace PiHealth.Web.MappingExtention
             entity.IsfollowUpNeed = model.isfollowUpNeed;
             entity.FollowUp = model.followUp;
             entity.IsDeleted = model.isDeleted;
+            entity.Fees = model.fees;
             entity.CreatedBy =model.createdBy;            
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;

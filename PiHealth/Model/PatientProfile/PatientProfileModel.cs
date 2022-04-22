@@ -28,6 +28,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public string impression { get; set; }
         public string advice { get; set; }
         public string plan { get; set; }
+        public long fees { get; set; }
         public bool isfollowUpNeed { get; set; }
         public DateTime? followUp { get; set; }
         public string followUpDate { get; set; }

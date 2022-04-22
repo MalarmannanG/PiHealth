@@ -31,9 +31,9 @@ namespace PiHealth.Web.MappingExtention
         {
             model.id = entity.Id;
             model.ulId = entity.UlID;
-            model.age = entity.Age;
             model.address = entity.Address;
             model.dob = entity.DOB;
+            model.age = entity.DOB.HasValue  ? CalculateAge(entity.DOB.Value) : entity.Age;
             model.gender = entity.PatientGender;
             model.patientName = entity.PatientName;
             model.initial = entity.Initial;
@@ -47,6 +47,17 @@ namespace PiHealth.Web.MappingExtention
             model.createdOn = entity.CreatedDate;
 
             return model;
+        }
+    
+        public static int CalculateAge(DateTime bob)
+        {
+
+            int year = DateTime.Now.Year - bob.Year;
+            int _month = DateTime.Now.Month - bob.Month;
+            if (_month < 0 || (_month == 0 && DateTime.Now.Day < bob.Day))
+                year--;
+            return year;
+
         }
     }
 }
