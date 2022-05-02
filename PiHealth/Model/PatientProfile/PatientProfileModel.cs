@@ -38,6 +38,8 @@ namespace PiHealth.Web.Model.PatientProfile
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+        public long? doctorServiceId { get; set; }
+        public DoctorService.DoctorServiceModel doctorService { get; set; }
         public PatientModel patientModel { get; set; }
         public AppointmentModel appointment { get; set; }
         public ProcedureModel procedureModel { get; set; }

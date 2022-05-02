@@ -18,6 +18,7 @@ namespace PiHealth.DataModel.Entity
         public long? TemplateMasterId { get; set; }
         public long? ProcedureMasterId { get; set; }
         public long AppointmentId { get; set; }
+       
         public string Compliants { get; set; }
         public string Examination { get; set; }
         public string PastHistory { get; set; }
@@ -36,6 +37,8 @@ namespace PiHealth.DataModel.Entity
         public long? ModifiedBy { get; set; }
         public virtual TemplateMaster TemplateMaster { get; set; }
         public virtual Patient Patient { get; set; }
+        public long? DoctorServiceId { get; set; }
+        public virtual DoctorService DoctorService { get; set; }
         public virtual Appointment Appointment { get; set; }
         public virtual ICollection<PatientDiagnosis> PatientDiagnosis { get; set; }
         public virtual ICollection<Prescription> Prescriptions { get; set; }

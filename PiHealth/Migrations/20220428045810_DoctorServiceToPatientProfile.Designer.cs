@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220428045810_DoctorServiceToPatientProfile")]
+    partial class DoctorServiceToPatientProfile
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -443,7 +445,7 @@ namespace PiHealth.Migrations
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ServiceName")
+                    b.Property<string>("ServieName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -689,9 +691,6 @@ namespace PiHealth.Migrations
                     b.Property<long>("DoctorId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("DoctorServiceId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Examination")
                         .HasColumnType("nvarchar(max)");
 
@@ -734,6 +733,12 @@ namespace PiHealth.Migrations
                     b.Property<string>("ReferredDoctor")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long?>("ServiceId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("ServiveId")
+                        .HasColumnType("bigint");
+
                     b.Property<long?>("TemplateMasterId")
                         .HasColumnType("bigint");
 
@@ -742,9 +747,9 @@ namespace PiHealth.Migrations
                     b.HasIndex("AppointmentId")
                         .IsUnique();
 
-                    b.HasIndex("DoctorServiceId");
-
                     b.HasIndex("PatientId");
+
+                    b.HasIndex("ServiceId");
 
                     b.HasIndex("TemplateMasterId");
 
@@ -1309,15 +1314,15 @@ namespace PiHealth.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PiHealth.DataModel.Entity.DoctorService", "DoctorService")
-                        .WithMany()
-                        .HasForeignKey("DoctorServiceId");
-
                     b.HasOne("PiHealth.DataModel.Entity.Patient", "Patient")
                         .WithMany("PatientProfile")
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("PiHealth.DataModel.Entity.DoctorService", "Service")
+                        .WithMany()
+                        .HasForeignKey("ServiceId");
 
                     b.HasOne("PiHealth.DataModel.Entity.TemplateMaster", "TemplateMaster")
                         .WithMany("PatientProfile")

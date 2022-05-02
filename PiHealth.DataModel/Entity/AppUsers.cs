@@ -22,7 +22,6 @@ namespace PiHealth.DataModel.Entity
         public string Address { get; set; }
         public bool IsActive { get; set; }
         public string SerialNumber { get; set; }
-        [ForeignKey("Specialization")]
         public long? SpecializationId { get; set; }
         public virtual Specialization Specialization { get; set; }
         public string RegistrationNo { get; set; }

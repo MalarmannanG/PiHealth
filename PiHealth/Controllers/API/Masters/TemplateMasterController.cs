@@ -11,6 +11,9 @@ using PiHealth.Services.Master;
 using PiHealth.Web.MappingExtention;
 using PiHealth.Web.Model.TemplateMaster;
 using PiHealth.Controllers;
+using Abp.Application.Services.Dto;
+
+//using Abp.Application.Services.Dto;
 
 namespace PiHealth.Web.Controllers.API.Masters
 {
@@ -58,6 +61,25 @@ namespace PiHealth.Web.Controllers.API.Masters
             var result = entities.ToList()?.Select(a => a.ToModel(new TemplateMasterModel())).ToList();
             return Ok(new { result, total });
         }
+
+        //[HttpGet]
+        //[Route("GetAll")]
+        //public async Task<PagedResultDto<TemplateMasterModel>> GetAll([FromQuery] TemplateQueryModel model)
+        //{
+        //    var entities = _templateMasterService.GetAll(name: model.name);
+        //    var total = entities.Count();
+        //    entities = entities.OrderBy(a => model.Sorting ?? "id asc").Skip(model.SkipCount);
+        //    if (model.MaxResultCount > 0)
+        //    {
+        //        entities = entities.Take(model.MaxResultCount);
+        //    }
+        //    var result = entities.ToList()?.Select(a => a.ToModel(new TemplateMasterModel())).ToList();
+        //    //return Ok(new { result, total });
+        //    return new PagedResultDto<TemplateMasterModel>(
+        //        total,
+        //        result
+        //    );
+        //}
 
         [HttpPost]
         [Route("Create")]

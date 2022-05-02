@@ -256,6 +256,7 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile = model.ToEntity(new PatientProfile());
                     patientProfile.CreatedDate = DateTime.Now;
                     patientProfile.CreatedBy = ActiveUser.Id;
+                    patientProfile.DoctorServiceId = model.doctorServiceId;
                     if (!model.appointment.isActive)
                     {
                         _appoinment.IsActive = false;
@@ -273,6 +274,7 @@ namespace PiHealth.Web.Controllers.API
                     patientProfile.IsDeleted = model.isDeleted;
                     patientProfile.ModifiedDate = DateTime.Now;
                     patientProfile.ModifiedBy = ActiveUser.Id;
+                    patientProfile.DoctorServiceId = model.doctorServiceId;
                     if (!model.appointment.isActive)
                     {
                         _appoinment.IsActive = false;

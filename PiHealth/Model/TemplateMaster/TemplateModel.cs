@@ -1,4 +1,8 @@
-﻿using System;
+﻿
+
+using Abp.Application.Services.Dto;
+//using PiHealth.Extention;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +57,7 @@ namespace PiHealth.Web.Model.TemplateMaster
         public long? modifiedBy { get; set; }
     }
 
-    public class TemplateQueryModel
+    public class TemplateQueryModel   
     {
         public string name { get; set; }
         public string orderBy { get; set; }

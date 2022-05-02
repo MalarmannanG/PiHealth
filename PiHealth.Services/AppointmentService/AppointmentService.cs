@@ -24,12 +24,13 @@ namespace PiHealth.Services.Master
 
             var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
 
-            if (patientIds?.Count() > 0)
+
+            if (patientIds != null )
             {
                 data = data.Where(a => a.PatientId != null && patientIds.Contains(a.PatientId.Value));
             }
 
-            if (doctorIds?.Count() > 0)
+            if (doctorIds != null )
             {
                 data = data.Where(a => a.AppUserId != null && doctorIds.Contains(a.AppUserId.Value));
             }
@@ -65,6 +66,38 @@ namespace PiHealth.Services.Master
 
             return data.Include(a => a.VitalsReport).Include(a => a.AppUser);
         }
+
+        public virtual IQueryable<Appointment> GetAll(string patientName, string doctorName, string clinicName, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
+        {
+
+            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
+
+            //data.WhereIf(!string.IsNullOrEmpty(clinicName), a => a.Patient.DoctorMaster.Name.Contains(clinicName))
+            //     .WhereIf(!string.IsNullOrEmpty(patientName), e => e.Patient.PatientName.Contains(patientName))
+            //     .WhereIf(!string.IsNullOrEmpty(doctorName), e => e.AppUser.Name.Contains(doctorName));
+
+           
+
+            if (fromDate != null)
+            {
+                var date = fromDate.Value;
+                TimeSpan time = new TimeSpan(0, 0, 0, 0);
+                DateTime combined = date.Add(time);
+                //data = data.Where(a => a.AppointmentDateTime >= combined);
+            }
+
+
+            if (toDate != null)
+            {
+                var date = toDate.Value;
+                TimeSpan time = new TimeSpan(0, 23, 59, 59);
+                DateTime combined = date.Add(time);
+                //data = data.Where(a => a.AppointmentDateTime <= combined);
+            }
+
+            return data;
+        }
+
 
         public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
@@ -126,6 +159,13 @@ namespace PiHealth.Services.Master
             data = data.Where(a => a.AppointmentDateTime >= appoinmentDate.AddMinutes(-15));
             data = data.Where(a => a.AppointmentDateTime <= appoinmentDate.AddMinutes(15));
             return data;
+        }
+        private DateTime getDateTimeFormate(DateTime? fromDate)
+        {
+            var date = fromDate.Value;
+            TimeSpan time = new TimeSpan(0, 0, 0, 0);
+            return date.Add(time);
+             
         }
     }
 }

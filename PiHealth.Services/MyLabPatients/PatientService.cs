@@ -34,9 +34,9 @@ namespace PiHealth.Services.PiHealthPatients
         }
 
 
-        public virtual IQueryable<Patient> GetAll(bool isTodayPatients = false, long[] ids=null, string name = null, long? referredBy = null, bool? isDeleted = false, DateTime? fromDate = null, DateTime? toDate = null)
+        public virtual IQueryable<Patient> GetAll(bool isTodayPatients = false, long[] ids=null, string name = null, string clinicName = null, long? referredBy = null, bool? isDeleted = false, DateTime? fromDate = null, DateTime? toDate = null)
         {
-            var data = _repository.TableNoTracking.AsQueryable().Where(a => !a.IsDeleted);
+            var data = _repository.TableNoTracking.AsQueryable().Where(a => !a.IsDeleted).WhereIf( !string.IsNullOrEmpty(clinicName), e=>e.DoctorMaster.Name.Contains(clinicName));
 
             if (fromDate != null)
             {

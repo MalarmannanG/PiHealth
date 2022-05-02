@@ -59,6 +59,7 @@ namespace PiHealth
                 services.AddControllers().AddNewtonsoftJson(setup =>
                 {
                     setup.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                    setup.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                     setup.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
                 });
             }
@@ -79,6 +80,7 @@ namespace PiHealth
             services.AddScoped<PrescriptionMasterService>();
             services.AddScoped<DoctorMasterService>();
             services.AddScoped<VitalsReportService>();
+            services.AddScoped<DoctorDataServices>();
 
             services.AddScoped<DiagnosisMasterService>();
             services.AddScoped<TestMasterService>();
@@ -114,12 +116,10 @@ namespace PiHealth
             {
                 option.Filters.Add(new ExceptionLogFilter());
                 option.Filters.Add(typeof(ExceptionHandlingFilter)); // by type                
-            })
-               .AddJsonOptions(
-           options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-       );
-
-
+            }) .AddJsonOptions(
+                options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                );
+            
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PIHealth API", Version = "v1" });

@@ -84,26 +84,26 @@ namespace PiHealth.Web.Controllers.API
                 }
             }
 
-            if (!string.IsNullOrEmpty(model.patientName))
-            {
-                patients2 = _patientService.GetAll(name: model.patientName).Select(a => a.Id).ToList();
-            }
+            //if (!string.IsNullOrEmpty(model.patientName))
+            //{
+                patients2 = _patientService.GetAll(name: model.patientName, clinicName:model.clinicName).Select(a => a.Id).ToList();
+            //}
 
             if (!string.IsNullOrEmpty(model.doctorName))
             {
                 doctorIds = _appUserService.GetIdByDoctorName(name: model.doctorName).Select(a => a.Id).ToArray();
             }
 
-            if (patients1?.Count() > 0 && patients2?.Count() > 0)
+            if (patients1 != null  && patients2 != null)
             {
                 patients1.AddRange(patients2);
                 patientIds = patients1.ToArray();
             }
-            else if (patients1?.Count() > 0)
+            else if (patients1 != null)
             {
                 patientIds = patients1.ToArray();
             }
-            else if (patients2?.Count() > 0)
+            else if (patients2 != null)
             {
                 patientIds = patients2.ToArray();
             }
