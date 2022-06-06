@@ -111,8 +111,8 @@ namespace PiHealth.Web.Controllers.API
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
             var appointments = _appointmentService.GetAll(patientIds: patientIds, doctorIds: doctorIds, isProcedure: model?.isProcedure, fromDate: fromDate, toDate: toDate);
             var total = appointments?.Count();
-            var orderBy = string.IsNullOrEmpty(model?.order_by) ? "CreatedDate" : model.order_by;
-            appointments = appointments?.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
+            var orderBy = string.IsNullOrEmpty(model?.order_by) ? "AppointmentDateTime" : model.order_by;
+            appointments = appointments?.OrderByDescending(a => a.AppointmentDateTime).Skip(model.skip);
 
             if (model.take > 0)
             {
@@ -146,7 +146,7 @@ namespace PiHealth.Web.Controllers.API
                 model.appointmentDateTime = appointment.AppointmentDateTime;
                 model.id = -1;
             }
-            return Ok(appointment);
+            return Ok(model);
         }
 
         [HttpPut]

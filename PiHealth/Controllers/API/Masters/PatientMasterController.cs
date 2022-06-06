@@ -121,6 +121,8 @@ namespace PiHealth.Web.Controllers.API.Masters
                 _patientService.Update(entity);
                 templateId = entity.Id;
             }
+            else
+                templateId = -1;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success");
 
             return Ok(templateId);

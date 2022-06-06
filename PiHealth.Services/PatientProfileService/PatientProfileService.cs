@@ -78,7 +78,7 @@ namespace PiHealth.Services.PatientProfileService
 
         public virtual async Task<PatientProfile> GetByPatient(long id)
         {
-            return await _repository.Table.Where(a => a.Patient.Id == id).Include(a => a.Patient).Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests).ThenInclude(a => a.TestMaster).Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a => a.Appointment.PatientFiles).Include(a => a.Appointment.VitalsReport).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.Patient.Id == id).Include(a => a.Patient).Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests).ThenInclude(a => a.TestMaster).Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a => a.Appointment.PatientFiles).Include(a => a.Appointment.VitalsReport).OrderByDescending(a => a.Id).OrderByDescending(a=>a.Id).FirstOrDefaultAsync();
         }
 
         public virtual async Task<PatientProfile> GetPrescriptions(long id)

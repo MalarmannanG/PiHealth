@@ -111,12 +111,15 @@ namespace PiHealth.Web.Controllers.API
             //patientProfile.followUp.HasValue
             if (result == null)
             {
-                var appointment = await _appointmentService.Get(id);
-                patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
-                patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
-                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
-                patientProfile.appointmentId = appointment.Id;
-                patientProfile.patientId = appointment.PatientId ?? 0;
+                //var appointment = await _appointmentService.Get(id);
+                //patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
+                //patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
+                //patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
+                //patientProfile.appointmentId = appointment.Id;
+                //patientProfile.patientId = appointment.PatientId ?? 0;
+                patientProfile.appointment = new AppointmentModel();
+                patientProfile.appointment.patientFiles = new System.Collections.Generic.List<PatientFilesModel>();
+                patientProfile.patientModel = new Model.Patient.PatientModel();
                 patientProfile.procedureModel = new ProcedureModel();
             }
             else
@@ -354,6 +357,66 @@ namespace PiHealth.Web.Controllers.API
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("PastVisitCount/{id}")]
+        public async Task<IActionResult> PastVisitCount(long id)
+        {
+            var result = await _patientProfileService.GetByPatient(id);
+            int a = 0;
+            if (result != null)
+                a = 1;
+            return Ok(a);
+        }
+
+
+        [HttpGet]
+        [Route("LastVisit/{id}")]
+        public async Task<IActionResult> LastVisit(long id)
+        {
+
+            var result = await _patientProfileService.Get(id);
+            var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
+            //patientProfile.followUp.HasValue
+            if (result == null)
+            {
+                var appointment = await _appointmentService.Get(id);
+                patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
+                patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
+                patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
+                patientProfile.appointmentId = appointment.Id;
+                patientProfile.patientId = appointment.PatientId ?? 0;
+                patientProfile.procedureModel = new ProcedureModel();
+            }
+            else
+            {
+                patientProfile.procedureModel = new ProcedureModel();
+                var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
+                if (entity != null)
+                {
+                    patientProfile.procedureModel.id = entity.Id;
+                    patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
+                    if (entity.DoctorMasterId > 0)
+                    {
+                        var doctorentity = await _doctorService.Get(entity.DoctorMasterId.Value);
+                        patientProfile.procedureModel.referedByName = doctorentity.Name;
+                    }
+                    patientProfile.procedureModel.date = entity.Date;
+                    patientProfile.procedureModel.description = entity.Description;
+                    patientProfile.procedureModel.diagnosis = entity.Diagnosis;
+                    patientProfile.procedureModel.others = entity.Others;
+                    patientProfile.procedureModel.name = entity.Procedurename;
+                    patientProfile.procedureModel.actualCost = entity.ActualCost;
+                    patientProfile.procedureModel.anesthesia = entity.Anesthesia;
+                    patientProfile.procedureModel.complication = entity.Complication;
+                    patientProfile.procedureModel.createdBy = entity.CreatedBy;
+                    patientProfile.procedureModel.createdDate = entity.CreatedDate;
+                }
+
+
+            }
+            return Ok(patientProfile);
         }
 
         #endregion PatientProfile Ends
