@@ -105,7 +105,6 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] PatientModel model)
         {
-            long templateId = -1;
             if (model == null)
                 return BadRequest();
 
@@ -114,18 +113,18 @@ namespace PiHealth.Web.Controllers.API.Masters
             if (entity == null)
                 return BadRequest();
 
-            entity = model.ToEntity(entity);
+            
             var _templates = await _patientService.GetByName(model.patientName, model.id, model.mobileNumber);
             if (_templates == null)
             {
+                entity = model.ToEntity(entity);
                 _patientService.Update(entity);
-                templateId = entity.Id;
+                model.id = entity.Id;
             }
             else
-                templateId = -1;
+                model.id = -1;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: ActiveUser.Id, RequestIP: RequestIP, value1: "Success");
-
-            return Ok(templateId);
+            return Ok(model);
         }
 
         [HttpDelete]

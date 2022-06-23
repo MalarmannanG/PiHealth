@@ -68,40 +68,41 @@ namespace PiHealth.Controllers.API.Masters
         [Route("Create")]
         public async Task<DoctorServiceModel> Create([FromBody] DoctorServiceModel model)
         {
-            var doctorService = model.ToEntity(new DoctorService());
-            doctorService.CreatedDate = DateTime.Now;
-            doctorService.CreatedBy = ActiveUser.Id;
-            var _templates = await _doctorService.GetByName(doctorService.ServiceName, ActiveUser.Id, 0);
+          
+            var _templates = await _doctorService.GetByName(model.serviceName, ActiveUser.Id, 0);
             if (_templates == null)
             {
+                var doctorService = model.ToEntity(new DoctorService());
+                doctorService.CreatedDate = DateTime.Now;
+                doctorService.CreatedBy = ActiveUser.Id;
                 await _doctorService.Create(doctorService);
 
             }
             else
             {
-                doctorService.Id = -1;
+                model.id = -1;
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-            return  doctorService.ToModel(new DoctorServiceModel());
+            return  model;
         }
 
         [HttpPut]
         [Route("Update")]
         public async Task<DoctorServiceModel> Update([FromBody] DoctorServiceModel model)
         {
-            var templateMaster = await _doctorService.UpdateGet(model.id);
-            var doctorService = model.ToEntity(templateMaster);
-            doctorService.ModifiedDate = DateTime.Now;
-            doctorService.ModifiedBy = ActiveUser.Id;
-            var _templates = await _doctorService.GetByName(doctorService.ServiceName, ActiveUser.Id, model.id);
+            
+            var _templates = await _doctorService.GetByName(model.serviceName, ActiveUser.Id, model.id);
             if (_templates == null)
             {
+                var templateMaster = await _doctorService.UpdateGet(model.id);
+                var doctorService = model.ToEntity(templateMaster);
+                doctorService.ModifiedDate = DateTime.Now;
+                doctorService.ModifiedBy = ActiveUser.Id;
                 await _doctorService.Update(doctorService);
-
             }
             else
             {
-                doctorService.Id = -1;
+                model.id = -1;
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return model;
