@@ -20,7 +20,7 @@ namespace PiHealth.Web.Model.DoctorMaster
         public string phoneNo1 { get; set; }
         public string phoneNo2 { get; set; }
         public string email { get; set; }
-        public long pinCode { get; set; }
+        public long? pinCode { get; set; }
         public bool isDeleted { get; set; }
         public double percentage { get; set; }
         public DateTime createdDate { get; set; }

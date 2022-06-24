@@ -28,13 +28,13 @@ namespace PiHealth.Web.Controllers.API.Masters
 
         public DoctorMasterController(DoctorMasterService doctorMasterService, IAppUserService appUserService, IWebHostEnvironment hostingEnvironment, AuditLogServices auditLogServices)
         {
-            _doctorMasterService = doctorMasterService;                      
+            _doctorMasterService = doctorMasterService;
             _hostingEnvironment = hostingEnvironment;
             _auditLogService = auditLogServices;
         }
 
         [HttpGet]
-        [Route("Get/{id}")]        
+        [Route("Get/{id}")]
         public IActionResult Get(long id)
         {
             var doctorMaster = _doctorMasterService.Get(id)?.Result?.ToModel(new DoctorMasterModel());
@@ -42,7 +42,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         }
 
         [HttpGet]
-        [Route("GetAll")]        
+        [Route("GetAll")]
         public IActionResult GetAll([FromQuery] DoctorQueryModel model)
         {
             var doctorMasters = _doctorMasterService.GetAll(name: model?.name);
@@ -54,10 +54,10 @@ namespace PiHealth.Web.Controllers.API.Masters
                 doctorMasters = doctorMasters.Take(model.take);
             }
             var result = doctorMasters?.ToList().Select(a => a.ToModel(new DoctorMasterModel())).ToList();
-            return Ok(new { result, total});
+            return Ok(new { result, total });
         }
 
-        [HttpGet]        
+        [HttpGet]
         [Route("AutoComplete")]
         public IActionResult AutoComplete(string name = null)
         {
@@ -71,7 +71,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         }
 
         [HttpPost]
-        [Route("Create")]        
+        [Route("Create")]
         public async Task<IActionResult> Create([FromBody] DoctorMasterModel model)
         {
             if (model == null)
@@ -95,7 +95,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         }
 
         [HttpPut]
-        [Route("Update")]        
+        [Route("Update")]
         public async Task<IActionResult> Update([FromBody] DoctorMasterModel model)
         {
             if (model == null)
@@ -120,7 +120,8 @@ namespace PiHealth.Web.Controllers.API.Masters
                 entity.PhoneNo1 = model.phoneNo1;
                 entity.PhoneNo2 = model.phoneNo2;
                 entity.Qualification = model.qualification;
-                entity.PinCode = model.pinCode;
+                if (model.pinCode.HasValue)
+                    entity.PinCode = model.pinCode.Value;
                 await _doctorMasterService.Update(entity);
             }
             else
@@ -129,9 +130,9 @@ namespace PiHealth.Web.Controllers.API.Masters
 
             return Ok(model);
         }
-        
+
         [HttpDelete]
-        [Route("Delete/{id}")]        
+        [Route("Delete/{id}")]
         public async Task<IActionResult> Delete(long id)
         {
             var entity = await _doctorMasterService.Get(id);
