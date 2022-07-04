@@ -18,9 +18,9 @@ namespace PiHealth.DataModel.Entity
         public string Units { get; set; }
         public string Remarks { get; set; }
         public bool BeforeFood { get; set; }
-        public bool Morning { get; set; }
-        public bool Noon { get; set; }
-        public bool Night { get; set; }
+        public string Morning { get; set; }
+        public string Noon { get; set; }
+        public string Night { get; set; }
         public int NoOfDays { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }
