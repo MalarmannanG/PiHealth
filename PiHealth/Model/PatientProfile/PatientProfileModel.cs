@@ -107,6 +107,7 @@ namespace PiHealth.Web.Model.PatientProfile
         public string strength { get; set; }
         public string units { get; set; }
         public string remarks { get; set; }
+        public string instructions { get; set; }
         public bool beforeFood { get; set; }
         public string morning { get; set; }
         public string noon { get; set; }

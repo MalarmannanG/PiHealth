@@ -87,7 +87,8 @@ namespace PiHealth.Web.MappingExtention
             model.morning = entity.Morning;
             model.noon = entity.Noon;
             model.night = entity.Night;
-            model.remarks = entity.Units;
+            model.remarks = entity.Remarks;
+            model.instructions = entity.Instructions;
             model.noOfDays = entity.NoOfDays;
             model.isDeleted = entity.IsDeleted;
             model.createdBy = entity.CreatedBy;
@@ -112,6 +113,7 @@ namespace PiHealth.Web.MappingExtention
             entity.Noon = model.noon;
             entity.Night = model.night;
             entity.Remarks = model.remarks;
+            entity.Instructions = model.instructions;
             entity.NoOfDays = model.noOfDays;
             entity.IsDeleted = model.isDeleted;
             entity.CreatedBy = model.createdBy;

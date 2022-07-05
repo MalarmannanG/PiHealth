@@ -17,6 +17,7 @@ namespace PiHealth.Web.MappingExtention
             model.strength = entity.Strength;
             model.units = entity.Units;
             model.remarks = entity.Remarks;
+            model.instructions = entity.Instructions;
             model.isDeleted = entity.IsDeleted;
             model.id = entity.Id;
             model.createdBy = entity.CreatedBy;
@@ -34,6 +35,7 @@ namespace PiHealth.Web.MappingExtention
             entity.Strength = model.strength;
             entity.Units = model.units;
             entity.Remarks = model.remarks;
+            entity.Instructions = model.instructions;
             entity.Id = model.id;
             entity.IsDeleted = model.isDeleted;
             entity.CreatedBy =model.createdBy;

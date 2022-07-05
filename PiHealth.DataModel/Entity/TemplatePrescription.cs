@@ -19,6 +19,7 @@ namespace PiHealth.DataModel.Entity
         public string Noon { get; set; }
         public string Night { get; set; }
         public string Remarks { get; set; }
+        public string Instructions { get; set; }
         public int NoOfDays { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? ModifiedDate { get; set; }

@@ -14,6 +14,7 @@ namespace PiHealth.Web.Model.PrescriptionMaster
         public string strength { get; set; }
         public string units { get; set; }
         public string remarks { get; set; }
+        public string instructions { get; set; }
         public bool isDeleted { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }

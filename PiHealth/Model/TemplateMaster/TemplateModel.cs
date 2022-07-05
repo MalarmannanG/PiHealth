@@ -49,6 +49,7 @@ namespace PiHealth.Web.Model.TemplateMaster
         public string noon { get; set; }
         public string night { get; set; }
         public string remarks { get; set; }
+        public string instructions { get; set; }
         public int noOfDays { get; set; }
         public bool isDeleted { get; set; }
         public DateTime createdDate { get; set; }
