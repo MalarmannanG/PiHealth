@@ -45,6 +45,7 @@ namespace PiHealth.Web.Model.TemplateMaster
         public string medicineName { get; set; }
         public string strength { get; set; }
         public bool beforeFood { get; set; }
+        public bool afterFood { get; set; }
         public string morning { get; set; }
         public string noon { get; set; }
         public string night { get; set; }

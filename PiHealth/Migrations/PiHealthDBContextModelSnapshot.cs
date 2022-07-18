@@ -798,6 +798,9 @@ namespace PiHealth.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("AfterFood")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("BeforeFood")
                         .HasColumnType("bit");
 
@@ -1037,6 +1040,9 @@ namespace PiHealth.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("AfterFood")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("BeforeFood")
                         .HasColumnType("bit");

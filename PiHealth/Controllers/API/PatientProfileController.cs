@@ -128,6 +128,7 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
                 {
                     beforeFood = a.BeforeFood,
+                    afterFood = a.AfterFood,
                     categoryName = a.CategoryName,
                     genericName = a.GenericName,
                     medicineName = a.MedicineName,
@@ -198,7 +199,9 @@ namespace PiHealth.Web.Controllers.API
         {
             var _complaints = _patientProfileService.GetComplaints();
             var _advices = _patientProfileService.GetAdvice();
-            return Ok(new { complaints = _complaints, advices = _advices });
+            var _plans = _patientProfileService.GetPlan();
+            var _impressions = _patientProfileService.GetImpression();
+            return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions });
         }
 
         [HttpPost]

@@ -45,15 +45,21 @@ namespace PiHealth.Services.PatientProfileService
             
             return data;
         }
-        public virtual IQueryable<string> GetComplaints(string name = null)
+        public virtual IQueryable<string> GetComplaints()
         {
-            var data = _repository.Table.Where(a => !string.IsNullOrEmpty(a.Compliants)).Select(a=>a.Compliants).Distinct();
-            return data;
+            return  _repository.Table.Where(a => !string.IsNullOrEmpty(a.Compliants)).Select(a=>a.Compliants).Distinct();
         }
-        public virtual IQueryable<string> GetAdvice(string name = null)
+        public virtual IQueryable<string> GetAdvice()
         {
-            var data = _repository.Table.Where(a => !string.IsNullOrEmpty(a.Advice)).Select(a => a.Advice).Distinct();
-            return data;
+            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Advice)).Select(a => a.Advice).Distinct();
+        }
+        public virtual IQueryable<string> GetPlan()
+        {
+            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Plan)).Select(a => a.Plan).Distinct();
+        }
+        public virtual IQueryable<string> GetImpression()
+        {
+            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Impression)).Select(a => a.Impression).Distinct();
         }
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {

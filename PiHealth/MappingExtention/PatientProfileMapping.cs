@@ -84,6 +84,12 @@ namespace PiHealth.Web.MappingExtention
             model.units = entity.Units;
             model.strength = entity.Strength;
             model.beforeFood = entity.BeforeFood;
+            if (!string.IsNullOrEmpty(entity.Remarks))
+            {
+                model.beforeFood = entity.Remarks.ToLower().Contains("before") ? true : false;
+                model.beforeFood = entity.Remarks.ToLower().Contains("after") ? false : true;
+            }
+            model.afterFood = entity.AfterFood;
             model.morning = entity.Morning;
             model.noon = entity.Noon;
             model.night = entity.Night;
@@ -109,6 +115,7 @@ namespace PiHealth.Web.MappingExtention
             entity.Units = model.units;
             entity.CategoryName = model.categoryName;
             entity.BeforeFood = model.beforeFood;
+            entity.AfterFood = model.afterFood;
             entity.Morning = model.morning;
             entity.Noon = model.noon;
             entity.Night = model.night;

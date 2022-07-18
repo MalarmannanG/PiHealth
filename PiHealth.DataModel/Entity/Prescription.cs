@@ -19,6 +19,7 @@ namespace PiHealth.DataModel.Entity
         public string Remarks { get; set; }
         public string Instructions { get; set; }
         public bool BeforeFood { get; set; }
+        public bool AfterFood { get; set; }
         public string Morning { get; set; }
         public string Noon { get; set; }
         public string Night { get; set; }
