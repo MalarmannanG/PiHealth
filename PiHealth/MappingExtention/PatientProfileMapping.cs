@@ -132,7 +132,6 @@ namespace PiHealth.Web.MappingExtention
             entity.Sos = model.sos;
             entity.Stat = model.stat;
             entity.PrescriptionMasterId = model.prescriptionMasterId;
-            entity.PrescriptionMaster = model.presciptionMaster?.ToEntity(new PrescriptionMaster());
             return entity;
         }
 

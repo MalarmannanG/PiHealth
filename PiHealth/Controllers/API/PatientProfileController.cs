@@ -129,8 +129,8 @@ namespace PiHealth.Web.Controllers.API
                 {
                     beforeFood = a.BeforeFood,
                     afterFood = a.AfterFood,
-                    categoryName = a.CategoryName,
-                    genericName = a.GenericName,
+                    categoryName = a.PrescriptionMaster.CategoryName,
+                    genericName = a.PrescriptionMaster.GenericName,
                     medicineName = a.MedicineName,
                     morning = a.Morning,
                     night = a.Night,
@@ -139,7 +139,7 @@ namespace PiHealth.Web.Controllers.API
                     remarks = a.Remarks,
                     instructions = a.Instructions,
                     strength = a.Strength,
-                    units = a.Units
+                    units = a.PrescriptionMaster.Units,
                 }).ToList();
 
                 patientProfile.procedureModel = new ProcedureModel();
