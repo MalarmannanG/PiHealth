@@ -20,7 +20,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<TemplateMaster> GetAll(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).Include(a => a.TemplatePrescriptions).AsQueryable();
+            var data = _repository.Table.Where(a => !a.IsDeleted).Include(a => a.TemplatePrescriptions).ThenInclude(a=>a.PrescriptionMaster).AsQueryable();
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -61,7 +61,7 @@ namespace PiHealth.Services.Master
 
         public virtual async Task<TemplateMaster> Get(long id)
         {
-            return await _repository.TableNoTracking.Where(a => a.Id == id).Include(a => a.TemplatePrescriptions).FirstOrDefaultAsync();
+            return await _repository.TableNoTracking.Where(a => a.Id == id).Include(a => a.TemplatePrescriptions)?.ThenInclude(a=>a.PrescriptionMaster).FirstOrDefaultAsync();
         }
         public virtual async Task<TemplateMaster> GetByName(string TemplateName, long id)
         {

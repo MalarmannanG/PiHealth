@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using PiHealth.Web.Model.Appointment;
 using PiHealth.Web.Model.Patient;
+using PiHealth.DataModel.Entity;
+using PiHealth.Web.Model.PrescriptionMaster;
 
 namespace PiHealth.Web.Model.PatientProfile
 {
@@ -121,6 +123,8 @@ namespace PiHealth.Web.Model.PatientProfile
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+        public long? prescriptionMasterId { get; set; }
+        public PrescriptionMasterModel presciptionMaster { get; set; }
     }
 
     public class ProcedureModel

@@ -14,15 +14,19 @@ namespace PiHealth.Services.PatientProfileService
     {
         public readonly IRepository<PatientProfile> _repository;
         public readonly IRepository<PatientProcedure> _repositoryProcedure;
-        public PatientProfileService(IRepository<PatientProfile> repository, IRepository<PatientProcedure> repositoryProcedure)
+        public readonly IRepository<Prescription> _repositoryPrescription;
+        public PatientProfileService(IRepository<PatientProfile> repository, 
+            IRepository<PatientProcedure> repositoryProcedure, 
+            IRepository<Prescription> repositoryPrescription)
         {
             _repository = repository;
             _repositoryProcedure = repositoryProcedure;
-        }      
+            _repositoryPrescription = repositoryPrescription;
+        }
 
         public virtual IQueryable<PatientProfile> GetAll(string name = null, long? patientId = null, long[] appointmentIds = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).Include(a => a.Appointment).Include(a=> a.Prescriptions).AsQueryable();
+            var data = _repository.Table.Where(a => !a.IsDeleted).Include(a => a.Appointment).Include(a=> a.Prescriptions).ThenInclude(a=>a.PrescriptionMaster).AsQueryable();
 
             if(patientId != null)
             {
@@ -61,6 +65,10 @@ namespace PiHealth.Services.PatientProfileService
         {
             return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Impression)).Select(a => a.Impression).Distinct();
         }
+        public virtual IQueryable<string> GetInstructions()
+        {
+            return _repositoryPrescription.Table.Where(a => !string.IsNullOrEmpty(a.Instructions)).Select(a => a.Instructions).Distinct();
+        }
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {
             return await _repository.UpdateAsync(entity);
@@ -79,7 +87,7 @@ namespace PiHealth.Services.PatientProfileService
         
         public virtual async Task<PatientProfile> Get(long id)
         {
-            return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient).Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests).ThenInclude(a => a.TestMaster).Include(a => a.Prescriptions).Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a=>a.Appointment.PatientFiles).Include(a => a.Appointment.VitalsReport).Include(a=>a.DoctorService).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient).Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests).ThenInclude(a => a.TestMaster).Include(a => a.Prescriptions).ThenInclude(a=>a.PrescriptionMaster).Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a=>a.Appointment.PatientFiles).Include(a => a.Appointment.VitalsReport).Include(a=>a.DoctorService).FirstOrDefaultAsync();
         }
 
         public virtual async Task<PatientProfile> GetByPatient(long id)

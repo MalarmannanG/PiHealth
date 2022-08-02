@@ -42,7 +42,7 @@ namespace PiHealth.DataModel.Entity
         public virtual Appointment Appointment { get; set; }
         public virtual ICollection<PatientDiagnosis> PatientDiagnosis { get; set; }
         public virtual ICollection<Prescription> Prescriptions { get; set; }
-        public virtual ICollection<PatientTest> PatientTests { get; set; }        
+        public virtual ICollection<PatientTest> PatientTests { get; set; }
 
     }
 }

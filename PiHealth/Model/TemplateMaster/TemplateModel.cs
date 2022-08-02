@@ -1,6 +1,7 @@
 ﻿
 
 using Abp.Application.Services.Dto;
+using PiHealth.Web.Model.PrescriptionMaster;
 //using PiHealth.Extention;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,8 @@ namespace PiHealth.Web.Model.TemplateMaster
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+        public long? prescriptionMasterId { get; set; }
+        public PrescriptionMasterModel presciptionMaster { get; set; }
     }
 
     public class TemplateQueryModel   

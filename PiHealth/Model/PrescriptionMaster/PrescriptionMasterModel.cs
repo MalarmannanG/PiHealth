@@ -20,6 +20,7 @@ namespace PiHealth.Web.Model.PrescriptionMaster
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+
     }
 
     public class PrescriptionMasterQueryModel

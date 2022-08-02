@@ -32,6 +32,8 @@ namespace PiHealth.DataModel.Entity
         public bool Sos { get; set; }
         public bool Stat { get; set; }
         public virtual PatientProfile PatientProfile { get; set; }
+        public long? PrescriptionMasterId { get; set; }
+        public virtual PrescriptionMaster PrescriptionMaster { get; set; }
 
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using PiHealth.DataModel.Entity;
+using PiHealth.Web.Model.PrescriptionMaster;
 using PiHealth.Web.Model.TemplateMaster;
 
 namespace PiHealth.Web.MappingExtention
@@ -73,6 +74,8 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
+            model.prescriptionMasterId = entity.PrescriptionMasterId;
+            model.presciptionMaster = entity.PrescriptionMaster?.ToModel(new PrescriptionMasterModel());
             return model;
         }
 
@@ -94,6 +97,7 @@ namespace PiHealth.Web.MappingExtention
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;
             entity.ModifiedDate = model.modifiedDate;
+            entity.PrescriptionMasterId = model.prescriptionMasterId;
             return entity;
         }
     }

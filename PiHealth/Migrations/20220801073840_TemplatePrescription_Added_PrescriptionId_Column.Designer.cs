@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220801073840_TemplatePrescription_Added_PrescriptionId_Column")]
+    partial class TemplatePrescription_Added_PrescriptionId_Column
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -846,9 +848,6 @@ namespace PiHealth.Migrations
                     b.Property<long>("PatientProfileId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("PrescriptionMasterId")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(max)");
 
@@ -867,8 +866,6 @@ namespace PiHealth.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("PatientProfileId");
-
-                    b.HasIndex("PrescriptionMasterId");
 
                     b.ToTable("Prescription");
                 });
@@ -906,9 +903,6 @@ namespace PiHealth.Migrations
 
                     b.Property<DateTime?>("ModifiedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<long?>("PrescriptionMasterId")
-                        .HasColumnType("bigint");
 
                     b.Property<string>("Remarks")
                         .HasColumnType("nvarchar(max)");
@@ -1374,10 +1368,6 @@ namespace PiHealth.Migrations
                         .HasForeignKey("PatientProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("PiHealth.DataModel.Entity.PrescriptionMaster", "PrescriptionMaster")
-                        .WithMany()
-                        .HasForeignKey("PrescriptionMasterId");
                 });
 
             modelBuilder.Entity("PiHealth.DataModel.Entity.TemplatePrescription", b =>

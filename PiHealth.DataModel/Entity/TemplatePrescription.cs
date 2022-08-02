@@ -28,5 +28,7 @@ namespace PiHealth.DataModel.Entity
         public long? ModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
         public virtual TemplateMaster TemplateMaster { get; set; }
+        public long? PrescriptionMasterId { get; set; }
+        public virtual PrescriptionMaster PrescriptionMaster { get; set; }
     }
 }

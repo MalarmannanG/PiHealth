@@ -103,6 +103,8 @@ namespace PiHealth.Web.MappingExtention
             model.modifiedDate = entity.ModifiedDate;
             model.sos = entity.Sos;
             model.stat = entity.Stat;
+            model.prescriptionMasterId = entity.PrescriptionMasterId;
+            model.presciptionMaster = entity.PrescriptionMaster?.ToModel(new Model.PrescriptionMaster.PrescriptionMasterModel());
             return model;
         }
 
@@ -129,6 +131,8 @@ namespace PiHealth.Web.MappingExtention
             entity.ModifiedDate = model.modifiedDate;
             entity.Sos = model.sos;
             entity.Stat = model.stat;
+            entity.PrescriptionMasterId = model.prescriptionMasterId;
+            entity.PrescriptionMaster = model.presciptionMaster?.ToEntity(new PrescriptionMaster());
             return entity;
         }
 

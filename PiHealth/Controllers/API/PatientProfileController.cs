@@ -137,6 +137,7 @@ namespace PiHealth.Web.Controllers.API
                     noOfDays = a.NoOfDays,
                     noon = a.Noon,
                     remarks = a.Remarks,
+                    instructions = a.Instructions,
                     strength = a.Strength,
                     units = a.Units
                 }).ToList();
@@ -201,7 +202,8 @@ namespace PiHealth.Web.Controllers.API
             var _advices = _patientProfileService.GetAdvice();
             var _plans = _patientProfileService.GetPlan();
             var _impressions = _patientProfileService.GetImpression();
-            return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions });
+            var _instructions = _patientProfileService.GetInstructions();
+            return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions  = _instructions });
         }
 
         [HttpPost]
