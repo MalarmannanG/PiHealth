@@ -10,7 +10,6 @@ namespace PiHealth.DataModel.Entity
         {
 
         }
-
         public string GenericName { get; set; }
         public string CategoryName { get; set; }
         public string MedicineName { get; set; }
@@ -23,6 +22,5 @@ namespace PiHealth.DataModel.Entity
         public long CreatedBy { get; set; }
         public long? ModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
-        public long? PrescriptionMasterId { get; set; }
     }
 }

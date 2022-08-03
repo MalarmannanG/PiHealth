@@ -105,6 +105,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetByPatient/{id}")]
         public async Task<IActionResult> GetByPatient(long id)
         {
+            
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
 
