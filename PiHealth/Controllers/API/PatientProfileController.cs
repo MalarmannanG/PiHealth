@@ -125,22 +125,23 @@ namespace PiHealth.Web.Controllers.API
             else
             {
                 var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
-                patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
-                {
-                    beforeFood = a.BeforeFood,
-                    afterFood = a.AfterFood,
-                    categoryName = a.PrescriptionMaster.CategoryName,
-                    genericName = a.PrescriptionMaster.GenericName,
-                    medicineName = a.MedicineName,
-                    morning = a.Morning,
-                    night = a.Night,
-                    noOfDays = a.NoOfDays,
-                    noon = a.Noon,
-                    remarks = a.Remarks,
-                    instructions = a.Instructions,
-                    strength = a.Strength,
-                    units = a.PrescriptionMaster.Units,
-                }).ToList();
+                patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => a.ToModel(new PrescriptionModel())).ToList();
+                //patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
+                //{
+                //    beforeFood = a.BeforeFood,
+                //    afterFood = a.AfterFood,
+                //    categoryName = a.PrescriptionMaster.CategoryName,
+                //    genericName = a.PrescriptionMaster.GenericName,
+                //    medicineName = a.MedicineName,
+                //    morning = a.Morning,
+                //    night = a.Night,
+                //    noOfDays = a.NoOfDays,
+                //    noon = a.Noon,
+                //    remarks = a.Remarks,
+                //    instructions = a.Instructions,
+                //    strength = a.Strength,
+                //    units = a.PrescriptionMaster.Units,
+                //}).ToList();
 
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
