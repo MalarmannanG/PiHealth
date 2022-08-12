@@ -104,7 +104,6 @@ namespace PiHealth.Web.Controllers.API.Masters
                 return BadRequest();
 
             diagnosis.IsDeleted = true;
-
             diagnosis.ModifiedDate = DateTime.Now;
             diagnosis.ModifiedBy = ActiveUser.Id;
 

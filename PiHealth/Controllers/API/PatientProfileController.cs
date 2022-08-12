@@ -195,16 +195,18 @@ namespace PiHealth.Web.Controllers.API
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             return Ok(patientProfiles);
         }
+
         [HttpGet]
-        [Route("GetAllComplaints")]
-        public IActionResult GetAllComplaints()
+        [Route("GetAllInstructions")]
+        public IActionResult GetAllInstructions()
         {
-            var _complaints = _patientProfileService.GetComplaints();
-            var _advices = _patientProfileService.GetAdvice();
-            var _plans = _patientProfileService.GetPlan();
-            var _impressions = _patientProfileService.GetImpression();
+            //var _complaints = _patientProfileService.GetComplaints();
+            //var _advices = _patientProfileService.GetAdvice();
+            //var _plans = _patientProfileService.GetPlan();
+            //var _impressions = _patientProfileService.GetImpression();
             var _instructions = _patientProfileService.GetInstructions();
-            return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions  = _instructions });
+            //return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions = _instructions });
+            return Ok(new { instructions = _instructions });
         }
 
         [HttpPost]
