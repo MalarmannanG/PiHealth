@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20220808041847_PatientProfileDataMapping")]
+    partial class PatientProfileDataMapping
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -758,27 +760,12 @@ namespace PiHealth.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long>("CreatedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<long>("Key")
                         .HasColumnType("bigint");
-
-                    b.Property<long?>("ModifiedBy")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime?>("ModifiedDate")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -1093,28 +1080,6 @@ namespace PiHealth.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TemplateMaster");
-                });
-
-            modelBuilder.Entity("PiHealth.DataModel.Entity.TemplateMasterDataMapping", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<long>("PatientProfileDataId")
-                        .HasColumnType("bigint");
-
-                    b.Property<long>("TemplateMasterId")
-                        .HasColumnType("bigint");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PatientProfileDataId");
-
-                    b.HasIndex("TemplateMasterId");
-
-                    b.ToTable("TemplateMasterDataMapping");
                 });
 
             modelBuilder.Entity("PiHealth.DataModel.Entity.TemplatePrescription", b =>
@@ -1468,21 +1433,6 @@ namespace PiHealth.Migrations
                     b.HasOne("PiHealth.DataModel.Entity.PrescriptionMaster", "PrescriptionMaster")
                         .WithMany()
                         .HasForeignKey("PrescriptionMasterId");
-                });
-
-            modelBuilder.Entity("PiHealth.DataModel.Entity.TemplateMasterDataMapping", b =>
-                {
-                    b.HasOne("PiHealth.DataModel.Entity.PatientProfileData", "PatientProfileData")
-                        .WithMany()
-                        .HasForeignKey("PatientProfileDataId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PiHealth.DataModel.Entity.TemplateMaster", "TemplateMaster")
-                        .WithMany()
-                        .HasForeignKey("TemplateMasterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("PiHealth.DataModel.Entity.TemplatePrescription", b =>

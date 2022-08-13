@@ -126,22 +126,23 @@ namespace PiHealth.Web.Controllers.API
             else
             {
                 var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
-                patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
-                {
-                    beforeFood = a.BeforeFood,
-                    afterFood = a.AfterFood,
-                    categoryName = a.PrescriptionMaster.CategoryName,
-                    genericName = a.PrescriptionMaster.GenericName,
-                    medicineName = a.MedicineName,
-                    morning = a.Morning,
-                    night = a.Night,
-                    noOfDays = a.NoOfDays,
-                    noon = a.Noon,
-                    remarks = a.Remarks,
-                    instructions = a.Instructions,
-                    strength = a.Strength,
-                    units = a.PrescriptionMaster.Units,
-                }).ToList();
+                patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => a.ToModel(new PrescriptionModel())).ToList();
+                //patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
+                //{
+                //    beforeFood = a.BeforeFood,
+                //    afterFood = a.AfterFood,
+                //    categoryName = a.PrescriptionMaster.CategoryName,
+                //    genericName = a.PrescriptionMaster.GenericName,
+                //    medicineName = a.MedicineName,
+                //    morning = a.Morning,
+                //    night = a.Night,
+                //    noOfDays = a.NoOfDays,
+                //    noon = a.Noon,
+                //    remarks = a.Remarks,
+                //    instructions = a.Instructions,
+                //    strength = a.Strength,
+                //    units = a.PrescriptionMaster.Units,
+                //}).ToList();
 
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
@@ -195,16 +196,18 @@ namespace PiHealth.Web.Controllers.API
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             return Ok(patientProfiles);
         }
+
         [HttpGet]
-        [Route("GetAllComplaints")]
-        public IActionResult GetAllComplaints()
+        [Route("GetAllInstructions")]
+        public IActionResult GetAllInstructions()
         {
-            var _complaints = _patientProfileService.GetComplaints();
-            var _advices = _patientProfileService.GetAdvice();
-            var _plans = _patientProfileService.GetPlan();
-            var _impressions = _patientProfileService.GetImpression();
+            //var _complaints = _patientProfileService.GetComplaints();
+            //var _advices = _patientProfileService.GetAdvice();
+            //var _plans = _patientProfileService.GetPlan();
+            //var _impressions = _patientProfileService.GetImpression();
             var _instructions = _patientProfileService.GetInstructions();
-            return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions  = _instructions });
+            //return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions = _instructions });
+            return Ok(new { instructions = _instructions });
         }
 
         [HttpPost]
