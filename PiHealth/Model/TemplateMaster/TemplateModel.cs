@@ -15,6 +15,10 @@ namespace PiHealth.Web.Model.TemplateMaster
         public TemplateMasterModel()
         {
             templatePrescriptionModel = new List<TemplatePrescriptionModel>();
+            templateComplaints = new List<PatientProfileDataMapModel>();
+            templatePlans = new List<PatientProfileDataMapModel>();
+            templateImpressions = new List<PatientProfileDataMapModel>();
+            templateAdvices = new List<PatientProfileDataMapModel>();
         }
         public long id { get; set; }
         public string name { get; set; }
@@ -31,6 +35,10 @@ namespace PiHealth.Web.Model.TemplateMaster
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
         public List<TemplatePrescriptionModel> templatePrescriptionModel { get; set; }
+        public List<PatientProfileDataMapModel> templateComplaints { get; set; }
+        public List<PatientProfileDataMapModel> templatePlans { get; set; }
+        public List<PatientProfileDataMapModel> templateImpressions { get; set; }
+        public List<PatientProfileDataMapModel> templateAdvices { get; set; }
 
     }
 
@@ -68,5 +76,13 @@ namespace PiHealth.Web.Model.TemplateMaster
         public string orderBy { get; set; }
         public int skip { get; set; }
         public int take { get; set; }
+    }
+
+    public class PatientProfileDataMapModel
+    {
+        public long templateMasterId { get; set; }
+        public long patientProfileDataId { get; set; }
+        public string description { get; set; }
+        public long key { get; set; }
     }
 }

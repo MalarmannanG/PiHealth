@@ -82,6 +82,7 @@ namespace PiHealth
             services.AddScoped<VitalsReportService>();
             services.AddScoped<DoctorDataServices>();
             services.AddScoped<PatientProfileDataService>();
+            services.AddScoped<TemplateMasterDataMapService>();
 
             services.AddScoped<DiagnosisMasterService>();
             services.AddScoped<TestMasterService>();

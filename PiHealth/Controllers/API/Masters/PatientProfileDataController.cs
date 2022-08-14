@@ -23,6 +23,7 @@ namespace PiHealth.Controllers.API.Masters
     public class PatientProfileDataController : BaseApiController
     {
         private readonly PatientProfileDataService _patientProfileDataService;
+      
         private readonly AuditLogServices _auditLogService;
 
         public PatientProfileDataController(
@@ -31,6 +32,7 @@ namespace PiHealth.Controllers.API.Masters
         {
             _patientProfileDataService = patientProfileDataService;
             _auditLogService = auditLogServices;
+           
         }
 
         [HttpGet]
@@ -46,15 +48,15 @@ namespace PiHealth.Controllers.API.Masters
         [Route("GetAll")]
         public IActionResult GetAll([FromQuery] PatientProfileDataQueryModel model)
         {
-            var entities = _patientProfileDataService.GetAll(model.description , model.key);
+            var entities = _patientProfileDataService.GetAll(model.description, model.key);
             var total = entities.Count();
             entities = entities.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
-            if(model.take > 0)
+            if (model.take > 0)
             {
                 entities = entities.Take(model.take);
             }
             var result = entities.ToList()?.Select(a => a.ToModel(new PatientProfileDataModel())).ToList();
-            return Ok(new {result, total});
+            return Ok(new { result, total });
         }
 
         [HttpPost]
@@ -73,14 +75,14 @@ namespace PiHealth.Controllers.API.Masters
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] PatientProfileDataModel model)
         {
-            if(model == null)
+            if (model == null)
             {
                 return BadRequest();
             }
 
             var entity = await _patientProfileDataService.Get(model.id);
 
-            if(entity == null)
+            if (entity == null)
             {
                 return BadRequest();
             }
@@ -99,8 +101,8 @@ namespace PiHealth.Controllers.API.Masters
         public async Task<IActionResult> Delete(long id)
         {
             var entity = await _patientProfileDataService.Get(id);
-           
-            if(entity == null)
+
+            if (entity == null)
             {
                 return BadRequest();
             }

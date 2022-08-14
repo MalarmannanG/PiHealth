@@ -12,6 +12,8 @@ using PiHealth.Web.MappingExtention;
 using PiHealth.Web.Model.TemplateMaster;
 using PiHealth.Controllers;
 using Abp.Application.Services.Dto;
+using System.Collections.Generic;
+using PiHealth.Services.AppConstants;
 
 //using Abp.Application.Services.Dto;
 
@@ -23,16 +25,19 @@ namespace PiHealth.Web.Controllers.API.Masters
     public class TemplateMasterController : BaseApiController
     {
         private readonly TemplateMasterService _templateMasterService;
+        private readonly TemplateMasterDataMapService _templateMasterDataMapService;
         private readonly IAppUserService _appUserService;
         private readonly AuditLogServices _auditLogService;
 
         public TemplateMasterController(
             TemplateMasterService templateMasterService,
+            TemplateMasterDataMapService templateMasterDataMapService,
             IAppUserService appUserService,
             AuditLogServices auditLogServices)
         {
             _templateMasterService = templateMasterService;
             _appUserService = appUserService;
+            _templateMasterDataMapService = templateMasterDataMapService;
             _auditLogService = auditLogServices;
         }
 
@@ -44,6 +49,11 @@ namespace PiHealth.Web.Controllers.API.Masters
         {
             var result = await _templateMasterService.Get(id);
             var templateMaster = result.ToModel(new TemplateMasterModel());
+            var _patientProfileData = _templateMasterDataMapService.GetAll(id).Select(a => new PatientProfileDataMapModel() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, templateMasterId = a.TemplateMasterId });
+            templateMaster.templateComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
+            templateMaster.templateImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();
+            templateMaster.templateAdvices = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Advice).Select(a => a).ToList();
+            templateMaster.templatePlans = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Plan).Select(a => a).ToList();
             return Ok(templateMaster);
         }
 
@@ -94,6 +104,10 @@ namespace PiHealth.Web.Controllers.API.Masters
             {
                 await _templateMasterService.Create(templateMaster);
                 templateId = templateMaster.Id;
+                await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
+                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).ToList();
+                await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = a.templateMasterId }).ToList());
+                
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return Ok(templateId);
@@ -121,6 +135,9 @@ namespace PiHealth.Web.Controllers.API.Masters
                 templateMaster.ModifiedBy = ActiveUser.Id;
 
                 await _templateMasterService.Update(templateMaster);
+                await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
+                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).ToList();
+                await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = a.templateMasterId }).ToList());
             }
             else
                 model.id = templateId;

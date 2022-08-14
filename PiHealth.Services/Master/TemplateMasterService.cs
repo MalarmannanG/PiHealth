@@ -12,7 +12,8 @@ namespace PiHealth.Services.Master
 {   
     public class TemplateMasterService
     {
-        public readonly IRepository<TemplateMaster> _repository;     
+        public readonly IRepository<TemplateMaster> _repository;
+        //public readonly IRepository<TemplateMasterDataMapService> _dataRepository;
         public TemplateMasterService(IRepository<TemplateMaster> repository)
         {
             _repository = repository;           
