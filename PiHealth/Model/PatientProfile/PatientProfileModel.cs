@@ -16,6 +16,10 @@ namespace PiHealth.Web.Model.PatientProfile
             prescriptionModel = new List<PrescriptionModel>();
             patientDiagnosisModel = new List<PatientDiagnosisModel>();
             patientTestModel = new List<PatientTestModel>();
+            patientComplaints = new List<PatientProfileDataMapModel>();
+            patientImpressions = new List<PatientProfileDataMapModel>();
+            patientPlans = new List<PatientProfileDataMapModel>();
+            patientAdvices = new List<PatientProfileDataMapModel>();
         }
         public long id { get; set; }
         public long? templateMasterId { get; set; }
@@ -48,6 +52,10 @@ namespace PiHealth.Web.Model.PatientProfile
         public List<PatientDiagnosisModel> patientDiagnosisModel { get; set; }
         public List<PrescriptionModel> prescriptionModel { get; set; }
         public List<PatientTestModel> patientTestModel { get; set; }
+        public List<PatientProfileDataMapModel> patientComplaints { get; set; }
+        public List<PatientProfileDataMapModel> patientPlans { get; set; }
+        public List<PatientProfileDataMapModel> patientImpressions { get; set; }
+        public List<PatientProfileDataMapModel> patientAdvices { get; set; }
     }
     public class PatientProfileQueryModel
     {
@@ -148,5 +156,13 @@ namespace PiHealth.Web.Model.PatientProfile
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+    }
+
+    public class PatientProfileDataMapModel
+    {
+        public long patientProfileId { get; set; }
+        public long patientProfileDataId { get; set; }
+        public string description { get; set; }
+        public long key { get; set; }
     }
 }

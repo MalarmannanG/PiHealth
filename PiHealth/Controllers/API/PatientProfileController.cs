@@ -17,6 +17,7 @@ using PiHealth.Controllers;
 using PiHealth.Web.Model.PatientProcedureModel;
 using PiHealth.Services.PiHealthPatients;
 using System.Globalization;
+using PiHealth.Services.AppConstants;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -26,6 +27,7 @@ namespace PiHealth.Web.Controllers.API
     public class PatientProfileController : BaseApiController
     {
         private readonly PatientProfileService _patientProfileService;
+        private readonly PatientProfileDataMapService _patientProfileDataMapService;
         private readonly IAppUserService _appUserService;
         private readonly AuditLogServices _auditLogService;
         private readonly AppointmentService _appointmentService;
@@ -35,6 +37,7 @@ namespace PiHealth.Web.Controllers.API
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
+            PatientProfileDataMapService patientProfileDataMapService,
             IAppUserService appUserService,
             AppointmentService appointmentService,
             PatientProcedureService patientProcedureService,
@@ -43,6 +46,7 @@ namespace PiHealth.Web.Controllers.API
             AuditLogServices auditLogServices)
         {
             _patientProfileService = patientProfileService;
+            _patientProfileDataMapService = patientProfileDataMapService;
             _appUserService = appUserService;
             _appointmentService = appointmentService;
             _auditLogService = auditLogServices;
@@ -60,6 +64,11 @@ namespace PiHealth.Web.Controllers.API
 
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
+            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapModel() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
+            patientProfile.patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
+            patientProfile.patientImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();
+            patientProfile.patientAdvices = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Advice).Select(a => a).ToList();
+            patientProfile.patientPlans = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Plan).Select(a => a).ToList();
             //patientProfile.followUp.HasValue
             if (result == null)
             {
@@ -247,6 +256,9 @@ namespace PiHealth.Web.Controllers.API
                 }
             }
             await _patientProfileService.Create(patientProfile);
+            await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
+            var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans).Concat(model.patientAdvices).ToList();
+            await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
             return Ok(patientProfile);
@@ -278,6 +290,9 @@ namespace PiHealth.Web.Controllers.API
                     }
 
                     await _patientProfileService.Create(patientProfile);
+                    await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
+                    var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans).Concat(model.patientAdvices).ToList();
+                    await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
                 }
                 else
                 {
@@ -295,6 +310,9 @@ namespace PiHealth.Web.Controllers.API
                         await _appointmentService.Update(_appoinment);
                     }
                     await _patientProfileService.Update(patientProfile);
+                    await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
+                    var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans).Concat(model.patientAdvices).ToList();
+                    await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
                     _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
                 }
@@ -362,6 +380,7 @@ namespace PiHealth.Web.Controllers.API
             patientProfile.ModifiedBy = ActiveUser.Id;
 
             await _patientProfileService.Update(patientProfile);
+            await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 

@@ -66,7 +66,8 @@ namespace PiHealth.Controllers.API.Masters
             var patientProfileData = model.ToEntity(new PatientProfileData());
             patientProfileData.CreatedDate = DateTime.Now;
             patientProfileData.CreatedBy = ActiveUser.Id;
-            await _patientProfileDataService.Create(patientProfileData);
+            var res = await _patientProfileDataService.Create(patientProfileData);
+            model.id = res.Id;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return model;
         }

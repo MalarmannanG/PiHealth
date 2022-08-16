@@ -106,7 +106,7 @@ namespace PiHealth.Web.Controllers.API.Masters
                 templateId = templateMaster.Id;
                 await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
                 var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).ToList();
-                await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = a.templateMasterId }).ToList());
+                await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = templateId }).ToList());
                 
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
@@ -161,6 +161,7 @@ namespace PiHealth.Web.Controllers.API.Masters
             templateMaster.ModifiedBy = ActiveUser.Id;
 
             await _templateMasterService.Update(templateMaster);
+            await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 

@@ -3,7 +3,7 @@ using PiHealth.Model.PatientProfileData;
 
 namespace PiHealth.MappingExtention
 {
-    public static class PatientProfileDataMapping
+    public static class PatientProfileDatasMapping
     {
         public static PatientProfileDataModel ToModel(this PatientProfileData entity,PatientProfileDataModel model)
         {
