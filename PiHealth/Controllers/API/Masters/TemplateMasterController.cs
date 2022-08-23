@@ -54,6 +54,7 @@ namespace PiHealth.Web.Controllers.API.Masters
             templateMaster.templateImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();
             templateMaster.templateAdvices = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Advice).Select(a => a).ToList();
             templateMaster.templatePlans = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Plan).Select(a => a).ToList();
+            templateMaster.templateExaminations = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Examination).Select(a => a).ToList();
             return Ok(templateMaster);
         }
 
@@ -105,7 +106,7 @@ namespace PiHealth.Web.Controllers.API.Masters
                 await _templateMasterService.Create(templateMaster);
                 templateId = templateMaster.Id;
                 await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
-                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).ToList();
+                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).Concat(model.templateExaminations).ToList();
                 await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = templateId }).ToList());
                 
             }
@@ -136,7 +137,7 @@ namespace PiHealth.Web.Controllers.API.Masters
 
                 await _templateMasterService.Update(templateMaster);
                 await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
-                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).ToList();
+                var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).Concat(model.templateExaminations).ToList();
                 await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = a.templateMasterId }).ToList());
             }
             else

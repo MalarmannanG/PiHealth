@@ -11,6 +11,8 @@ namespace PiHealth.Services.AppConstants
         Complaints = 1,
         Impression = 2,
         Advice = 3,
-        Plan = 4
+        Plan = 4,
+        Examination = 5,
+        InvestigationResult = 6
     }
 }

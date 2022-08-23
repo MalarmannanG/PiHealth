@@ -19,6 +19,7 @@ namespace PiHealth.Web.Model.TemplateMaster
             templatePlans = new List<PatientProfileDataMapModel>();
             templateImpressions = new List<PatientProfileDataMapModel>();
             templateAdvices = new List<PatientProfileDataMapModel>();
+            templateExaminations = new List<PatientProfileDataMapModel>();
         }
         public long id { get; set; }
         public string name { get; set; }
@@ -39,6 +40,8 @@ namespace PiHealth.Web.Model.TemplateMaster
         public List<PatientProfileDataMapModel> templatePlans { get; set; }
         public List<PatientProfileDataMapModel> templateImpressions { get; set; }
         public List<PatientProfileDataMapModel> templateAdvices { get; set; }
+        public List<PatientProfileDataMapModel> templateExaminations { get; set; }
+
 
     }
 
