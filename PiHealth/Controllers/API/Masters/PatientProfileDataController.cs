@@ -63,11 +63,20 @@ namespace PiHealth.Controllers.API.Masters
         [Route("Create")]
         public async Task<PatientProfileDataModel> Create([FromBody] PatientProfileDataModel model)
         {
-            var patientProfileData = model.ToEntity(new PatientProfileData());
-            patientProfileData.CreatedDate = DateTime.Now;
-            patientProfileData.CreatedBy = ActiveUser.Id;
-            var res = await _patientProfileDataService.Create(patientProfileData);
-            model.id = res.Id;
+            var entity = await _patientProfileDataService.GetPatientProfileData(model.description,model.key,0);
+            if(entity == null)
+            {
+                var patientProfileData = model.ToEntity(new PatientProfileData());
+                patientProfileData.CreatedDate = DateTime.Now;
+                patientProfileData.CreatedBy = ActiveUser.Id;
+                var res = await _patientProfileDataService.Create(patientProfileData);
+                model.id = res.Id;
+            }
+            else
+            {
+                model.id = -1;
+            }
+            
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return model;
         }
