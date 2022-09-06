@@ -85,6 +85,8 @@ namespace PiHealth.Web.Controllers.API.Masters
                 return BadRequest();
 
             diagnosis = model.ToEntity(diagnosis);
+            diagnosis.ModifiedDate = DateTime.Now;
+            diagnosis.ModifiedBy = ActiveUser.Id;
             await _prescriptionMasterService.Update(diagnosis);
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");

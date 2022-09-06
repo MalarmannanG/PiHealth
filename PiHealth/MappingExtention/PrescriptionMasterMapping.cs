@@ -24,6 +24,13 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
             model.modifiedDate = entity.ModifiedDate;
+            model.noOfDays = entity.NoOfDays;
+            model.sos = entity.Sos;
+            model.stat = entity.Stat;
+            model.beforeFood = entity.BeforeFood;
+            model.morning = entity.Morning;
+            model.noon = entity.Noon;
+            model.night = entity.Night;
             return model;
         }
 
@@ -42,6 +49,13 @@ namespace PiHealth.Web.MappingExtention
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;
             entity.ModifiedDate = model.modifiedDate;
+            entity.NoOfDays = model.noOfDays;
+            entity.Sos = model.sos;
+            entity.Stat = model.stat;
+            entity.BeforeFood = model.beforeFood;
+            entity.Morning = model.morning;
+            entity.Noon = model.noon;
+            entity.Night =model.night;
             return entity;
         }
     }

@@ -70,6 +70,9 @@ namespace PiHealth.Web.MappingExtention
             model.instructions = entity.Instructions;
             model.noOfDays = entity.NoOfDays;
             model.isDeleted = entity.IsDeleted;
+            model.units = entity.Units;
+            model.sos = entity.Sos;
+            model.stat = entity.Stat;
             model.createdBy = entity.CreatedBy;
             model.createdDate = entity.CreatedDate;
             model.modifiedBy = entity.ModifiedBy;
@@ -93,6 +96,9 @@ namespace PiHealth.Web.MappingExtention
             entity.Instructions = model.instructions;
             entity.NoOfDays = model.noOfDays;
             entity.IsDeleted = model.isDeleted;
+            entity.Units = model.units;
+            entity.Sos = model.sos;
+            entity.Stat = model.stat;
             entity.CreatedBy = model.createdBy;
             entity.CreatedDate = model.createdDate;
             entity.ModifiedBy = model.modifiedBy;

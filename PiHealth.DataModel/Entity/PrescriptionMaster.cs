@@ -22,5 +22,12 @@ namespace PiHealth.DataModel.Entity
         public long CreatedBy { get; set; }
         public long? ModifiedBy { get; set; }
         public bool IsDeleted { get; set; }
+        public int NoOfDays { get; set; }
+        public bool BeforeFood { get; set; }
+        public string Morning { get; set; }
+        public string Noon { get; set; }
+        public string Night { get; set; }
+        public bool Sos { get; set; }
+        public bool Stat { get; set; }
     }
 }

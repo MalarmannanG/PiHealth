@@ -20,6 +20,13 @@ namespace PiHealth.Web.Model.PrescriptionMaster
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
         public long? modifiedBy { get; set; }
+        public int noOfDays { get; set; }
+        public bool beforeFood { get; set; }
+        public string morning { get; set; }
+        public string noon { get; set; }
+        public string night { get; set; }
+        public bool sos { get; set; }
+        public bool stat { get; set; }
 
     }
 
