@@ -108,7 +108,7 @@ namespace PiHealth.Web.Controllers.API.Masters
                 await _templateMasterDataMapService.DeleteByTemplateId(templateMaster.Id);
                 var _patientProfileData = model.templateComplaints.Concat(model.templateImpressions).Concat(model.templatePlans).Concat(model.templateAdvices).Concat(model.templateExaminations).ToList();
                 await _templateMasterDataMapService.Create(_patientProfileData.Select(a => new TemplateMasterDataMapping() { PatientProfileDataId = a.patientProfileDataId, TemplateMasterId = templateId }).ToList());
-                
+
             }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return Ok(templateId);
@@ -143,7 +143,7 @@ namespace PiHealth.Web.Controllers.API.Masters
             else
                 model.id = templateId;
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
-            
+
             return Ok(model);
 
         }
