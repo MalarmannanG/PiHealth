@@ -49,7 +49,7 @@ namespace PiHealth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-           
+
             GlobalConfiguration.WebRootPath = _webHostEnvironment.WebRootPath;
             GlobalConfiguration.ContentRootPath = _webHostEnvironment.ContentRootPath;
 
@@ -84,6 +84,7 @@ namespace PiHealth
             services.AddScoped<PatientProfileDataService>();
             services.AddScoped<TemplateMasterDataMapService>();
             services.AddScoped<PatientProfileDataMapService>();
+            services.AddScoped<ReportService>();
 
             services.AddScoped<DiagnosisMasterService>();
             services.AddScoped<TestMasterService>();
@@ -93,7 +94,7 @@ namespace PiHealth
             services.AddScoped<AuditLogServices>();
             services.AddScoped<AccessModuleService>();
             services.AddScoped<AccessFunctionService>();
-            services.AddScoped<ProcedureMasterService>(); 
+            services.AddScoped<ProcedureMasterService>();
             services.AddScoped<AccessRoleFunctionService>();
             services.Configure<BearerTokensOptions>(options => Configuration.GetSection("BearerTokens").Bind(options));
             services.Configure<PrefixOption>(options => Configuration.GetSection("PrefixOption").Bind(options));
@@ -119,15 +120,23 @@ namespace PiHealth
             {
                 option.Filters.Add(new ExceptionLogFilter());
                 option.Filters.Add(typeof(ExceptionHandlingFilter)); // by type                
-            }) .AddJsonOptions(
+            }).AddJsonOptions(
                 options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                 );
-            
+
             services.AddSwaggerGen(c =>
             {
                 c.ResolveConflictingActions(x => x.First());
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PIHealth API", Version = "v1" });
             });
+
+            services.AddMemoryCache();
+            services.AddEntityFrameworkSqlServer();
+            services.AddMiniProfiler(options => 
+            { 
+                options.RouteBasePath = "/profiler";
+            }).AddEntityFramework();
+            services.AddControllers();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -244,6 +253,8 @@ namespace PiHealth
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            app.UseMiniProfiler();
         }
     }
 }

@@ -65,6 +65,9 @@ namespace PiHealth.Web.Model.TemplateMaster
         public string instructions { get; set; }
         public int noOfDays { get; set; }
         public bool isDeleted { get; set; }
+        public string units { get; set; }
+        public bool sos { get; set; }
+        public bool stat { get; set; }
         public DateTime createdDate { get; set; }
         public DateTime? modifiedDate { get; set; }
         public long createdBy { get; set; }
