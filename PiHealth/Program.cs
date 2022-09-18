@@ -21,10 +21,6 @@ namespace PiHealth
             var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
-            var fileInfo = new FileInfo(@"log4net.config");
-
-            log4net.Config.XmlConfigurator.Configure(logRepository, fileInfo);
-
             log.Info("test");
 
             CreateHostBuilder(args).Build().Run();
@@ -41,8 +37,8 @@ namespace PiHealth
             var webHost =  Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    //webBuilder.UseStartup<Startup>();
-                    webBuilder.UseStartup<Startup>().UseKestrel(a => a.ListenAnyIP(portNumber)); 
+                    webBuilder.UseStartup<Startup>();
+                    //webBuilder.UseStartup<Startup>().UseKestrel(a => a.ListenAnyIP(portNumber)); 
                 });
             return webHost;
         }

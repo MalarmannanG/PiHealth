@@ -47,4 +47,15 @@ namespace PiHealth.Web.Model.Appointment
         public string toDate { get; set; }
         public bool todayPatients { get; set; }
     }
+
+    public class DashboardQueryModel : BaseQueryModel
+    {
+        public long patientId { get; set; }
+        public bool? isProcedure { get; set; }
+        public long doctorId { get; set; }
+        public long clinicId { get; set; }
+        public string fromDate { get; set; }
+        public string toDate { get; set; }
+        public bool todayPatients { get; set; }
+    }
 }

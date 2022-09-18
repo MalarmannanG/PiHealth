@@ -20,20 +20,20 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<TemplateMasterDataMapping> GetAll(long templateMasterId = 0)
         {
-            var data = _repository.Table.WhereIf(templateMasterId > 0, a =>a.TemplateMasterId == templateMasterId).Include(a=>a.PatientProfileData).AsQueryable();
+            var data = _repository.Table.WhereIf(templateMasterId > 0, a => a.TemplateMasterId == templateMasterId).Include(a => a.PatientProfileData).AsQueryable();
             return data;
         }
-     
+
 
         public virtual async Task<TemplateMasterDataMapping> Update(TemplateMasterDataMapping entity)
         {
-            
+
             return await _repository.UpdateAsync(entity);
         }
 
         public virtual async Task Create(List<TemplateMasterDataMapping> entities)
         {
-             await _repository.InsertAsync(entities);
+            await _repository.InsertAsync(entities);
         }
 
         public virtual async Task Delete(TemplateMasterDataMapping entity)
@@ -44,8 +44,8 @@ namespace PiHealth.Services.Master
         {
             var items = _repository.Table.Where(a => a.TemplateMasterId == templateMasterId).AsQueryable();
             _repository.Delete(items);
-           
-        }
 
+        }
     }
+       
 }

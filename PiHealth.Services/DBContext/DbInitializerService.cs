@@ -64,7 +64,7 @@ namespace PiHealth.Services.DBContext
             {
               var userService = serviceScope.ServiceProvider.GetRequiredService<IAppUserService>();
               var security = serviceScope.ServiceProvider.GetRequiredService<SecurityService>();
-                if (!userService.GetAll().Any())
+                if (!userService.GetAll(null).Any())
                 {
                     var user = new AppUser()
                     {

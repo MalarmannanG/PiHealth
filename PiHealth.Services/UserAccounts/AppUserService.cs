@@ -16,6 +16,7 @@ namespace PiHealth.Service.UserAccounts
     public interface IAppUserService
     {
         IQueryable<AppUser> GetAll(string name = null);
+        IQueryable<AppUser> GetAll(long id = -1);
         Task<AppUser> FindUserAsync(long userId);
 
         Task<AppUser> Update(AppUser user);
@@ -54,6 +55,13 @@ namespace PiHealth.Service.UserAccounts
             var data = _repository.Table.Where(a => a.IsActive).WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name)).Include(a=>a.Specialization);
             //data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
             
+            return data;
+        }
+        public virtual IQueryable<AppUser> GetAll(long id)
+        {
+            var data = _repository.Table.Where(a => a.IsActive).WhereIf(id > 0, e => false || e.Id == id).Include(a => a.Specialization);
+            //data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
+
             return data;
         }
         public virtual IQueryable<AppUser> GetIdByDoctorName(string name)

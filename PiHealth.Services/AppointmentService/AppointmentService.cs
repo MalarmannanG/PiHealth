@@ -98,6 +98,32 @@ namespace PiHealth.Services.Master
             return data;
         }
 
+        public virtual IQueryable<Appointment> GetDashboardAll(long patientId, long doctorId, long clinicId, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
+        {
+
+            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).
+                ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
+
+            data.WhereIf(clinicId > 0,  a => a.Patient.DoctorMaster.Id == clinicId)
+                 .WhereIf(patientId > 0, e => e.Patient.Id == patientId)
+                 .WhereIf(doctorId > 0, e => e.AppUser.Id == doctorId );
+
+            if (fromDate != null)
+            {
+                var date = fromDate.Value;
+                TimeSpan time = new TimeSpan(0, 0, 0, 0);
+                DateTime combined = date.Add(time);
+            }
+
+            if (toDate != null)
+            {
+                var date = toDate.Value;
+                TimeSpan time = new TimeSpan(0, 23, 59, 59);
+                DateTime combined = date.Add(time);
+            }
+
+            return data;
+        }
 
         public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {

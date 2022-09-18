@@ -125,6 +125,7 @@ namespace PiHealth
             
             services.AddSwaggerGen(c =>
             {
+                c.ResolveConflictingActions(x => x.First());
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PIHealth API", Version = "v1" });
             });
         }
@@ -137,6 +138,7 @@ namespace PiHealth
 
             app.UseSwaggerUI(options =>
             {
+               
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "PIHealth API V1");
                 //options.IndexStream = () => Assembly.GetExecutingAssembly()
                 //    .GetManifestResourceStream("PiHealthAPI.wwwroot.swagger.ui.index.html");

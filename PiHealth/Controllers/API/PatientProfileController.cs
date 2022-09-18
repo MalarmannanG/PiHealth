@@ -21,7 +21,7 @@ using PiHealth.Services.AppConstants;
 
 namespace PiHealth.Web.Controllers.API
 {
-    [Authorize]
+    //[Authorize]
     [Route("Api/[controller]")]
     [Produces("application/json")]
     public class PatientProfileController : BaseApiController
@@ -58,13 +58,27 @@ namespace PiHealth.Web.Controllers.API
         #region  PatientProfile Master
 
         [HttpGet]
+        [Route("Test")]
+        public async Task<IActionResult> Test( )
+        {
+            
+            return Ok(_patientProfileService.test());
+        }
+        [HttpGet]
+        [Route("Test1")]
+        public async Task<IActionResult> Test1()
+        {
+
+            return Ok(_patientProfileService.test1());
+        }
+        [HttpGet]
         [Route("Get/{id}")]
         public async Task<IActionResult> Get(long id)
         {
 
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
-            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapModel() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
+            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
             if(patientProfile.id > 0)
             {
                 patientProfile.patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
@@ -122,7 +136,7 @@ namespace PiHealth.Web.Controllers.API
             
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
-            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapModel() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
+            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
             if (patientProfile.id > 0)
             {
                 patientProfile.patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
@@ -210,7 +224,7 @@ namespace PiHealth.Web.Controllers.API
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             for(int i=0; i<patientProfiles.Count; i++)
             {
-                var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfiles[i].id).Select(a => new PatientProfileDataMapModel() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
+                var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfiles[i].id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
                 {
                     patientProfiles[i].patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
                     patientProfiles[i].patientImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();

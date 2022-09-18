@@ -10,7 +10,8 @@ namespace PiHealth.Web.Middleware
     public class ErrorHandlingMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<ErrorHandlingMiddleware> _logger;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger; 
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
         {
 
