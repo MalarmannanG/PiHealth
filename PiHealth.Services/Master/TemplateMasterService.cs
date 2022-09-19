@@ -72,5 +72,14 @@ namespace PiHealth.Services.Master
         {
             return await _repository.Table.Where(a=> a.Id == id).Include(a => a.TemplatePrescriptions).FirstOrDefaultAsync();
         }
+
+        public virtual IQueryable<TemplateMaster> GetAllTemplates()
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted).AsQueryable();
+
+            
+
+            return data;
+        }
     }
 }

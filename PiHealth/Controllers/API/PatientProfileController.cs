@@ -34,6 +34,11 @@ namespace PiHealth.Web.Controllers.API
         private readonly PatientProcedureService _patientProcedureService;
         private readonly PatientService _patientService;
         private readonly DoctorMasterService _doctorService;
+        private readonly PrescriptionMasterService _prescriptionMasterService;
+        private readonly TestMasterService _testMasterService;
+        private readonly DiagnosisMasterService _diagnosisMasterService;
+        private readonly TemplateMasterService _templateMasterService;
+        private readonly ProcedureMasterService _procedureMasterService;
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
@@ -43,6 +48,11 @@ namespace PiHealth.Web.Controllers.API
             PatientProcedureService patientProcedureService,
             PatientService patientService,
             DoctorMasterService doctorService,
+            PrescriptionMasterService prescriptionMaster,
+             TestMasterService testMaster,
+             DiagnosisMasterService diagnosisMaster,
+             TemplateMasterService templateMaster,
+             ProcedureMasterService procedureMaster,
             AuditLogServices auditLogServices)
         {
             _patientProfileService = patientProfileService;
@@ -53,24 +63,16 @@ namespace PiHealth.Web.Controllers.API
             _patientProcedureService = patientProcedureService;
             _patientService = patientService;
             _doctorService = doctorService;
+            _prescriptionMasterService = prescriptionMaster;
+            _testMasterService = testMaster;
+            _diagnosisMasterService = diagnosisMaster;
+            _templateMasterService = templateMaster;
+            _procedureMasterService = procedureMaster;
         }
 
         #region  PatientProfile Master
 
-        [HttpGet]
-        [Route("Test")]
-        public async Task<IActionResult> Test( )
-        {
-            
-            return Ok(_patientProfileService.test());
-        }
-        [HttpGet]
-        [Route("Test1")]
-        public async Task<IActionResult> Test1()
-        {
 
-            return Ok(_patientProfileService.test1());
-        }
         [HttpGet]
         [Route("Get/{id}")]
         public async Task<IActionResult> Get(long id)
@@ -78,8 +80,8 @@ namespace PiHealth.Web.Controllers.API
 
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
-            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
-            if(patientProfile.id > 0)
+            var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId }).ToList();
+            if (patientProfile.id > 0)
             {
                 patientProfile.patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
                 patientProfile.patientImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();
@@ -133,7 +135,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetByPatient/{id}")]
         public async Task<IActionResult> GetByPatient(long id)
         {
-            
+
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
@@ -147,15 +149,8 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.patientInvestigationResults = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.InvestigationResult).Select(a => a).ToList();
             }
 
-            //patientProfile.followUp.HasValue
             if (result == null)
             {
-                //var appointment = await _appointmentService.Get(id);
-                //patientProfile.patientModel = appointment?.Patient?.ToModel(new Model.Patient.PatientModel());
-                //patientProfile.appointment = appointment?.ToModel(new AppointmentModel());
-                //patientProfile.appointment.patientFiles = appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
-                //patientProfile.appointmentId = appointment.Id;
-                //patientProfile.patientId = appointment.PatientId ?? 0;
                 patientProfile.appointment = new AppointmentModel();
                 patientProfile.appointment.patientFiles = new System.Collections.Generic.List<PatientFilesModel>();
                 patientProfile.patientModel = new Model.Patient.PatientModel();
@@ -165,22 +160,6 @@ namespace PiHealth.Web.Controllers.API
             {
                 var prescriptios = await _patientProfileService.GetPrescriptions(result.Id);
                 patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => a.ToModel(new PrescriptionModel())).ToList();
-                //patientProfile.prescriptionModel = prescriptios?.Prescriptions.Select(a => new PrescriptionModel()
-                //{
-                //    beforeFood = a.BeforeFood,
-                //    afterFood = a.AfterFood,
-                //    categoryName = a.PrescriptionMaster.CategoryName,
-                //    genericName = a.PrescriptionMaster.GenericName,
-                //    medicineName = a.MedicineName,
-                //    morning = a.Morning,
-                //    night = a.Night,
-                //    noOfDays = a.NoOfDays,
-                //    noon = a.Noon,
-                //    remarks = a.Remarks,
-                //    instructions = a.Instructions,
-                //    strength = a.Strength,
-                //    units = a.PrescriptionMaster.Units,
-                //}).ToList();
 
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
@@ -222,7 +201,7 @@ namespace PiHealth.Web.Controllers.API
             var appointments = _appointmentService.GetAllInActive().Where(a => a.PatientId == model.PatientId && a.AppointmentDateTime <= model.appointmentDate).ToList();
             var appointmentIds = appointments.Select(a => a.Id).ToArray();
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
-            for(int i=0; i<patientProfiles.Count; i++)
+            for (int i = 0; i < patientProfiles.Count; i++)
             {
                 var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfiles[i].id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
                 {
@@ -489,6 +468,29 @@ namespace PiHealth.Web.Controllers.API
 
             }
             return Ok(patientProfile);
+        }
+
+
+        [HttpGet]
+        [Route("getInitialLoad")]
+        public IActionResult getInitialLoad()
+        {
+            var prescriptions = _prescriptionMasterService.GetAll().ToList();
+            var testMasters = _testMasterService.GetAll().ToList();
+            var diagnosis = _diagnosisMasterService.GetAll().ToList();
+            var templates = _templateMasterService.GetAllTemplates().ToList();
+            var procedures = _procedureMasterService.GetAll().ToList();
+            var doctors = _doctorService.GetAll().ToList();
+            //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
+            return Ok(new
+            {
+                prescriptions = prescriptions,
+                testMasters = testMasters,
+                diagnosis = diagnosis,
+                templates = templates,
+                procedures = procedures,
+                doctors = doctors
+            });
         }
 
         #endregion PatientProfile Ends

@@ -18,8 +18,9 @@ using System.Globalization;
 
 namespace PiHealth.Controllers.API
 {
-    [Route("api/[controller]")]
-    [ApiController]
+    //[Authorize]
+    [Route("Api/[controller]")]
+    [Produces("application/json")]
     public class DashboardController : BaseApiController
     {
 
@@ -46,16 +47,27 @@ namespace PiHealth.Controllers.API
             _doctorMasterService = doctorMasterService;
         }
 
+        [HttpPost]
+        [Route("CardData")]
+        public async Task<IActionResult> CardData([FromBody] DashboardQueryModel model)
+        {
+            DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
+            DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
+            var data = _appointmentService.GetDashboardCardCount(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate);
+            int _appointmentCount = data.Where(a=>a.VisitType.ToLower() != "procedure").Count();
+            int _procedureCount = data.Where(a => a.VisitType.ToLower() == "procedure").Count();
+            return Ok(new { Appointments = _appointmentCount, Procedures = _procedureCount  });
+        }
 
         [HttpGet]
-        [Route("Dashboard")]
-        public async Task<IActionResult> IntialDataLoad(long doctorId)
+        [Route("InitialLoad/{id}")]
+        public IActionResult InitialLoad(long id)
         {
             var patientsquery = _patientService.GetAll();
             patientsquery = patientsquery?.Include(a => a.DoctorMaster).OrderByDescending(a => a.PatientName);
             var patients = patientsquery.ToList()?.Select(a => a.ToModel(new Web.Model.Patient.PatientModel())).ToList();
 
-            var doctorsquery = _userService.GetAll(-1).OrderByDescending(a => a.Name);
+            var doctorsquery = _userService.GetAll(id).OrderByDescending(a => a.Name);
             var doctors = doctorsquery.Select(a => a.ToModel()).ToList();
 
             var facilityQuery = _doctorMasterService.GetAll();
@@ -65,22 +77,22 @@ namespace PiHealth.Controllers.API
             return Ok(new { patients, doctors, facilities });
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetAllAppointment")]
-        public IActionResult GetAllAppointment([FromQuery] DashboardQueryModel model)
-        {
+        public IActionResult GetAllAppointment([FromBody] DashboardQueryModel model)
+            {
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
 
             var appointments = _appointmentService.GetDashboardAll(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate, isProcedure: model?.isProcedure);
             var total = appointments?.Count();
-            var orderBy = string.IsNullOrEmpty(model?.order_by) ? "AppointmentDateTime" : model.order_by;
-            appointments = appointments?.OrderByDescending(a => a.AppointmentDateTime).Skip(model.skip);
 
-            if (model.take > 0)
-            {
-                appointments = appointments.Take(model.take);
-            }
+            appointments = appointments?.OrderByDescending(a => a.AppointmentDateTime);
+
+            //if (model.take > 0)
+            //{
+            //    appointments = appointments.Take(model.take);
+            //}
 
             var result = appointments.ToList().Select(a => a.ToModel(new AppointmentModel())).OrderByDescending(a => a.appointmentDateTime).ToList() ?? new List<AppointmentModel>();
             return Ok(new { result, total });

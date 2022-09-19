@@ -72,11 +72,11 @@ namespace PiHealth.Services.Master
 
             var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
 
-            //data.WhereIf(!string.IsNullOrEmpty(clinicName), a => a.Patient.DoctorMaster.Name.Contains(clinicName))
+            //data = data.WhereIf(!string.IsNullOrEmpty(clinicName), a => a.Patient.DoctorMaster.Name.Contains(clinicName))
             //     .WhereIf(!string.IsNullOrEmpty(patientName), e => e.Patient.PatientName.Contains(patientName))
             //     .WhereIf(!string.IsNullOrEmpty(doctorName), e => e.AppUser.Name.Contains(doctorName));
 
-           
+
 
             if (fromDate != null)
             {
@@ -104,26 +104,72 @@ namespace PiHealth.Services.Master
             var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).
                 ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
 
-            data.WhereIf(clinicId > 0,  a => a.Patient.DoctorMaster.Id == clinicId)
+            data = data.WhereIf(clinicId > 0,  a => a.Patient.DoctorMasterId == clinicId)
                  .WhereIf(patientId > 0, e => e.Patient.Id == patientId)
                  .WhereIf(doctorId > 0, e => e.AppUser.Id == doctorId );
+
+            if (isProcedure != null)
+            {
+                if (isProcedure == true)
+                {
+                    data = data.Where(a => a.VisitType == "Procedure");
+                }
+                else
+                {
+                    data = data.Where(a => a.VisitType != "Procedure");
+                }
+            }
 
             if (fromDate != null)
             {
                 var date = fromDate.Value;
                 TimeSpan time = new TimeSpan(0, 0, 0, 0);
                 DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime >= combined);
             }
+
 
             if (toDate != null)
             {
                 var date = toDate.Value;
                 TimeSpan time = new TimeSpan(0, 23, 59, 59);
                 DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime <= combined);
             }
 
             return data;
         }
+
+        public virtual IQueryable<Appointment> GetDashboardCardCount(long patientId, long doctorId, long clinicId, DateTime? fromDate, DateTime? toDate )
+        {
+
+            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).
+                ThenInclude(a => a.DoctorMaster).Include(a => a.AppUser).AsQueryable();
+
+            data = data.WhereIf(clinicId > 0, a => a.Patient.DoctorMaster.Id == clinicId)
+                 .WhereIf(patientId > 0, e => e.Patient.Id == patientId)
+                 .WhereIf(doctorId > 0, e => e.AppUser.Id == doctorId);
+
+            if (fromDate != null)
+            {
+                var date = fromDate.Value;
+                TimeSpan time = new TimeSpan(0, 0, 0, 0);
+                DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime >= combined);
+            }
+
+
+            if (toDate != null)
+            {
+                var date = toDate.Value;
+                TimeSpan time = new TimeSpan(0, 23, 59, 59);
+                DateTime combined = date.Add(time);
+                data = data.Where(a => a.AppointmentDateTime <= combined);
+            }
+
+            return data;
+        }
+
 
         public virtual IQueryable<Appointment> GetAllInActive(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
