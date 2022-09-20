@@ -63,9 +63,7 @@ namespace PiHealth.Controllers.API
         [Route("InitialLoad/{id}")]
         public IActionResult InitialLoad(long id)
         {
-            var patientsquery = _patientService.GetAll();
-            patientsquery = patientsquery?.Include(a => a.DoctorMaster).OrderByDescending(a => a.PatientName);
-            var patients = patientsquery.ToList()?.Select(a => a.ToModel(new Web.Model.Patient.PatientModel())).ToList();
+            var patientsCount = _patientService.GetPatientsCount();
 
             var doctorsquery = _userService.GetAll(id).OrderByDescending(a => a.Name);
             var doctors = doctorsquery.Select(a => a.ToModel()).ToList();
@@ -74,7 +72,7 @@ namespace PiHealth.Controllers.API
             facilityQuery = facilityQuery?.OrderByDescending(a => a.ClinicName);
             var facilities = facilityQuery?.ToList().Select(a => a.ToModel(new Web.Model.DoctorMaster.DoctorMasterModel())).ToList();
 
-            return Ok(new { patients, doctors, facilities });
+            return Ok(new { patientsCount, doctors, facilities });
         }
 
         [HttpPost]
