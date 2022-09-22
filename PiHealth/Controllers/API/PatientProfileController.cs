@@ -480,7 +480,11 @@ namespace PiHealth.Web.Controllers.API
             var testMasters = _testMasterService.GetAll().ToList();
             var diagnosis = _diagnosisMasterService.GetAll().ToList();
             var templates = _templateMasterService.GetAllTemplates().ToList();
-            var procedures = _procedureMasterService.GetAll().ToList();
+            //var procedures = _procedureMasterService.GetAll().ToList();
+            var procedures = _procedureMasterService.GetAll()
+                .Select(a => new { actualCost = a.ActualCost, anesthesia = a.Anesthesia,
+                    complication = a.Complication,date = a.Date,description = a.Description,diagnosis = a.Diagnosis,
+                id = a.Id,others = a.Others,name = a.Procedurename}).ToList();
             var doctors = _doctorService.GetAll().ToList();
             //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
             return Ok(new

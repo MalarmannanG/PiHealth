@@ -100,17 +100,23 @@ namespace PiHealth.Services.PatientProfileService
 
         public virtual async Task<PatientProfile> Get(long id)
         {
+            //return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient)
+            //    .Include(a => a.PatientDiagnosis).Include(a => a.PatientTests)
+            //    .Include(a => a.Prescriptions)
+            //    .Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a => a.Appointment.PatientFiles)
+            //    .Include(a => a.Appointment.VitalsReport).Include(a => a.DoctorService).FirstOrDefaultAsync();
             return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient)
-                .Include(a => a.PatientDiagnosis).Include(a => a.PatientTests)
-                .Include(a => a.Prescriptions)
+                .Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster).Include(a => a.PatientTests)
+                .Include(a => a.Prescriptions).ThenInclude(a => a.PrescriptionMaster)
                 .Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a => a.Appointment.PatientFiles)
                 .Include(a => a.Appointment.VitalsReport).Include(a => a.DoctorService).FirstOrDefaultAsync();
         }
 
         public virtual async Task<PatientProfile> GetByPatient(long id)
         {
+
             return await _repository.Table.Where(a => a.Patient.Id == id).Include(a => a.Patient)
-                .Include(a => a.PatientDiagnosis)
+                .Include(a => a.PatientDiagnosis).ThenInclude(a => a.DiagnosisMaster)
                 .Include(a => a.PatientTests)
                 .Include(a => a.Appointment).ThenInclude(a => a.AppUser).Include(a => a.Appointment.PatientFiles)
                 .Include(a => a.Appointment.VitalsReport).OrderByDescending(a => a.Id).FirstOrDefaultAsync();
