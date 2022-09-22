@@ -15,10 +15,12 @@ using PiHealth.Web.MappingExtention;
 using PiHealth.Web.Model.Appointment;
 using PiHealth.Controllers;
 using System.Globalization;
+using System.ComponentModel;
+using PiHealth.DataModel.Options;
 
 namespace PiHealth.Controllers.API
 {
-    //[Authorize]
+    [Authorize]
     [Route("Api/[controller]")]
     [Produces("application/json")]
     public class DashboardController : BaseApiController
@@ -65,13 +67,12 @@ namespace PiHealth.Controllers.API
         {
             var patientsCount = _patientService.GetPatientsCount();
 
-            var doctorsquery = _userService.GetAll(id).OrderByDescending(a => a.Name);
-            var doctors = doctorsquery.Select(a => a.ToModel()).ToList();
+            var doctorsquery = _userService.GetAll(id,userType:"Doctor").OrderByDescending(a => a.Name);
+            var doctors = doctorsquery.Select(a => new AppUser{ Name=a.Name, Id=a.Id }).ToList();
+          
 
-            var facilityQuery = _doctorMasterService.GetAll();
-            facilityQuery = facilityQuery?.OrderByDescending(a => a.ClinicName);
-            var facilities = facilityQuery?.ToList().Select(a => a.ToModel(new Web.Model.DoctorMaster.DoctorMasterModel())).ToList();
-
+            var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
+          
             return Ok(new { patientsCount, doctors, facilities });
         }
 

@@ -20,7 +20,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<DoctorMaster> GetAll(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted);
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted);
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -32,7 +32,7 @@ namespace PiHealth.Services.Master
         }
         public virtual IQueryable<DoctorMaster> AutoComplete(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted);
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted);
 
             if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
             {

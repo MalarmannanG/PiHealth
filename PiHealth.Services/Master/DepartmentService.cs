@@ -19,7 +19,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<DepartmentMaster> GetAll(bool? isActive = null, string name = null)
         {
-            var data = _repository.Table;
+            var data = _repository.TableNoTracking;
 
             if (!string.IsNullOrEmpty(name))
             {

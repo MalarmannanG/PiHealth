@@ -20,7 +20,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<DoctorService> GetAll(long userId, string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).WhereIf(!string.IsNullOrEmpty(name), e => e.ServiceName.Contains(name))
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).WhereIf(!string.IsNullOrEmpty(name), e => e.ServiceName.Contains(name))
                    .WhereIf(userId > 0, e => e.AppUserId == userId).Include(a=>a.AppUser);
             return data;
         }

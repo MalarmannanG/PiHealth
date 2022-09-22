@@ -20,7 +20,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<TemplateMasterDataMapping> GetAll(long templateMasterId = 0)
         {
-            var data = _repository.Table.WhereIf(templateMasterId > 0, a => a.TemplateMasterId == templateMasterId).Include(a => a.PatientProfileData).AsQueryable();
+            var data = _repository.TableNoTracking.WhereIf(templateMasterId > 0, a => a.TemplateMasterId == templateMasterId).Include(a => a.PatientProfileData).AsQueryable();
             return data;
         }
 

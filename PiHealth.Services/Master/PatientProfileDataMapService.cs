@@ -21,7 +21,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<PatientProfileDataMapping> GetAll(long patientProfileId = 0)
         {
-            var data = _repository.Table.WhereIf(patientProfileId > 0, a => a.PatientProfileId == patientProfileId).Include(a => a.PatientProfileData).AsQueryable();
+            var data = _repository.TableNoTracking.WhereIf(patientProfileId > 0, a => a.PatientProfileId == patientProfileId).Include(a => a.PatientProfileData).AsQueryable();
             return data;
         }
 

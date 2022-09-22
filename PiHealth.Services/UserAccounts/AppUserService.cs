@@ -10,13 +10,14 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace PiHealth.Service.UserAccounts
 {
     public interface IAppUserService
     {
-        IQueryable<AppUser> GetAll(string name = null);
-        IQueryable<AppUser> GetAll(long id = -1);
+
+        IQueryable<AppUser> GetAll(long id = -1, string name = null, string userType = null);
         Task<AppUser> FindUserAsync(long userId);
 
         Task<AppUser> Update(AppUser user);
@@ -30,7 +31,7 @@ namespace PiHealth.Service.UserAccounts
         AppUser ActiveUser { get; }
         IQueryable<Specialization> GetAllSpecialition(string name);
         IQueryable<AppUser> GetIdByDoctorName(string name);
- 
+
 
     }
     public class AppUserService : IAppUserService
@@ -50,18 +51,12 @@ namespace PiHealth.Service.UserAccounts
             _repositorySpecialization = repositorySpecialization;
         }
 
-        public virtual IQueryable<AppUser> GetAll(string name = null)
-        {
-            var data = _repository.Table.Where(a => a.IsActive).WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name)).Include(a=>a.Specialization);
-            //data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
-            
-            return data;
-        }
-        public virtual IQueryable<AppUser> GetAll(long id)
-        {
-            var data = _repository.Table.Where(a => a.IsActive).WhereIf(id > 0, e => false || e.Id == id).Include(a => a.Specialization);
-            //data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
 
+        public virtual IQueryable<AppUser> GetAll(long id = -1, string name = null, string userType = null)
+        {
+            var data = _repository.TableNoTracking.Where(a => a.IsActive).WhereIf(id > 0, e => false || e.Id == id);
+            data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
+            data = data.WhereIf(!string.IsNullOrWhiteSpace(userType), e => e.UserType.Contains(userType));
             return data;
         }
         public virtual IQueryable<AppUser> GetIdByDoctorName(string name)
@@ -74,29 +69,23 @@ namespace PiHealth.Service.UserAccounts
         {
             return _repository.UpdateAsync(user);
         }
-
         public virtual Task<AppUser> Create(AppUser user)
         {
             return _repository.InsertAsync(user);
         }
-
-
         public virtual Task<AppUser> FindUserAsync(long userId)
         {
             return _repository.Table.FirstOrDefaultAsync(a => a.Id == userId);
         }
-
         public Task<AppUser> FindUserAsync(string email, string password)
         {
             var passwordHash = _securityService.GetSha256Hash(password);
             return _repository.Table.FirstOrDefaultAsync(x => x.Email == email && x.Password == passwordHash);
         }
-
         public bool EmailAlreadyExit(string email, long? userId = null)
         {
             return GetAll().Any(x => x.Email == email && x.Id != userId);
         }
-
         public virtual async Task<AppUser> UpdateAsync(AppUser user)
         {
             return await _repository.UpdateAsync(user);
@@ -121,7 +110,7 @@ namespace PiHealth.Service.UserAccounts
 
         public virtual AppUser GetByID(long id)
         {
-            return _repository.Table.Include(a=>a.Specialization).FirstOrDefault(a => a.Id == id);
+            return _repository.Table.Include(a => a.Specialization).FirstOrDefault(a => a.Id == id);
         }
 
         public IQueryable<Specialization> GetAllSpecialition(string name)

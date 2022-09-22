@@ -21,7 +21,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<PatientProfileData> GetAll(string description = null, long id = 0)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).WhereIf(id > 0, a => a.Key == id).WhereIf(!string.IsNullOrEmpty(description), a => a.Description.Contains(description));
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).WhereIf(id > 0, a => a.Key == id).WhereIf(!string.IsNullOrEmpty(description), a => a.Description.Contains(description));
             return data;
         }
         public virtual async Task<PatientProfileData> Create(PatientProfileData entity)

@@ -21,7 +21,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<TemplateMaster> GetAll(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).Include(a => a.TemplatePrescriptions).ThenInclude(a=>a.PrescriptionMaster).AsQueryable();
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).Include(a => a.TemplatePrescriptions).ThenInclude(a=>a.PrescriptionMaster).AsQueryable();
 
             if (!string.IsNullOrEmpty(name))
             {
@@ -33,7 +33,7 @@ namespace PiHealth.Services.Master
         }
         public virtual IQueryable<TemplateMaster> AutoComplete(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted);
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted);
 
             if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
             {
@@ -75,7 +75,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<TemplateMaster> GetAllTemplates()
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted).AsQueryable();
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).AsQueryable();
 
             
 

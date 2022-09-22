@@ -19,7 +19,7 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<PrescriptionMaster> GetAll(string name = null)
         {
-            var data = _repository.Table.Where(a => !a.IsDeleted);
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted);
 
             if (!string.IsNullOrEmpty(name))
             {
