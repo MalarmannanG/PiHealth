@@ -79,6 +79,7 @@ namespace PiHealth.Web.Controllers.API
         {
 
             var result = await _patientProfileService.Get(id);
+             
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId }).ToList();
             if (patientProfile.id > 0)
