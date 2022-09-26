@@ -13,24 +13,26 @@ namespace PiHealth.Services.PatientProfileService
     public class PatientProfileService
     {
         public readonly IRepository<PatientProfile> _repository;
-        public readonly IRepository<PatientProcedure> _repositoryProcedure;
+        //public readonly IRepository<PatientProcedure> _repositoryProcedure;
         public readonly IRepository<Prescription> _repositoryPrescription;
         public readonly IRepository<PatientDiagnosis> _repositoryPd;
-        public readonly IRepository<DiagnosisMaster> _repositoryDM;
-        public readonly IRepository<Appointment> _repositoryApp;
+        public readonly IRepository<PatientTest> _repositoryTest;
+        //public readonly IRepository<DiagnosisMaster> _repositoryDM;
+        //public readonly IRepository<Appointment> _repositoryApp;
         public PatientProfileService(IRepository<PatientProfile> repository,
-            IRepository<PatientProcedure> repositoryProcedure,
+            //IRepository<PatientProcedure> repositoryProcedure,
             IRepository<Prescription> repositoryPrescription,
-             IRepository<DiagnosisMaster> repositoryDM,
-             IRepository<PatientDiagnosis> repositoryPd,
-             IRepository<Appointment> repositoryApp)
+             IRepository<PatientTest> repositoryTest,
+             IRepository<PatientDiagnosis> repositoryPd)
+            // IRepository<Appointment> repositoryApp)
         {
             _repository = repository;
-            _repositoryProcedure = repositoryProcedure;
+            //_repositoryProcedure = repositoryProcedure;
+            //_repositoryPrescription = repositoryPrescription;
             _repositoryPrescription = repositoryPrescription;
+            _repositoryTest = repositoryTest;
             _repositoryPd = repositoryPd;
-            _repositoryDM = repositoryDM;
-            _repositoryApp = repositoryApp;
+            //_repositoryApp = repositoryApp;
         }
 
         public virtual IQueryable<PatientProfile> GetAll(string name = null, long? patientId = null, long[] appointmentIds = null)
@@ -56,32 +58,9 @@ namespace PiHealth.Services.PatientProfileService
         public virtual IQueryable<PatientProfile> AutoComplete(string name = null)
         {
             var data = _repository.Table.Where(a => !a.IsDeleted);
-
-
             return data;
         }
-        /*
-        public virtual IQueryable<string> GetComplaints()
-        {
-            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Compliants)).Select(a => a.Compliants).Distinct();
-        }
-        public virtual IQueryable<string> GetAdvice()
-        {
-            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Advice)).Select(a => a.Advice).Distinct();
-        }
-        public virtual IQueryable<string> GetPlan()
-        {
-            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Plan)).Select(a => a.Plan).Distinct();
-        }
-        public virtual IQueryable<string> GetImpression()
-        {
-            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Impression)).Select(a => a.Impression).Distinct();
-        }    */
-        public virtual IQueryable<string> GetInstructions()
-        {
-            return _repositoryPrescription.Table.Where(a => !string.IsNullOrEmpty(a.Instructions)).Select(a => a.Instructions).Distinct();
-        }
-    
+         
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {
             return await _repository.UpdateAsync(entity);
@@ -112,6 +91,23 @@ namespace PiHealth.Services.PatientProfileService
                 .Include(a => a.Appointment.VitalsReport).Include(a => a.DoctorService).FirstOrDefaultAsync();
         }
 
+        
+        public virtual async Task<PatientProfile> GetByAppointment(long id)
+        {
+            return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient).Include(a => a.Appointment.AppUser).FirstOrDefaultAsync();
+        }
+        public virtual async Task<List<Prescription>> getPrescriptions(long patientProfileId)
+        {
+            return await _repositoryPrescription.Table.Where(a => a.PatientProfileId == patientProfileId).Include(a => a.PrescriptionMaster).ToListAsync();
+        }
+        public virtual async Task<List<PatientDiagnosis>> getDiagnosis(long patientProfileId)
+        {
+            return await _repositoryPd.Table.Where(a => a.PatientProfileId == patientProfileId).Include(a => a.DiagnosisMaster).ToListAsync();
+        }
+        public virtual async Task<List<PatientTest>> getTestValues(long patientProfileId)
+        {
+            return await _repositoryTest.Table.Where(a => a.PatientProfileId == patientProfileId).Include(a => a.TestMaster).ToListAsync();
+        }
         public virtual async Task<PatientProfile> GetByPatient(long id)
         {
 
@@ -127,35 +123,12 @@ namespace PiHealth.Services.PatientProfileService
             return await _repository.Table.Where(a => a.Id == id && !a.IsDeleted)
                 .Include(a => a.Prescriptions).ThenInclude(a => a.PrescriptionMaster).FirstOrDefaultAsync();
         }
+        public virtual List<long> getHistory(long patientId, long appointmentId)
+        {
+            return _repository.Table.Where(a => a.PatientId == patientId && a.AppointmentId != appointmentId).Select(a => a.Id).ToList();
+                 
+        }
+        
 
-
-        public class DiagnosisBasedGraph
-        {
-            public string Name { get; set; }
-            public string Date { get; set; }
-            public int ItemCount { get; set; }
         }
-
-        public class DataFormat
-        {
-            public string Name { get; set; }
-            public int ItemCount { get; set; }
-        }
-        public class ResponseData
-        {
-            public string  Date  { get; set; }
-            public List<DataFormat> dataItems { get; set; }
-        }
-
-        public class DataFormatChart
-        {
-            public string Name { get; set; }
-            public List<int> values { get; set; }
-        }
-        public class ResponseForChart
-        {
-            public List<string> dates { get; set; }
-            public List<DataFormatChart> categories { get; set; }
-        }
-    }
 }

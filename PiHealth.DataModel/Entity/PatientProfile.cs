@@ -36,6 +36,7 @@ namespace PiHealth.DataModel.Entity
         public long CreatedBy { get; set; }
         public long? ModifiedBy { get; set; }
         public virtual TemplateMaster TemplateMaster { get; set; }
+        
         public virtual Patient Patient { get; set; }
         public long? DoctorServiceId { get; set; }
         public virtual DoctorService DoctorService { get; set; }

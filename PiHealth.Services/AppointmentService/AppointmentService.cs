@@ -14,9 +14,11 @@ namespace PiHealth.Services.Master
     public class AppointmentService
     {
         public readonly IRepository<Appointment> _repository;
-        public AppointmentService(IRepository<Appointment> repository)
+        public readonly IRepository<PatientFiles> _repositoryPF;
+        public AppointmentService(IRepository<Appointment> repository, IRepository<PatientFiles> repositoryPF)
         {
             _repository = repository;
+            _repositoryPF = repositoryPF;
         }
 
         public virtual IQueryable<Appointment> GetAll(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
@@ -238,6 +240,16 @@ namespace PiHealth.Services.Master
             TimeSpan time = new TimeSpan(0, 0, 0, 0);
             return date.Add(time);
              
+        }
+
+        public virtual async Task<List<PatientFiles>> GetPatientFiles(long id)
+        {
+            return await _repositoryPF.Table.Where(a => a.AppointmentID == id).Select(a=>a).ToListAsync();
+        }
+
+        public virtual async Task<VitalsReport> GetVitalReports(long id)
+        {
+            return await _repository.Table.Where(a=>a.Id == id).Select(a=>a.VitalsReport).FirstOrDefaultAsync();
         }
     }
 }
