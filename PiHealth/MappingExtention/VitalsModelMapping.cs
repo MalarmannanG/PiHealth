@@ -26,7 +26,7 @@ namespace PiHealth.Web.MappingExtention
             model.createdDate = entity.CreatedDate;
             model.updatedBy = entity.UpdatedBy;
             model.updatedDate = entity.UpdatedDate;
-            model.patientFiles = entity.Appointment.PatientFiles.Select(a => a.ToModel(new PatientFilesModel())).ToList();
+            model.patientFiles = entity.Appointment?.PatientFiles?.Select(a => a.ToModel(new PatientFilesModel())).ToList();
             return model;
         }
 

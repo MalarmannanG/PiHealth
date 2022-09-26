@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using PiHealth.DataModel.Entity;
 using PiHealth.Web.Model.PatientProcedureModel;
+using PiHealth.Web.Model.PatientProfile;
 
 namespace PiHealth.Web.MappingExtention
 {
@@ -39,6 +40,23 @@ namespace PiHealth.Web.MappingExtention
             model.complication = entity.Complication;
             model.createdBy = entity.CreatedBy;
             model.createdOn = entity.CreatedDate;
+            return model;
+        }
+
+        public static ProcedureModel ToModel1(this PatientProcedure entity, ProcedureModel model)
+        {
+            model.id = entity.Id;
+            model.referedBy = entity.DoctorMasterId;
+            model.date = entity.Date;
+            model.description = entity.Description;
+            model.diagnosis = entity.Diagnosis;
+            model.others = entity.Others;
+            model.name = entity.Procedurename;
+            model.actualCost = entity.ActualCost;
+            model.anesthesia = entity.Anesthesia;
+            model.complication = entity.Complication;
+            model.createdBy = entity.CreatedBy;
+            model.createdDate = entity.CreatedDate;
             return model;
         }
     }

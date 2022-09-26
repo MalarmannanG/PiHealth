@@ -8,6 +8,7 @@ namespace PiHealth.Services
 {
     public class AuditLogServices
     {
+        
         public readonly IRepository<AuditLog> _repository;
         public AuditLogServices(IRepository<AuditLog> repository)
         {

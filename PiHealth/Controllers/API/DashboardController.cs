@@ -28,6 +28,7 @@ namespace PiHealth.Controllers.API
     [Produces("application/json")]
     public class DashboardController : BaseApiController
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
         private readonly AppointmentService _appointmentService;
         private readonly IAppUserService _appUserService;
@@ -59,11 +60,14 @@ namespace PiHealth.Controllers.API
         [Route("CardData")]
         public async Task<IActionResult> CardData([FromBody] DashboardQueryModel model)
         {  
+            var startdate= DateTime.Now;
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
             var data = _appointmentService.GetDashboardCardCount(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate);
             int _appointmentCount = data.Where(a=>a.VisitType.ToLower() != "procedure").Count();
             int _procedureCount = data.Where(a => a.VisitType.ToLower() == "procedure").Count();
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for Dashboard Card {0}", diff.TotalSeconds.ToString()));
             return Ok(new { Appointments = _appointmentCount, Procedures = _procedureCount  });
         }
 
@@ -83,6 +87,7 @@ namespace PiHealth.Controllers.API
         //}
         public async Task<IActionResult> InitialLoad(long id)
         {
+            var startdate = DateTime.Now;
             //Redis Start
             var cacheKey = "facilities";
             string serializedFacilitiesList;
@@ -110,7 +115,9 @@ namespace PiHealth.Controllers.API
           
 
             var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
-          
+
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for Dashboard InitialLoad {0}", diff.TotalSeconds.ToString()));
             return Ok(new { patientsCount, doctors, facilities, facilitiesList });
         }
 
@@ -118,6 +125,7 @@ namespace PiHealth.Controllers.API
         [Route("GetAllAppointment")]
         public IActionResult GetAllAppointment([FromBody] DashboardQueryModel model)
             {
+            var startdate= DateTime.Now;
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
 
@@ -132,6 +140,8 @@ namespace PiHealth.Controllers.API
             //}
 
             var result = appointments.ToList().Select(a => a.ToModel(new AppointmentModel())).OrderByDescending(a => a.appointmentDateTime).ToList() ?? new List<AppointmentModel>();
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for Dashboard GetAllAppointment {0}", diff.TotalSeconds.ToString() ));
             return Ok(new { result, total });
         }
     }

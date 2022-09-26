@@ -21,15 +21,17 @@ using PiHealth.Services.AppConstants;
 
 namespace PiHealth.Web.Controllers.API
 {
-    //[Authorize]
+    [Authorize]
     [Route("Api/[controller]")]
     [Produces("application/json")]
     public class PatientProfileController : BaseApiController
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private readonly PatientProfileService _patientProfileService;
         private readonly PatientProfileDataMapService _patientProfileDataMapService;
         private readonly IAppUserService _appUserService;
-        private readonly AuditLogServices _auditLogService;
+        //private readonly AuditLogServices _auditLogService;
         private readonly AppointmentService _appointmentService;
         private readonly PatientProcedureService _patientProcedureService;
         private readonly PatientService _patientService;
@@ -59,7 +61,7 @@ namespace PiHealth.Web.Controllers.API
             _patientProfileDataMapService = patientProfileDataMapService;
             _appUserService = appUserService;
             _appointmentService = appointmentService;
-            _auditLogService = auditLogServices;
+            //_auditLogService = auditLogServices;
             _patientProcedureService = patientProcedureService;
             _patientService = patientService;
             _doctorService = doctorService;
@@ -72,18 +74,30 @@ namespace PiHealth.Web.Controllers.API
 
         #region  PatientProfile Master
 
+        [HttpGet]
+        [Route("TestAPIResponse")]
+        public IActionResult TestAPIResponse()
+        {
+            return Ok(DateTime.Now);
+        }
 
         [HttpGet]
         [Route("Get/{id}")]
         public async Task<IActionResult> Get(long id)
         {
+            var startdate = DateTime.Now;
+            var result = await _patientProfileService.GetByAppointment(id);
 
-            var result = await _patientProfileService.Get(id);
-             
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId }).ToList();
             if (patientProfile.id > 0)
             {
+                var _patientDiagnosis = await _patientProfileService.getDiagnosis(patientProfile.id);
+                patientProfile.patientDiagnosisModel = _patientDiagnosis.Select(a => a.ToModel(new PatientDiagnosisModel())).ToList();
+                var _patientTest = await _patientProfileService.getTestValues(patientProfile.id);
+                patientProfile.patientTestModel = _patientTest.Select(a => a.ToModel(new PatientTestModel())).ToList();
+                var _patientPrescription = await _patientProfileService.getPrescriptions(patientProfile.id);
+                patientProfile.prescriptionModel = _patientPrescription.Select(a => a.ToModel(new PrescriptionModel())).ToList();
                 patientProfile.patientComplaints = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Complaints).Select(a => a).ToList();
                 patientProfile.patientImpressions = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Impression).Select(a => a).ToList();
                 patientProfile.patientAdvices = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.Advice).Select(a => a).ToList();
@@ -107,28 +121,11 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
                 if (entity != null)
-                {
-                    patientProfile.procedureModel.id = entity.Id;
-                    patientProfile.procedureModel.referedBy = entity.DoctorMasterId;
-                    if (entity.DoctorMasterId > 0)
-                    {
-                        var doctorentity = await _doctorService.Get(entity.DoctorMasterId.Value);
-                        patientProfile.procedureModel.referedByName = doctorentity.Name;
-                    }
-                    patientProfile.procedureModel.date = entity.Date;
-                    patientProfile.procedureModel.description = entity.Description;
-                    patientProfile.procedureModel.diagnosis = entity.Diagnosis;
-                    patientProfile.procedureModel.others = entity.Others;
-                    patientProfile.procedureModel.name = entity.Procedurename;
-                    patientProfile.procedureModel.actualCost = entity.ActualCost;
-                    patientProfile.procedureModel.anesthesia = entity.Anesthesia;
-                    patientProfile.procedureModel.complication = entity.Complication;
-                    patientProfile.procedureModel.createdBy = entity.CreatedBy;
-                    patientProfile.procedureModel.createdDate = entity.CreatedDate;
-                }
-
+                    patientProfile.procedureModel = entity.ToModel1(new ProcedureModel());
 
             }
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile Get {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfile);
         }
 
@@ -136,7 +133,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetByPatient/{id}")]
         public async Task<IActionResult> GetByPatient(long id)
         {
-
+            var startdate = DateTime.Now;
             var result = await _patientProfileService.GetByPatient(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfile.id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
@@ -192,6 +189,8 @@ namespace PiHealth.Web.Controllers.API
                 }
 
             }
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetByPatient {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfile);
         }
 
@@ -199,6 +198,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetAll")]
         public IActionResult GetAll([FromQuery] PatientProfileQueryModel model)
         {
+            var startdate = DateTime.Now;
             var appointments = _appointmentService.GetAllInActive().Where(a => a.PatientId == model.PatientId && a.AppointmentDateTime <= model.appointmentDate).ToList();
             var appointmentIds = appointments.Select(a => a.Id).ToArray();
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
@@ -214,6 +214,8 @@ namespace PiHealth.Web.Controllers.API
                     patientProfiles[i].patientInvestigationResults = _patientProfileData.Where(a => a.key == (int)ProfileDataEnum.InvestigationResult).Select(a => a).ToList();
                 }
             }
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetAll {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfiles);
         }
 
@@ -221,9 +223,12 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetAllInActive")]
         public IActionResult GetAllInActive([FromQuery] PatientProfileQueryModel model)
         {
+            var startdate = DateTime.Now;
             var appointments = _appointmentService.GetAllInActive().Where(a => a.PatientId == model.PatientId).ToList();
             var appointmentIds = appointments.Select(a => a.Id).ToArray();
             var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile AllInactive {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfiles);
         }
 
@@ -231,12 +236,10 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetAllInstructions")]
         public IActionResult GetAllInstructions()
         {
-            //var _complaints = _patientProfileService.GetComplaints();
-            //var _advices = _patientProfileService.GetAdvice();
-            //var _plans = _patientProfileService.GetPlan();
-            //var _impressions = _patientProfileService.GetImpression();
-            var _instructions = _patientProfileService.GetInstructions();
-            //return Ok(new { complaints = _complaints, advices = _advices, plans = _plans, impressions = _impressions, instructions = _instructions });
+            var startdate = DateTime.Now;
+            var _instructions = _prescriptionMasterService.GetInstructions();
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetAllInstructions {0}", diff.TotalSeconds.ToString()));
             return Ok(new { instructions = _instructions });
         }
 
@@ -244,6 +247,8 @@ namespace PiHealth.Web.Controllers.API
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] PatientProfileModel model)
         {
+
+            var startdate = DateTime.Now;
             var patientProfile = model.ToEntity(new PatientProfile());
             var _appoinment = await _appointmentService.Get(model.appointmentId);
             patientProfile.CreatedDate = DateTime.Now;
@@ -258,30 +263,32 @@ namespace PiHealth.Web.Controllers.API
                 _appoinment.UpdatedDate = DateTime.Now;
                 await _appointmentService.Update(_appoinment);
             }
-            if (model.procedureModel != null)
-            {
-                if (model.procedureModel.id > 0)
-                {
-                    var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
-                    var entity = model.procedureModel.ToEntity(patientProcedure);
-                    await _patientProcedureService.Update(entity);
 
-                }
-                else
-                {
-                    var entity = model.procedureModel.ToEntity(new PatientProcedure());
-                    entity.PatientProfileId = patientProfile.Id;
-                    var _model = entity.ToModel(model.procedureModel);
-                    if (entity.DoctorMasterId > 0)
-                        await _patientProcedureService.Create(_model);
-                }
+            if (model.procedureMasterId.HasValue)
+            {
+                var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                var entity = model.procedureModel.ToEntity(patientProcedure);
+                await _patientProcedureService.Update(entity);
+
             }
+            else
+            {
+                var entity = model.procedureModel.ToEntity(new PatientProcedure());
+                entity.PatientProfileId = patientProfile.Id;
+                var _model = entity.ToModel(model.procedureModel);
+                if (entity.DoctorMasterId > 0)
+                    await _patientProcedureService.Create(_model);
+            }
+
             await _patientProfileService.Create(patientProfile);
             await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
             var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans)
                 .Concat(model.patientAdvices).Concat(model.patientExaminations).Concat(model.patientInvestigationResults).ToList();
             await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            //_auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile Create PatiPro {0}", diff.TotalSeconds.ToString()));
 
             return Ok(patientProfile);
         }
@@ -290,10 +297,11 @@ namespace PiHealth.Web.Controllers.API
         [Route("Update")]
         public async Task<IActionResult> Update([FromBody] PatientProfileModel model)
         {
+            var startdate = DateTime.Now;
             if (model == null)
                 return BadRequest();
 
-            var patientProfile = await _patientProfileService.Get(model.appointmentId);
+            var patientProfile = await _patientProfileService.GetByAppointment(model.appointmentId);
             var _appoinment = await _appointmentService.Get(model.appointmentId);
             try
             {
@@ -337,25 +345,23 @@ namespace PiHealth.Web.Controllers.API
                     var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans)
                 .Concat(model.patientAdvices).Concat(model.patientExaminations).Concat(model.patientInvestigationResults).ToList();
                     await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
-                    _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+                    //_auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
                 }
-                if (model.procedureModel != null)
+                if (model.procedureMasterId.HasValue)
                 {
-                    if (model.procedureModel.id > 0)
-                    {
-                        var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
-                        var entity = model.procedureModel.ToEntity(patientProcedure);
-                        await _patientProcedureService.Update(entity);
+                    var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                    var entity = model.procedureModel.ToEntity(patientProcedure);
+                    await _patientProcedureService.Update(entity);
 
-                    }
-                    else
-                    {
-                        var entity = model.procedureModel.ToEntity(new PatientProcedure());
-                        entity.PatientProfileId = patientProfile.Id;
-                        await _patientProcedureService.Create(entity);
-                    }
                 }
+                else
+                {
+                    var entity = model.procedureModel.ToEntity(new PatientProcedure());
+                    entity.PatientProfileId = patientProfile.Id;
+                    await _patientProcedureService.Create(entity);
+                }
+
 
             }
             catch (Exception ex)
@@ -384,6 +390,9 @@ namespace PiHealth.Web.Controllers.API
             {
                 throw ex;
             }
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile Update PatientP {0}", diff.TotalSeconds.ToString()));
+
             return Ok(model);
 
         }
@@ -393,7 +402,7 @@ namespace PiHealth.Web.Controllers.API
         public async Task<IActionResult> Delete(long id)
         {
 
-            var patientProfile = await _patientProfileService.Get(id);
+            var patientProfile = await _patientProfileService.GetByAppointment(id);
 
             if (patientProfile == null)
                 return BadRequest();
@@ -406,7 +415,7 @@ namespace PiHealth.Web.Controllers.API
             await _patientProfileService.Update(patientProfile);
             await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
 
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            //_auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
             return Ok();
         }
@@ -415,10 +424,13 @@ namespace PiHealth.Web.Controllers.API
         [Route("PastVisitCount/{id}")]
         public async Task<IActionResult> PastVisitCount(long id)
         {
+            var startdate = DateTime.Now;
             var result = await _patientProfileService.GetByPatient(id);
             int a = 0;
             if (result != null)
                 a = 1;
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile Past Visits {0}", diff.TotalSeconds.ToString()));
             return Ok(a);
         }
 
@@ -427,7 +439,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("LastVisit/{id}")]
         public async Task<IActionResult> LastVisit(long id)
         {
-
+            var startdate = DateTime.Now;
             var result = await _patientProfileService.Get(id);
             var patientProfile = result?.ToModel(new PatientProfileModel()) ?? new PatientProfileModel();
             //patientProfile.followUp.HasValue
@@ -468,6 +480,8 @@ namespace PiHealth.Web.Controllers.API
 
 
             }
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetAllInstructions {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfile);
         }
 
@@ -476,17 +490,29 @@ namespace PiHealth.Web.Controllers.API
         [Route("getInitialLoad")]
         public IActionResult getInitialLoad()
         {
+            var startdate = DateTime.Now;
             var prescriptions = _prescriptionMasterService.GetAll().ToList();
             var testMasters = _testMasterService.GetAll().ToList();
             var diagnosis = _diagnosisMasterService.GetAll().ToList();
             var templates = _templateMasterService.GetAllTemplates().ToList();
             //var procedures = _procedureMasterService.GetAll().ToList();
             var procedures = _procedureMasterService.GetAll()
-                .Select(a => new { actualCost = a.ActualCost, anesthesia = a.Anesthesia,
-                    complication = a.Complication,date = a.Date,description = a.Description,diagnosis = a.Diagnosis,
-                id = a.Id,others = a.Others,name = a.Procedurename}).ToList();
+                .Select(a => new
+                {
+                    actualCost = a.ActualCost,
+                    anesthesia = a.Anesthesia,
+                    complication = a.Complication,
+                    date = a.Date,
+                    description = a.Description,
+                    diagnosis = a.Diagnosis,
+                    id = a.Id,
+                    others = a.Others,
+                    name = a.Procedurename
+                }).ToList();
             var doctors = _doctorService.GetAll().ToList();
             //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile Initial Load {0}", diff.TotalSeconds.ToString()));
             return Ok(new
             {
                 prescriptions = prescriptions,
@@ -496,6 +522,29 @@ namespace PiHealth.Web.Controllers.API
                 procedures = procedures,
                 doctors = doctors
             });
+        }
+
+
+        [HttpGet]
+        [Route("GetPatientFiles/{id}")]
+        public IActionResult GetPatientFiles(long id)
+        {
+            var startdate = DateTime.Now;
+            var _patientFiles = _appointmentService.GetPatientFiles(id);
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetPatientFiles {0}", diff.TotalSeconds.ToString()));
+            return Ok(new { PatientFiles = _patientFiles });
+        }
+
+        [HttpGet]
+        [Route("GetVitalReports/{id}")]
+        public async Task<IActionResult> GetVitalReports(long id)
+        {
+            var startdate = DateTime.Now;
+            var result = await _appointmentService.GetVitalReports(id);
+            TimeSpan diff = DateTime.Now - startdate;
+            log.Error(string.Format("Time taken for PatienProfile GetVitalReports {0}", diff.TotalSeconds.ToString()));
+            return Ok(result?.ToModel(new VitalsReportModel()));
         }
 
         #endregion PatientProfile Ends

@@ -49,5 +49,9 @@ namespace PiHealth.Services.Master
         {
             return await _repository.GetByIdAsync(id);
         }
+        public virtual IQueryable<string> GetInstructions()
+        {
+            return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Instructions)).Select(a => a.Instructions).Distinct();
+        }
     }
 }
