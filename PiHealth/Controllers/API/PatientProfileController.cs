@@ -18,6 +18,10 @@ using PiHealth.Web.Model.PatientProcedureModel;
 using PiHealth.Services.PiHealthPatients;
 using System.Globalization;
 using PiHealth.Services.AppConstants;
+using System.Collections.Generic;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -39,6 +43,7 @@ namespace PiHealth.Web.Controllers.API
         private readonly DiagnosisMasterService _diagnosisMasterService;
         private readonly TemplateMasterService _templateMasterService;
         private readonly ProcedureMasterService _procedureMasterService;
+        private readonly IDistributedCache _distributedCache;
 
         public PatientProfileController(
             PatientProfileService patientProfileService,
@@ -53,7 +58,8 @@ namespace PiHealth.Web.Controllers.API
              DiagnosisMasterService diagnosisMaster,
              TemplateMasterService templateMaster,
              ProcedureMasterService procedureMaster,
-            AuditLogServices auditLogServices)
+            AuditLogServices auditLogServices,
+            IDistributedCache distributedCache)
         {
             _patientProfileService = patientProfileService;
             _patientProfileDataMapService = patientProfileDataMapService;
@@ -68,6 +74,7 @@ namespace PiHealth.Web.Controllers.API
             _diagnosisMasterService = diagnosisMaster;
             _templateMasterService = templateMaster;
             _procedureMasterService = procedureMaster;
+            _distributedCache = distributedCache;
         }
 
         #region  PatientProfile Master
@@ -482,9 +489,18 @@ namespace PiHealth.Web.Controllers.API
             var templates = _templateMasterService.GetAllTemplates().ToList();
             //var procedures = _procedureMasterService.GetAll().ToList();
             var procedures = _procedureMasterService.GetAll()
-                .Select(a => new { actualCost = a.ActualCost, anesthesia = a.Anesthesia,
-                    complication = a.Complication,date = a.Date,description = a.Description,diagnosis = a.Diagnosis,
-                id = a.Id,others = a.Others,name = a.Procedurename}).ToList();
+                .Select(a => new
+                {
+                    actualCost = a.ActualCost,
+                    anesthesia = a.Anesthesia,
+                    complication = a.Complication,
+                    date = a.Date,
+                    description = a.Description,
+                    diagnosis = a.Diagnosis,
+                    id = a.Id,
+                    others = a.Others,
+                    name = a.Procedurename
+                }).ToList();
             var doctors = _doctorService.GetAll().ToList();
             //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
             return Ok(new
@@ -497,6 +513,35 @@ namespace PiHealth.Web.Controllers.API
                 doctors = doctors
             });
         }
+
+        //Redis implementation
+
+        //[HttpGet]
+        //[Route("getRedisPrescriptionData")]
+        //public async Task<IActionResult> getRedisPrescriptionData()
+        //{
+        //    var cacheKey = "prescriptions";
+        //    string serializedPrescriptionsList;
+        //    List<PrescriptionMaster> prescriptionList = new List<PrescriptionMaster>();
+        //    var redisPrescriptionList = await _distributedCache.GetAsync(cacheKey);
+        //    if(redisPrescriptionList != null)
+        //    {
+        //        serializedPrescriptionsList = Encoding.UTF8.GetString(redisPrescriptionList);
+        //        prescriptionList = JsonConvert.DeserializeObject<List<PrescriptionMaster>>(serializedPrescriptionsList);
+        //    }
+        //    else
+        //    {
+        //        prescriptionList = _prescriptionMasterService.GetAll().ToList();
+        //        serializedPrescriptionsList = JsonConvert.SerializeObject(prescriptionList);
+        //        redisPrescriptionList = Encoding.UTF8.GetBytes(serializedPrescriptionsList);
+        //        var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddMinutes(10)).SetSlidingExpiration(TimeSpan.FromMinutes(2));
+        //        await _distributedCache.SetAsync(cacheKey, redisPrescriptionList, options);
+        //    }
+        //    return Ok(new
+        //    {
+        //        prescriptionsList = prescriptionList,
+        //    });
+        //}
 
         #endregion PatientProfile Ends
     }

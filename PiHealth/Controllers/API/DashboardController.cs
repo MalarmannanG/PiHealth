@@ -69,50 +69,53 @@ namespace PiHealth.Controllers.API
 
         [HttpGet]
         [Route("InitialLoad/{id}")]
-        //public async IActionResult InitialLoad(long id)
+        public IActionResult InitialLoad(long id)
+        {
+            var patientsCount = _patientService.GetPatientsCount();
+
+            var doctorsquery = _userService.GetAll(id, userType: "Doctor").OrderByDescending(a => a.Name);
+            var doctors = doctorsquery.Select(a => new AppUser { Name = a.Name, Id = a.Id }).ToList();
+
+
+            var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
+
+            return Ok(new { patientsCount, doctors, facilities });
+        }
+
+        //Redis implementation
+
+        //public async Task<IActionResult> InitialLoad(long id)
         //{
+        //    //Redis Start
+        //    var cacheKey = "facilities";
+        //    string serializedFacilitiesList;
+        //    List<string> facilitiesList = new List<string>();
+        //    var redisFacilitiesList = await _distributedCache.GetAsync(cacheKey);
+        //    if(redisFacilitiesList != null)
+        //    {
+        //        serializedFacilitiesList = Encoding.UTF8.GetString(redisFacilitiesList);
+        //        facilitiesList = JsonConvert.DeserializeObject<List<string>>(serializedFacilitiesList);
+        //    }
+        //    else
+        //    {
+        //        facilitiesList = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
+        //        serializedFacilitiesList = JsonConvert.SerializeObject(facilitiesList);
+        //        redisFacilitiesList = Encoding.UTF8.GetBytes(serializedFacilitiesList);
+        //        var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddMinutes(10)).SetSlidingExpiration(TimeSpan.FromMinutes(2));
+        //        await _distributedCache.SetAsync(cacheKey, redisFacilitiesList, options);
+        //    }
+        //    //Redis End
+
         //    var patientsCount = _patientService.GetPatientsCount();
 
-        //    var doctorsquery = _userService.GetAll(id, userType: "Doctor").OrderByDescending(a => a.Name);
-        //    var doctors = doctorsquery.Select(a => new AppUser { Name = a.Name, Id = a.Id }).ToList();
+        //    var doctorsquery = _userService.GetAll(id,userType:"Doctor").OrderByDescending(a => a.Name);
+        //    var doctors = doctorsquery.Select(a => new AppUser{ Name=a.Name, Id=a.Id }).ToList();
 
 
         //    var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
 
-        //    return Ok(new { patientsCount, doctors, facilities });
+        //    return Ok(new { patientsCount, doctors, facilities, facilitiesList });
         //}
-        public async Task<IActionResult> InitialLoad(long id)
-        {
-            //Redis Start
-            var cacheKey = "facilities";
-            string serializedFacilitiesList;
-            List<string> facilitiesList = new List<string>();
-            var redisFacilitiesList = await _distributedCache.GetAsync(cacheKey);
-            if(redisFacilitiesList != null)
-            {
-                serializedFacilitiesList = Encoding.UTF8.GetString(redisFacilitiesList);
-                facilitiesList = JsonConvert.DeserializeObject<List<string>>(serializedFacilitiesList);
-            }
-            else
-            {
-                facilitiesList = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
-                serializedFacilitiesList = JsonConvert.SerializeObject(facilitiesList);
-                redisFacilitiesList = Encoding.UTF8.GetBytes(serializedFacilitiesList);
-                var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddMinutes(10)).SetSlidingExpiration(TimeSpan.FromMinutes(2));
-                await _distributedCache.SetAsync(cacheKey, redisFacilitiesList, options);
-            }
-            //Redis End
-
-            var patientsCount = _patientService.GetPatientsCount();
-
-            var doctorsquery = _userService.GetAll(id,userType:"Doctor").OrderByDescending(a => a.Name);
-            var doctors = doctorsquery.Select(a => new AppUser{ Name=a.Name, Id=a.Id }).ToList();
-          
-
-            var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
-          
-            return Ok(new { patientsCount, doctors, facilities, facilitiesList });
-        }
 
         [HttpPost]
         [Route("GetAllAppointment")]
