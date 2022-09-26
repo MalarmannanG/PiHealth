@@ -544,7 +544,10 @@ namespace PiHealth.Web.Controllers.API
             var result = await _appointmentService.GetVitalReports(id);
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for PatienProfile GetVitalReports {0}", diff.TotalSeconds.ToString()));
-            return Ok(result?.ToModel(new VitalsReportModel()));
+            if (result != null)
+                return Ok(result.ToModel(new VitalsReportModel()));
+            else
+                return Ok(new VitalsReportModel());
         }
 
         #endregion PatientProfile Ends
