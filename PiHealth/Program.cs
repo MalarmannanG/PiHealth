@@ -37,8 +37,8 @@ namespace PiHealth
             var webHost =  Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
-                    //webBuilder.UseStartup<Startup>().UseKestrel(a => a.ListenAnyIP(portNumber)); 
+                    //webBuilder.UseStartup<Startup>();
+                    webBuilder.UseStartup<Startup>().UseKestrel(a => a.ListenAnyIP(portNumber)); 
                 });
             return webHost;
         }
