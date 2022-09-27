@@ -57,7 +57,7 @@ namespace PiHealth.Service.UserAccounts
             var data = _repository.TableNoTracking.Where(a => a.IsActive).WhereIf(id > 0, e => false || e.Id == id);
             data = data.WhereIf(!string.IsNullOrWhiteSpace(name), e => false || e.Name.Contains(name) || e.Email.Contains(name) || e.UserType.Contains(name) || e.PhoneNo.Contains(name) || e.Gender.Contains(name) || e.Address.Contains(name));
             data = data.WhereIf(!string.IsNullOrWhiteSpace(userType), e => e.UserType.Contains(userType));
-            return data;
+            return data.Include(a=>a.Specialization);
         }
         public virtual IQueryable<AppUser> GetIdByDoctorName(string name)
         {

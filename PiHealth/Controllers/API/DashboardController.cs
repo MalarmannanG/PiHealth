@@ -59,16 +59,16 @@ namespace PiHealth.Controllers.API
         [HttpPost]
         [Route("CardData")]
         public async Task<IActionResult> CardData([FromBody] DashboardQueryModel model)
-        {  
-            var startdate= DateTime.Now;
+        {
+            var startdate = DateTime.Now;
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
             var data = _appointmentService.GetDashboardCardCount(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate);
-            int _appointmentCount = data.Where(a=>a.VisitType.ToLower() != "procedure").Count();
+            int _appointmentCount = data.Where(a => a.VisitType.ToLower() != "procedure").Count();
             int _procedureCount = data.Where(a => a.VisitType.ToLower() == "procedure").Count();
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for Dashboard Card {0}", diff.TotalSeconds.ToString()));
-            return Ok(new { Appointments = _appointmentCount, Procedures = _procedureCount  });
+            return Ok(new { Appointments = _appointmentCount, Procedures = _procedureCount });
         }
 
         [HttpGet]
@@ -89,43 +89,25 @@ namespace PiHealth.Controllers.API
         {
             var startdate = DateTime.Now;
             //Redis Start
-            var cacheKey = "facilities";
-            string serializedFacilitiesList;
-            List<string> facilitiesList = new List<string>();
-            var redisFacilitiesList = await _distributedCache.GetAsync(cacheKey);
-            if(redisFacilitiesList != null)
-            {
-                serializedFacilitiesList = Encoding.UTF8.GetString(redisFacilitiesList);
-                facilitiesList = JsonConvert.DeserializeObject<List<string>>(serializedFacilitiesList);
-            }
-            else
-            {
-                facilitiesList = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
-                serializedFacilitiesList = JsonConvert.SerializeObject(facilitiesList);
-                redisFacilitiesList = Encoding.UTF8.GetBytes(serializedFacilitiesList);
-                var options = new DistributedCacheEntryOptions().SetAbsoluteExpiration(DateTime.Now.AddMinutes(10)).SetSlidingExpiration(TimeSpan.FromMinutes(2));
-                await _distributedCache.SetAsync(cacheKey, redisFacilitiesList, options);
-            }
-            //Redis End
-
             var patientsCount = _patientService.GetPatientsCount();
 
-            var doctorsquery = _userService.GetAll(id,userType:"Doctor").OrderByDescending(a => a.Name);
-            var doctors = doctorsquery.Select(a => new AppUser{ Name=a.Name, Id=a.Id }).ToList();
-          
+            var doctorsquery = _userService.GetAll(id).OrderByDescending(a => a.Name);
+            var doctors = doctorsquery.Select(a => a.ToModel()).ToList();
 
-            var facilities = _doctorMasterService.GetAll().OrderByDescending(a => a.Name).Select(a => a.Name).ToList();
+            var facilityQuery = _doctorMasterService.GetAll();
+            facilityQuery = facilityQuery?.OrderByDescending(a => a.ClinicName);
+            var facilities = facilityQuery?.ToList().Select(a => a.ToModel(new Web.Model.DoctorMaster.DoctorMasterModel())).ToList();
 
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for Dashboard InitialLoad {0}", diff.TotalSeconds.ToString()));
-            return Ok(new { patientsCount, doctors, facilities, facilitiesList });
+            return Ok(new { patientsCount, doctors, facilities });
         }
 
         [HttpPost]
         [Route("GetAllAppointment")]
         public IActionResult GetAllAppointment([FromBody] DashboardQueryModel model)
-            {
-            var startdate= DateTime.Now;
+        {
+            var startdate = DateTime.Now;
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
 
@@ -141,7 +123,7 @@ namespace PiHealth.Controllers.API
 
             var result = appointments.ToList().Select(a => a.ToModel(new AppointmentModel())).OrderByDescending(a => a.appointmentDateTime).ToList() ?? new List<AppointmentModel>();
             TimeSpan diff = DateTime.Now - startdate;
-            log.Error(string.Format("Time taken for Dashboard GetAllAppointment {0}", diff.TotalSeconds.ToString() ));
+            log.Error(string.Format("Time taken for Dashboard GetAllAppointment {0}", diff.TotalSeconds.ToString()));
             return Ok(new { result, total });
         }
     }
