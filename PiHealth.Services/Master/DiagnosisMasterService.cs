@@ -69,7 +69,7 @@ namespace PiHealth.Services.Master
         }
         public virtual void UpdatePatientDiagnosis(long id)
         {
-            var data = _repositoryPatientDiag.TableNoTracking.Where(a => !a.IsDeleted).ToList();
+            var data = _repositoryPatientDiag.Table.Where(a => !a.IsDeleted).ToList();
             _repositoryPatientDiag.Delete(data);
         }
 
