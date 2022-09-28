@@ -29,7 +29,7 @@ namespace PiHealth.Extention
         {            
             services.AddDbContext<PiHealthDBContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-                b => b.MigrationsAssembly("PiHealth")));
+                b => b.MigrationsAssembly("PiHealth")), ServiceLifetime.Transient);
             return services;
         }
 

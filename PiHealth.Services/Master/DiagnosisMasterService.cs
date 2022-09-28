@@ -67,10 +67,11 @@ namespace PiHealth.Services.Master
         {
             return _repository.Table.Where(a => a.Name.ToLower() == diagName.ToLower() && !a.IsDeleted && a.Id != Id).FirstOrDefault();
         }
-        public virtual void UpdatePatientDiagnosis(long id)
+        public virtual async void UpdatePatientDiagnosis(long patientProfileId)
         {
-            var data = _repositoryPatientDiag.Table.Where(a => !a.IsDeleted).ToList();
-            _repositoryPatientDiag.Delete(data);
+            var entities = _repositoryPatientDiag.Table.Where(a=> a.PatientProfileId == patientProfileId).ToList();
+            _repositoryPatientDiag.Delete(entities);
+            
         }
 
     }
