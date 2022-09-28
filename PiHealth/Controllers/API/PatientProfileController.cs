@@ -334,7 +334,8 @@ namespace PiHealth.Web.Controllers.API
                 }
                 else
                 {
-
+                    _prescriptionMasterService.UpdatePatientPrescription(patientProfile.Id);
+                    _diagnosisMasterService.UpdatePatientDiagnosis(patientProfile.Id);
                     patientProfile = model.ToEntity(patientProfile);
                     patientProfile.IsDeleted = model.isDeleted;
                     patientProfile.ModifiedDate = DateTime.Now;
@@ -347,18 +348,17 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.UpdatedDate = DateTime.Now;
                         await _appointmentService.Update(_appoinment);
                     }
-                    _prescriptionMasterService.UpdatePatientPrescription(patientProfile.Id);
-                    _diagnosisMasterService.UpdatePatientDiagnosis(patientProfile.Id);
                     if (!string.IsNullOrEmpty(model.appointment.referredBy) && 
                         _appoinment.ReferredBy != model.appointment.referredBy)
                     {
                         _appoinment.ReferredBy = model.appointment.referredBy;
                         await _appointmentService.Update(_appoinment);
                     }
-                    await _patientProfileService.Update(patientProfile);
                     await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
+                    await _patientProfileService.Update(patientProfile);
                     var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans)
-                .Concat(model.patientAdvices).Concat(model.patientExaminations).Concat(model.patientInvestigationResults).ToList();
+                                                                     .Concat(model.patientAdvices).Concat(model.patientExaminations)
+                                                                     .Concat(model.patientInvestigationResults).ToList();
                     await _patientProfileDataMapService.Create(_patientProfileData.Select(a => new PatientProfileDataMapping() { PatientProfileDataId = a.patientProfileDataId, PatientProfileId = patientProfile.Id }).ToList());
                     //_auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
