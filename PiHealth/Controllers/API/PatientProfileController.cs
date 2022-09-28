@@ -347,6 +347,9 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.UpdatedDate = DateTime.Now;
                         await _appointmentService.Update(_appoinment);
                     }
+                    _prescriptionMasterService.UpdatePatientPrescription(patientProfile.Id);
+                    _diagnosisMasterService.UpdatePatientDiagnosis(patientProfile.Id);
+                    _prescriptionMasterService.UpdatePatientPrescription(patientProfile.Id);
                     await _patientProfileService.Update(patientProfile);
                     await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
                     var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans)

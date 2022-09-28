@@ -8,14 +8,16 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace PiHealth.Services.Master
-{   
+{
     public class DiagnosisMasterService
     {
-        public readonly IRepository<DiagnosisMaster> _repository;     
-        public DiagnosisMasterService(IRepository<DiagnosisMaster> repository)
+        public readonly IRepository<DiagnosisMaster> _repository;
+        public readonly IRepository<PatientDiagnosis> _repositoryPatientDiag;
+        public DiagnosisMasterService(IRepository<DiagnosisMaster> repository, IRepository<PatientDiagnosis> repositoryPatientDiag)
         {
-            _repository = repository;           
-        }      
+            _repository = repository;
+            _repositoryPatientDiag = repositoryPatientDiag;
+        }
 
         public virtual IQueryable<DiagnosisMaster> GetAll(string name = null)
         {
@@ -48,7 +50,7 @@ namespace PiHealth.Services.Master
 
         public virtual async Task<DiagnosisMaster> Create(DiagnosisMaster entity)
         {
-           return await _repository.InsertAsync(entity);
+            return await _repository.InsertAsync(entity);
         }
 
         public virtual async Task Delete(DiagnosisMaster entity)
@@ -65,5 +67,11 @@ namespace PiHealth.Services.Master
         {
             return _repository.Table.Where(a => a.Name.ToLower() == diagName.ToLower() && !a.IsDeleted && a.Id != Id).FirstOrDefault();
         }
+        public virtual void UpdatePatientDiagnosis(long id)
+        {
+            var data = _repositoryPatientDiag.TableNoTracking.Where(a => !a.IsDeleted).ToList();
+            _repositoryPatientDiag.Delete(data);
+        }
+
     }
 }

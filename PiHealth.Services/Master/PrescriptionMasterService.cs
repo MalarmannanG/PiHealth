@@ -12,9 +12,12 @@ namespace PiHealth.Services.Master
     public class PrescriptionMasterService
     {
         public readonly IRepository<PrescriptionMaster> _repository;
-        public PrescriptionMasterService(IRepository<PrescriptionMaster> repository)
+        public readonly IRepository<Prescription> _repositoryPrescription;
+
+        public PrescriptionMasterService(IRepository<PrescriptionMaster> repository, IRepository<Prescription> repositoryPrescription)
         {
             _repository = repository;
+            _repositoryPrescription = repositoryPrescription;
         }
 
         public virtual IQueryable<PrescriptionMaster> GetAll(string name = null)
@@ -52,6 +55,12 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<string> GetInstructions()
         {
             return _repository.Table.Where(a => !string.IsNullOrEmpty(a.Instructions)).Select(a => a.Instructions).Distinct();
+        }
+        public virtual void UpdatePatientPrescription(long patientProfileId)
+        {
+            var data = _repositoryPrescription.TableNoTracking.Where(a => !a.IsDeleted).ToList();
+
+            _repositoryPrescription.Delete(data);
         }
     }
 }
