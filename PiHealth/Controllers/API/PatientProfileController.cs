@@ -25,7 +25,7 @@ using Newtonsoft.Json;
 
 namespace PiHealth.Web.Controllers.API
 {
-    [Authorize]
+    //[Authorize]
     [Route("Api/[controller]")]
     [Produces("application/json")]
     public class PatientProfileController : BaseApiController
@@ -82,10 +82,18 @@ namespace PiHealth.Web.Controllers.API
         #region  PatientProfile Master
 
         [HttpGet]
-        [Route("TestAPIResponse")]
-        public IActionResult TestAPIResponse()
+        [Route("Test")]
+        public async Task<IActionResult> Test()
         {
-            return Ok(DateTime.Now);
+
+            return Ok(_patientProfileService.test());
+        }
+        [HttpGet]
+        [Route("Test1")]
+        public async Task<IActionResult> Test1()
+        {
+
+            return Ok(_patientProfileService.test1());
         }
 
         [HttpGet]
@@ -135,7 +143,7 @@ namespace PiHealth.Web.Controllers.API
             log.Error(string.Format("Time taken for PatienProfile Get {0}", diff.TotalSeconds.ToString()));
             return Ok(patientProfile);
         }
-
+         
         [HttpGet]
         [Route("GetByPatient/{id}")]
         public async Task<IActionResult> GetByPatient(long id)
