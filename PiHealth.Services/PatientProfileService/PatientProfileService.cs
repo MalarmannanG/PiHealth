@@ -13,26 +13,27 @@ namespace PiHealth.Services.PatientProfileService
     public class PatientProfileService
     {
         public readonly IRepository<PatientProfile> _repository;
-        //public readonly IRepository<PatientProcedure> _repositoryProcedure;
+        public readonly IRepository<PatientProcedure> _repositoryProcedure;
         public readonly IRepository<Prescription> _repositoryPrescription;
         public readonly IRepository<PatientDiagnosis> _repositoryPd;
         public readonly IRepository<PatientTest> _repositoryTest;
-        //public readonly IRepository<DiagnosisMaster> _repositoryDM;
-        //public readonly IRepository<Appointment> _repositoryApp;
+        public readonly IRepository<DiagnosisMaster> _repositoryDM;
+        public readonly IRepository<Appointment> _repositoryApp;
         public PatientProfileService(IRepository<PatientProfile> repository,
-            //IRepository<PatientProcedure> repositoryProcedure,
+            IRepository<PatientProcedure> repositoryProcedure,
             IRepository<Prescription> repositoryPrescription,
              IRepository<PatientTest> repositoryTest,
-             IRepository<PatientDiagnosis> repositoryPd)
-            // IRepository<Appointment> repositoryApp)
+             IRepository<PatientDiagnosis> repositoryPd,
+             IRepository<DiagnosisMaster> repositoryDM,
+             IRepository<Appointment> repositoryApp)
         {
             _repository = repository;
-            //_repositoryProcedure = repositoryProcedure;
-            //_repositoryPrescription = repositoryPrescription;
+            _repositoryProcedure = repositoryProcedure;
             _repositoryPrescription = repositoryPrescription;
+            _repositoryDM = repositoryDM;
             _repositoryTest = repositoryTest;
             _repositoryPd = repositoryPd;
-            //_repositoryApp = repositoryApp;
+            _repositoryApp = repositoryApp;
         }
 
         public virtual IQueryable<PatientProfile> GetAll(string name = null, long? patientId = null, long[] appointmentIds = null)
@@ -60,7 +61,7 @@ namespace PiHealth.Services.PatientProfileService
             var data = _repository.Table.Where(a => !a.IsDeleted);
             return data;
         }
-         
+
         public virtual async Task<PatientProfile> Update(PatientProfile entity)
         {
             return await _repository.UpdateAsync(entity);
@@ -91,7 +92,7 @@ namespace PiHealth.Services.PatientProfileService
                 .Include(a => a.Appointment.VitalsReport).Include(a => a.DoctorService).FirstOrDefaultAsync();
         }
 
-        
+
         public virtual async Task<PatientProfile> GetByAppointment(long id)
         {
             return await _repository.Table.Where(a => a.AppointmentId == id).Include(a => a.Patient).Include(a => a.Appointment.AppUser).FirstOrDefaultAsync();
@@ -126,9 +127,98 @@ namespace PiHealth.Services.PatientProfileService
         public virtual List<long> getHistory(long patientId, long appointmentId)
         {
             return _repository.Table.Where(a => a.PatientId == patientId && a.AppointmentId != appointmentId).Select(a => a.Id).ToList();
-                 
-        }
-        
 
         }
+        // public List<ResponseData> test1()
+        //{
+
+        //    var results = from r in _repository.Table
+        //                  join pd in _repositoryPd.Table on r.Id equals pd.PatientProfileId
+        //                  join dm in _repositoryDM.Table on pd.DiagnosisMasterId equals dm.Id
+        //                  join apt in _repositoryApp.Table on r.AppointmentId equals apt.Id
+        //                  where apt.IsActive == true && apt.AppointmentDateTime > DateTime.Now.AddDays(-100)
+        //                  group r by new { Name = dm.Name, Date = apt.AppointmentDateTime.Date } into grp
+        //                  select new { name = grp.Key.Name, date = grp.Key.Date, rowcount = grp.Count() };
+
+        //    var _grpData = results.ToList().Select(f => new DiagnosisBasedGraph() { Name = f.name, Date = f.date.ToString(), ItemCount = f.rowcount }).ToList();
+
+        //    var _obj = _grpData.Select(a => a.Date).Distinct().ToList();
+
+        //    List<ResponseData> _response = new List<ResponseData>();
+        //    ResponseForChart resChart = new ResponseForChart();
+        //    foreach (var item in _obj)
+        //    {
+        //        ResponseData res = new ResponseData();
+        //        res.Date = item;
+        //        res.dataItems = new List<DataFormat>();
+        //        res.dataItems = _grpData.Where(a => a.Date == item).GroupBy(a => new { name = a.Name, cnt = a.ItemCount }).Select(a => new DataFormat() { Name = a.Key.name, ItemCount = a.Key.cnt }).ToList();
+        //        _response.Add(res);
+        //    }
+
+        //    //return SetChartData(_response);
+        //    return _response;
+
+        //}
+
+
+        public ResponseForChart test()
+        {
+
+            var results = from r in _repository.Table.ToList()
+                          join pd in _repositoryPd.Table.ToList() on r.Id equals pd.PatientProfileId
+                          join dm in _repositoryDM.Table.ToList() on pd.DiagnosisMasterId equals dm.Id
+                          join apt in _repositoryApp.Table.ToList() on r.AppointmentId equals apt.Id
+                          where apt.IsActive == true && apt.AppointmentDateTime > DateTime.Now.AddDays(-100)
+                          group r by new { Name = dm.Name, Date = apt.AppointmentDateTime.Date.ToShortDateString() } into grp
+                          select new { name = grp.Key.Name, date = grp.Key.Date, rowcount = grp.Count() };
+
+            var _grpData = results.ToList().Select(f => new DiagnosisBasedGraph() { Name = f.name, Date = f.date, ItemCount = f.rowcount }).ToList();
+
+            var _obj = _grpData.Select(a => a.Date).Distinct().ToList();
+            var _objName = _grpData.Select(a => a.Name).Distinct().ToList();
+
+            ResponseForChart resChart = new ResponseForChart();
+            var _names = _grpData.Select(a=>a.Name).Distinct().ToList();
+            var _dates = _grpData.Select(a => a.Date).Distinct().ToList();
+            resChart.categories = _names.Select(a => new DataFormatChart() { Name = a, values = new List<int>() }).ToList();
+            resChart.dates = _dates;
+            int i = 0;
+            foreach (var item in _dates)
+            {
+                resChart.categories.ForEach(a => a.values.Add(_grpData.Where(g => g.Date == item && g.Name == a.Name).Sum(a => a.ItemCount)));
+                i++;
+                
+            }
+            return resChart;
+
+        }
+        public class DiagnosisBasedGraph
+        {
+            public string Name { get; set; }
+            public string Date { get; set; }
+            public int ItemCount { get; set; }
+        }
+
+        public class DataFormatChart
+        {
+            public string Name { get; set; }
+            public List<int> values { get; set; }
+        }
+        public class ResponseForChart
+        {
+            public List<string> dates { get; set; }
+            public List<DataFormatChart> categories { get; set; }
+        }
+        //public class DataFormat
+        //{
+        //    public string Name { get; set; }
+        //    public int ItemCount { get; set; }
+        //}
+        //public class ResponseData
+        //{
+        //    public string  Date  { get; set; }
+        //    public List<DataFormat> dataItems { get; set; }
+        //}
+
+    }
 }
