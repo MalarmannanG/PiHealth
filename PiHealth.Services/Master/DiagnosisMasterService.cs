@@ -69,7 +69,7 @@ namespace PiHealth.Services.Master
         }
         public virtual async void UpdatePatientDiagnosis(long patientProfileId)
         {
-            var entities = _repositoryPatientDiag.Table.Where(a=> a.PatientProfileId == patientProfileId).ToList();
+             var entities = _repositoryPatientDiag.Table.Where(a=> a.PatientProfileId == patientProfileId).ToList();
             _repositoryPatientDiag.Delete(entities);
             
         }

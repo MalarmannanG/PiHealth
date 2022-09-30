@@ -59,7 +59,6 @@ namespace PiHealth.Services.Master
         public virtual void UpdatePatientPrescription(long patientProfileId)
         {
             var data = _repositoryPrescription.TableNoTracking.Where(a =>  a.PatientProfileId == patientProfileId).ToList();
-
             _repositoryPrescription.Delete(data);
         }
     }

@@ -356,6 +356,12 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.UpdatedDate = DateTime.Now;
                         await _appointmentService.Update(_appoinment);
                     }
+                    if (!string.IsNullOrEmpty(model.appointment.referredBy) && 
+                        _appoinment.ReferredBy != model.appointment.referredBy)
+                    {
+                        _appoinment.ReferredBy = model.appointment.referredBy;
+                        await _appointmentService.Update(_appoinment);
+                    }
                     await _patientProfileDataMapService.DeleteByPatientProfileId(patientProfile.Id);
                     await _patientProfileService.Update(patientProfile);
                     var _patientProfileData = model.patientComplaints.Concat(model.patientImpressions).Concat(model.patientPlans)
@@ -393,6 +399,7 @@ namespace PiHealth.Web.Controllers.API
                     Appointment _model = new Appointment();
                     _model.PatientId = _appoinment.PatientId;
                     _model.AppUserId = ActiveUser.Id;
+                    _model.Description = model.appointment.description;
                     _model.VisitType = "Follow Up";
                     _model.CreatedDate = DateTime.Now;
                     _model.CreatedBy = ActiveUser.Id;
@@ -400,6 +407,7 @@ namespace PiHealth.Web.Controllers.API
                     _model.UpdatedBy = ActiveUser.Id;
                     _model.AppointmentDateTime = DateTime.ParseExact(model.followUpDate, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
                     _model.IsActive = true;
+                    _model.ReferredBy = model.appointment.referredBy;
                     await _appointmentService.Create(_model);
                 }
             }
