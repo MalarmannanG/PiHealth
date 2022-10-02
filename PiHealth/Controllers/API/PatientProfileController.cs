@@ -130,8 +130,14 @@ namespace PiHealth.Web.Controllers.API
                 patientProfile.procedureModel = new ProcedureModel();
                 var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
                 if (entity != null)
+                {
                     patientProfile.procedureModel = entity.ToModel1(new ProcedureModel());
-
+                    if (entity.DoctorMasterId > 0)
+                    {
+                        var doctorentity = await _doctorService.Get(entity.DoctorMasterId.Value);
+                        patientProfile.procedureModel.referedByName = doctorentity.Name;
+                    }
+                }
             }
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for PatienProfile Get {0}", diff.TotalSeconds.ToString()));
@@ -368,7 +374,7 @@ namespace PiHealth.Web.Controllers.API
                 if (model.procedureMasterId.HasValue)
                 {
                     var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
-                    var entity = model.procedureModel.ToEntity(patientProcedure);
+                    var entity = model.procedureModel.ToEntity(patientProcedure??new PatientProcedure());
                     await _patientProcedureService.Update(entity);
 
                 }

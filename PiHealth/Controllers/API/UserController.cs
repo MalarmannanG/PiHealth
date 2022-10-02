@@ -124,8 +124,8 @@ namespace PiHealth.Web.Controllers.API
                 user.SpecializationId = model.specializationId.Value;
             }
             user.RegistrationNo = model.registrationNo;
-            user = await _userService.Create(user);
             user.IsActive = true;
+            user = await _userService.Create(user);
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success", value2: "Create");
             model = user.ToModel(new UserModel());
             return Ok(model);
