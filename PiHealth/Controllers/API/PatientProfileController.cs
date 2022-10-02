@@ -90,11 +90,11 @@ namespace PiHealth.Web.Controllers.API
         }
         [HttpGet]
         [Route("Test1")]
-        public async Task<IActionResult> Test1()
-        {
+        //public async Task<IActionResult> Test1()
+        //{
 
-            return Ok(_patientProfileService.test1());
-        }
+        //    return Ok(_patientProfileService.test1());
+        //}
 
         [HttpGet]
         [Route("Get/{id}")]
