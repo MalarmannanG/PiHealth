@@ -88,13 +88,7 @@ namespace PiHealth.Web.Controllers.API
 
             return Ok(_patientProfileService.test());
         }
-        [HttpGet]
-        [Route("Test1")]
-        public async Task<IActionResult> Test1()
-        {
-
-            return Ok(_patientProfileService.test1());
-        }
+       
 
         [HttpGet]
         [Route("Get/{id}")]
