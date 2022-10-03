@@ -26,13 +26,13 @@ namespace PiHealth.Controllers.API.Masters
 
         [HttpGet]
         [Route("GetGenderRatio")]
-        //public async Task<IActionResult> GetGenderRatio([FromQuery] ReportQueryModel model)
-        //{
-        //    model.doctorId = ActiveUser.Id;
-        //    var result = _reportService.GetGenderRatio(doctorId: model.doctorId,
-        //        fromDate: model.fromDate, toDate: model.toDate);
-        //    return Ok(result);
-        //}
+        public async Task<IActionResult> GetGenderRatio([FromQuery] ReportQueryModel model)
+        {
+            model.doctorId = ActiveUser.Id;
+            var result = _reportService.GetGenderRatio(doctorId: model.doctorId,
+                fromDate: model.fromDate, toDate: model.toDate);
+            return Ok(result);
+        }
 
         [HttpGet]
         [Route("GetDiseaseCategories")]
@@ -56,13 +56,13 @@ namespace PiHealth.Controllers.API.Masters
 
         [HttpGet]
         [Route("GetNewAndOldPatients")]
-        //public async Task<ActionResult> GetNewAndOldPatients([FromQuery] ReportQueryModel model)
-        //{
-        //    model.doctorId = ActiveUser.Id;
-        //    var result = _reportService.GetNewAndOldPatients(doctorId: model.doctorId,
-        //        fromDate: model.fromDate, toDate: model.toDate);
-        //    return Ok(result);
-        //}
+        public async Task<ActionResult> GetNewAndOldPatients([FromQuery] ReportQueryModel model)
+        {
+            model.doctorId = ActiveUser.Id;
+            var result = _reportService.GetNewAndOldPatients(doctorId: model.doctorId,
+                fromDate: model.fromDate, toDate: model.toDate);
+            return Ok(result);
+        }
 
         [HttpGet]
         [Route("GetFeesData")]
