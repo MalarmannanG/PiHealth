@@ -24,7 +24,7 @@ namespace PiHealth.Web.MappingExtention
             model.serviceName = entity.ServiceName;
             model.userId = entity.AppUserId;
             model.fees = entity.Fees;
-            model.doctorName = entity.AppUser.Name;
+            model.doctorName = entity?.AppUser?.Name;
             model.isDeleted = entity.IsDeleted;
             model.id = entity.Id;
             return model;
