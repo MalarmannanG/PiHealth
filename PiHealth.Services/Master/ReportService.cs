@@ -63,31 +63,18 @@ namespace PiHealth.Services.Master
             DateTime? fromDate = null, DateTime? toDate = null)
         {
             List<FeesDataModel> response = new List<FeesDataModel>();
-            if(name == null)
-            {
-                var query = from pp in _repositoryPatientProfile.Table.ToList()
-                            join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
-                            join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
-                            join ds in _repositoryDoctorService.Table.ToList() on pp.DoctorServiceId equals ds.Id
-                            where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-                            select new { date = app.AppointmentDateTime, p.PatientName, ds.ServiceName, ds.Fees };
-                response = query.Select(f => new FeesDataModel()
-                {
-                    date = f.date.ToString("dd/MM/yyyy"),
-                    patientName = f.PatientName,
-                    serviceName = f.ServiceName,
-                    fees = f.Fees,
-                }).ToList();
-            }
-            if (name != null && name != "")
-            {
                 var query = from pp in _repositoryPatientProfile.Table.ToList()
                             join p in _repositoryPatient.Table on pp.PatientId equals p.Id
                             join app in _repositoryAppointment.Table on pp.AppointmentId equals app.Id
                             join ds in _repositoryDoctorService.Table on pp.DoctorServiceId equals ds.Id
                             where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-                            //&& p.PatientName.Contains(name) || ds.ServiceName.Contains(name)
                             select new { date = app.AppointmentDateTime, p.PatientName, ds.ServiceName, ds.Fees };
+
+                if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
+                {
+                    query = query.Where(e => e.PatientName.ToLower().Contains(name.ToLower()) || e.ServiceName.ToLower().Contains(name.ToLower()));
+                }
+
                 response = query.Select(f => new FeesDataModel()
                 {
                     date = f.date.ToString("dd/MM/yyyy"),
@@ -95,56 +82,54 @@ namespace PiHealth.Services.Master
                     serviceName = f.ServiceName,
                     fees = f.Fees,
                 }).ToList();
-            }
             return response;
         }
 
-        //public virtual List<ResponseData> GetGenderRatio(long doctorId = 0, 
-        //    DateTime? fromDate = null, DateTime? toDate = null)
-        //{
-        //    var query = from pp in _repositoryPatientProfile.Table
-        //                join p in _repositoryPatient.Table on pp.PatientId equals p.Id
-        //                join app in _repositoryAppointment.Table on pp.AppointmentId equals app.Id
-        //                where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate 
-        //                && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
-        //                && pp.IsDeleted == false
-        //                group pp by new { p.PatientGender, app.AppointmentDateTime } into grp
-        //                select new
-        //                {
-        //                    gender = grp.Key.PatientGender,
-        //                    date = grp.Key.AppointmentDateTime,
-        //                    count = grp.Count()
-        //                };
+        public virtual ResponseData GetGenderRatio(long doctorId = 0,
+            DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = from pp in _repositoryPatientProfile.Table.ToList()
+                        join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
+                        join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
+                        where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
+                        && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
+                        && pp.IsDeleted == false
+                        group pp by new { p.PatientGender, app.AppointmentDateTime } into grp
+                        select new
+                        {
+                            gender = grp.Key.PatientGender,
+                            date = grp.Key.AppointmentDateTime,
+                            count = grp.Count()
+                        };
 
-        //    var _grpData = query.Select(f => new Report()
-        //    {
-        //        data = f.gender,
-        //        date = f.date.ToString("dd/MM/yyyy"),
-        //        count = f.count
-        //    }).ToList();
+            var _grpData = query.Select(f => new Report()
+            {
+                data = f.gender,
+                date = f.date.ToString("dd/MM/yyyy"),
+                count = f.count
+            }).ToList();
 
-        //    var _obj = _grpData.Select(a => a.date).Distinct().ToList();
+            var _obj = _grpData.Select(a => a.date).Distinct().ToList();
+            var _objName = _grpData.Select(a => a.data).Distinct().ToList();
 
-        //    List<ResponseData> _response = new List<ResponseData>();
-        //    foreach (var item in _obj)
-        //    {
-        //        ResponseData response = new ResponseData();
-        //        response.date = item;
-        //        response.dataItems = new List<DataFormat>();
-        //        response.dataItems = _grpData.Where(a => a.date == item).
-        //            GroupBy(f => new
-        //            {
-        //                data = f.data,
-        //                count = f.count
-        //            }).Select(a => new DataFormat()
-        //            {
-        //                data = a.Key.data,
-        //                itemCount = a.Key.count
-        //            }).ToList();
-        //        _response.Add(response);
-        //    }
-        //    return _response;
-        //}
+            ResponseData response = new ResponseData();
+            var _datas = _grpData.Select(a => a.data).Distinct().ToList();
+            var _dates = _grpData.Select(a => a.date).Distinct().ToList();
+            response.dataItems = _datas.Select(a => new DataFormat()
+            {
+                name = a,
+                data = new List<int>()
+            }).ToList();
+            response.dates = _dates;
+            int i = 0;
+            foreach (var item in _dates)
+            {
+                response.dataItems.ForEach
+                    (a => a.data.Add(_grpData.Where(g => g.date == item && g.data == a.name).Sum(a => a.count)));
+                i++;
+            }
+            return response;
+        }
 
         public virtual ResponseData GetDiseaseCategories(long doctorId = 0,
             DateTime? fromDate = null, DateTime? toDate = null)
@@ -231,56 +216,54 @@ namespace PiHealth.Services.Master
             int i = 0;
             foreach (var item in _dates)
             {
-                response.dataItems.ForEach
-                    (a => a.data.Add(_grpData.Where(g => g.date == item && g.data == a.name).Sum(a => a.count)));
+                response.dataItems.ForEach(a => a.data.Add(_grpData.Where(g => g.date == item && g.data == a.name)
+                    .Sum(a => a.count)));
                 i++;
             }
             return response;
         }
 
-        //public virtual List<ResponseData> GetNewAndOldPatients(long doctorId = 0,
-        //    DateTime? fromDate = null, DateTime? toDate = null)
-        //{
-        //    var query = from pp in _repositoryPatientProfile.Table
-        //                join p in _repositoryPatient.Table on pp.PatientId equals p.Id
-        //                join app in _repositoryAppointment.Table on pp.AppointmentId equals app.Id
-        //                where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-        //                && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
-        //                && pp.IsDeleted == false
-        //                group pp by new { app.VisitType, app.AppointmentDateTime } into grp
-        //                select new
-        //                {
-        //                    visitType = grp.Key.VisitType,
-        //                    date = grp.Key.AppointmentDateTime,
-        //                    count = grp.Count()
-        //                };
-        //    var _grpData = query.Select(a => new Report()
-        //    {
-        //        data = a.visitType,
-        //        date = a.date.ToString("dd/MM/yyyy"),
-        //        count = a.count
-        //    }).ToList();
-        //    var _obj = _grpData.Select(a => a.date).Distinct().ToList();
-        //    List<ResponseData> _response = new List<ResponseData>();
-        //    foreach (var item in _obj)
-        //    {
-        //        ResponseData response = new ResponseData();
-        //        response.date = item;
-        //        response.dataItems = new List<DataFormat>();
-        //        response.dataItems = _grpData.Where(a => a.date == item).
-        //            GroupBy(f => new
-        //            {
-        //                data = f.data,
-        //                count = f.count
-        //            }).Select(f => new DataFormat()
-        //            {
-        //                data = f.Key.data,
-        //                itemCount = f.Key.count
-        //            }).ToList();
-        //        _response.Add(response);
-        //    }
-        //    return _response;
-        //}
+        public virtual ResponseData GetNewAndOldPatients(long doctorId = 0,
+            DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = from pp in _repositoryPatientProfile.Table.ToList()
+                        join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
+                        join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
+                        where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
+                        && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
+                        && pp.IsDeleted == false
+                        group pp by new { app.VisitType, app.AppointmentDateTime } into grp
+                        select new
+                        {
+                            visitType = grp.Key.VisitType,
+                            date = grp.Key.AppointmentDateTime,
+                            count = grp.Count()
+                        };
+            var _grpData = query.Select(a => new Report()
+            {
+                data = a.visitType,
+                date = a.date.ToString("dd/MM/yyyy"),
+                count = a.count
+            }).ToList();
+            var _obj = _grpData.Select(a => a.date).Distinct().ToList();
+            ResponseData response = new ResponseData();
+            var _datas = _grpData.Select(a => a.data).Distinct().ToList();
+            var _dates = _grpData.Select(a => a.date).Distinct().ToList();
+            response.dataItems = _datas.Select(a => new DataFormat()
+            {
+                name = a,
+                data = new List<int>()
+            }).ToList();
+            response.dates = _dates;
+            int i = 0;
+            foreach (var item in _dates)
+            {
+                response.dataItems.ForEach(a => a.data.Add(_grpData.Where(g => g.date == item && g.data == a.name)
+                    .Sum(a => a.count)));
+                i++;
+            }
+            return response;
+        }
     }
 
 

@@ -98,11 +98,19 @@ namespace PiHealth.Controllers.API.Masters
                 return BadRequest();
             }
 
-            entity = model.ToEntity(entity);
-            entity.ModifiedDate = DateTime.Now;
-            entity.ModifiedBy = ActiveUser.Id;
-
-            await _patientProfileDataService.Update(entity);
+            entity = await _patientProfileDataService.GetPatientProfileData(model.description, model.key, 0);
+            if (entity == null)
+            {
+                entity = model.ToEntity(entity);
+                entity.ModifiedDate = DateTime.Now;
+                entity.ModifiedBy = ActiveUser.Id;
+                var res = await _patientProfileDataService.Update(entity);
+                model.id = res.Id;
+            }
+            else
+            {
+                model.id = -1;
+            }
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             return Ok(model);
         }

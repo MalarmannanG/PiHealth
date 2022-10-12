@@ -371,20 +371,33 @@ namespace PiHealth.Web.Controllers.API
                     //_auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 
                 }
+                //if (model.procedureMasterId.HasValue)
+                //{
+                //    var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                //    var entity = model.procedureModel.ToEntity(patientProcedure??new PatientProcedure());
+                //    await _patientProcedureService.Update(entity);
+
+                //}
                 if (model.procedureMasterId.HasValue)
                 {
-                    var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
-                    var entity = model.procedureModel.ToEntity(patientProcedure??new PatientProcedure());
-                    await _patientProcedureService.Update(entity);
+                    if (model?.procedureModel?.id > 0)
+                    {
+                        var patientProcedure = await _patientProcedureService.Get(model.procedureModel.id);
+                        var entity = model.procedureModel.ToEntity(patientProcedure ?? new PatientProcedure());
+                        entity.ModifiedDate = DateTime.Now;
+                        entity.ModifiedBy = ActiveUser.Id;
+                        await _patientProcedureService.Update(entity);
 
+                    }
+                    else
+                    {
+                        var entity = model.procedureModel.ToEntity(new PatientProcedure());
+                        entity.PatientProfileId = patientProfile.Id;
+                        entity.CreatedDate = DateTime.Now;
+                        entity.CreatedBy = ActiveUser.Id;
+                        await _patientProcedureService.Create(entity);
+                    }
                 }
-                else
-                {
-                    var entity = model.procedureModel.ToEntity(new PatientProcedure());
-                    entity.PatientProfileId = patientProfile.Id;
-                    await _patientProcedureService.Create(entity);
-                }
-
 
             }
             catch (Exception ex)
