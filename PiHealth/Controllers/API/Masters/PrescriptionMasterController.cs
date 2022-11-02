@@ -63,13 +63,23 @@ namespace PiHealth.Web.Controllers.API.Masters
         [Route("Create")]
         public async Task<IActionResult> Create([FromBody] PrescriptionMasterModel model)
         {
-            var diagnosis = model.ToEntity(new PrescriptionMaster());
-            diagnosis.CreatedDate = DateTime.Now;
-            diagnosis.CreatedBy = ActiveUser.Id;
-            await _prescriptionMasterService.Create(diagnosis);
-            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            var entity = _prescriptionMasterService.GetPrescriptionData(model.id, model.medicineName,
+                model.strength, model.units).FirstOrDefault();
+            if (entity == null)
+            {
+                var diagnosis = model.ToEntity(new PrescriptionMaster());
+                diagnosis.CreatedDate = DateTime.Now;
+                diagnosis.CreatedBy = ActiveUser.Id;
+                var res = await _prescriptionMasterService.Create(diagnosis);
+                model.id = res.Id;
+            }
+            else
+            {
+                model.id = -1;
+            }
 
-            return Ok(diagnosis);
+            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
+            return Ok(model);
         }
 
         [HttpPut]
@@ -84,10 +94,22 @@ namespace PiHealth.Web.Controllers.API.Masters
             if (diagnosis == null)
                 return BadRequest();
 
-            diagnosis = model.ToEntity(diagnosis);
-            diagnosis.ModifiedDate = DateTime.Now;
-            diagnosis.ModifiedBy = ActiveUser.Id;
-            await _prescriptionMasterService.Update(diagnosis);
+            var temp =  _prescriptionMasterService.GetPrescriptionData(model.id, model.medicineName,
+                model.strength, model.units).FirstOrDefault();
+
+            if(temp == null)
+            {
+
+                diagnosis = model.ToEntity(diagnosis);
+                diagnosis.ModifiedDate = DateTime.Now;
+                diagnosis.ModifiedBy = ActiveUser.Id;
+                var res  = await _prescriptionMasterService.Update(diagnosis);
+                model.id = res.Id;  
+            }
+            else
+            {
+                model.id = -1;
+            }
 
             _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
 

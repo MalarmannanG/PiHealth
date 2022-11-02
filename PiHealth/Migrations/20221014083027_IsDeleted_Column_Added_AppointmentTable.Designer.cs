@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PiHealth.DataModel;
 
 namespace PiHealth.Migrations
 {
     [DbContext(typeof(PiHealthDBContext))]
-    partial class PiHealthDBContextModelSnapshot : ModelSnapshot
+    [Migration("20221014083027_IsDeleted_Column_Added_AppointmentTable")]
+    partial class IsDeleted_Column_Added_AppointmentTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -16,6 +16,10 @@ using Microsoft.Extensions.Options;
 using PiHealth.Web.Model.Prefix;
 using PiHealth.Web.Filters;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net;
+using PiHealth.Service.UserAccounts;
+using PiHealth.Services.Master;
 
 namespace PiHealth.Web.Controllers.API.Masters
 {
@@ -29,19 +33,25 @@ namespace PiHealth.Web.Controllers.API.Masters
         private readonly AuditLogServices _auditLogService;
         private readonly IConfiguration _configuration;
         private readonly IOptionsSnapshot<PrefixOption> _prefixOption;
+        private readonly IAppUserService _userService;
+        private readonly DoctorMasterService _doctorMasterService;
 
         public PatientMasterController(
             IHostingEnvironment hostingEnvironment,
             PatientService patientService,
             AuditLogServices auditLogServices,
             IConfiguration configuration,
-             IOptionsSnapshot<PrefixOption> prefixOption)
+             IOptionsSnapshot<PrefixOption> prefixOption,
+             IAppUserService userService,
+             DoctorMasterService doctorMasterService)
         {          
             _patientService = patientService;
             _hostingEnvironment = hostingEnvironment;
             _auditLogService = auditLogServices;
             _configuration = configuration;
             _prefixOption = prefixOption;
+            _userService = userService;
+            _doctorMasterService = doctorMasterService;
         }
 
         #region  Patient Master
@@ -70,7 +80,22 @@ namespace PiHealth.Web.Controllers.API.Masters
             {
                 entities = entities.Take(model.take);
             }
-            var result = entities.ToList()?.Select(a => a.ToModel(new PatientModel())).ToList();
+            //var result = entities.ToList()?.Select(a => a.ToModel(new PatientModel())).ToList();
+            var result = entities.Select(a => new
+            {
+                id = a.Id,
+                //hrno = a.HrNo,
+                initial = a.Initial,
+                patientName = a.PatientName,
+                //dob = a.DOB,
+                age = a.Age,
+                gender = a.PatientGender,
+                ulId = a.UlID,
+                mobileNumber = a.MobileNumber,
+                //referedBy = a.DoctorMasterId,
+                referedByName = a.DoctorMaster.Name,
+                address = a.Address
+            }).ToList();
             return Ok(new { result, total });
         }
 
@@ -155,6 +180,17 @@ namespace PiHealth.Web.Controllers.API.Masters
             }
 
             return BadRequest();
+        }
+
+        [HttpGet]
+        [Route("GetDoctorsAndFacilities")]
+        public IActionResult GetDoctorsAndFacilities()
+        {
+            var doctors = _userService.GetAll(userType: "Doctor").Select(a => new { id = a.Id, name = a.Name })
+                .OrderBy(a => a.name).ToList();
+            var facilities = _doctorMasterService.GetAll().Select(a => new {id=a.Id,name=a.Name})
+                .OrderBy(a=>a.name).ToList();
+            return Ok(new { doctors, facilities });
         }
 
         [AllowAnonymous]

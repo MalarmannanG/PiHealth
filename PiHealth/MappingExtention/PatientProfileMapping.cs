@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using PiHealth.DataModel;
@@ -56,7 +57,10 @@ namespace PiHealth.Web.MappingExtention
             entity.Advice = model.advice;
             entity.Plan = model.plan;
             entity.IsfollowUpNeed = model.isfollowUpNeed;
-            entity.FollowUp = model.followUp;
+            if(!string.IsNullOrEmpty(model.followUpDate))
+            {
+                entity.FollowUp = DateTime.ParseExact(model.followUpDate, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
+            }
             entity.IsDeleted = model.isDeleted;
             entity.Fees = model.fees;
             entity.CreatedBy =model.createdBy;            

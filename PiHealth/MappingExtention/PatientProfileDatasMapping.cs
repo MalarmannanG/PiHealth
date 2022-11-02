@@ -20,7 +20,7 @@ namespace PiHealth.MappingExtention
 
         public static PatientProfileData ToEntity(this PatientProfileDataModel model, PatientProfileData entity)
         {
-            entity.Id = model.id ?? 0;
+            entity.Id = model.id;
             entity.Key = model.key; 
             entity.Description = model.description;
             entity.IsDeleted = model.isDeleted;

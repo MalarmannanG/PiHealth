@@ -76,9 +76,6 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<TemplateMaster> GetAllTemplates()
         {
             var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).AsQueryable();
-
-            
-
             return data;
         }
     }

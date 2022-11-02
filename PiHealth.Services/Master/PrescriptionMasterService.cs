@@ -1,4 +1,5 @@
-﻿using PiHealth.DataModel;
+﻿using Microsoft.EntityFrameworkCore;
+using PiHealth.DataModel;
 using PiHealth.DataModel.Entity;
 using PiHealth.DataModel.Entity.Mapping;
 using System;
@@ -51,6 +52,30 @@ namespace PiHealth.Services.Master
         public virtual async Task<PrescriptionMaster> Get(long id)
         {
             return await _repository.GetByIdAsync(id);
+        }
+
+        public virtual IQueryable<PrescriptionMaster> GetPrescriptionData(long id = 0, string medicineName = null,
+            string strength = null, string unit = null)
+        {
+            var data = _repository.Table.Where(a => a.Id != id && !a.IsDeleted);
+
+            if (!string.IsNullOrEmpty(medicineName) && !string.IsNullOrWhiteSpace(medicineName))
+            {
+                data = data.Where(a => a.MedicineName.ToLower() == medicineName.ToLower());
+            }
+
+            if (!string.IsNullOrEmpty(strength) && !string.IsNullOrWhiteSpace(strength))
+            {
+                data = data.Where(a => a.Strength.ToLower() == strength.ToLower());
+            }
+
+            if (!string.IsNullOrEmpty(unit) && !string.IsNullOrWhiteSpace(unit))
+            {
+                data = data.Where(a => a.Units.ToLower() == unit.ToLower());
+            }
+
+            return data;
+
         }
         public virtual IQueryable<string> GetInstructions()
         {

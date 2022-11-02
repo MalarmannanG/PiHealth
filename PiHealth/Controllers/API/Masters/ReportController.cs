@@ -68,10 +68,11 @@ namespace PiHealth.Controllers.API.Masters
         [Route("GetFeesData")]
         public IActionResult GetFeesData([FromQuery] ReportQueryModel model)
         {
+            model.doctorId = ActiveUser.Id;
             var entities = _reportService.GetFeesData(name: model.name,doctorId: model.doctorId,
                 fromDate:model.fromDate,toDate:model.toDate);
             var total = entities.Count;
-            entities = entities.OrderByDescending(a => a.date).Skip(model.skip).ToList();
+            entities = entities.OrderBy(a => a.date).Skip(model.skip).ToList();
             if (model.take > 0)
             {
                 entities = entities.Take(model.take).ToList();

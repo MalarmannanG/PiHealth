@@ -119,6 +119,7 @@ namespace PiHealth.Service.UserAccounts
             return data;
         }
 
+
         public virtual AppUser ActiveUser
         {
             get

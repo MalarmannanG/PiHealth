@@ -24,6 +24,7 @@ namespace PiHealth.Web.Model.Appointment
         public string dayOrNight { get; set; }
         public string timeOfAppintment { get; set; }
         public bool isActive { get; set; }
+        public bool isDeleted { get; set; }
         public DateTime appointmentDateTime { get; set; }
         public string appointmentISOString  { get; set; }
         public DateTime createdDate { get; set; }

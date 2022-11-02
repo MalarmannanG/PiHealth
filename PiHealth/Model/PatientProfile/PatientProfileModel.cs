@@ -66,6 +66,9 @@ namespace PiHealth.Web.Model.PatientProfile
         public long? PatientId { get; set; }
         public DateTime? appointmentDate { get; set; }
         public long? appointmentId { get; set; }
+        public string orderBy { get; set; }
+        public int skip { get; set; }
+        public int take { get; set; }
     }
 
     public class PatientTestModel

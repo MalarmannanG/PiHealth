@@ -7,7 +7,7 @@ namespace PiHealth.Model.PatientProfileData
 {
     public class PatientProfileDataModel
     {
-        public long? id { get; set; }
+        public long id { get; set; }
         public long key { get; set; }
         public string description { get; set; }
         public bool isDeleted { get; set; }

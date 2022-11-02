@@ -39,7 +39,7 @@ namespace PiHealth.Services.PatientProfileService
         public virtual IQueryable<PatientProfile> GetAll(string name = null, long? patientId = null, long[] appointmentIds = null)
         {
             var data = _repository.Table.Where(a => !a.IsDeleted)
-                .Include(a => a.Appointment).Include(a => a.Prescriptions)
+                .Include(a => a.Appointment).ThenInclude(a=>a.AppUser).Include(a => a.Prescriptions)
                 .ThenInclude(a => a.PrescriptionMaster).AsQueryable();
 
             if (patientId != null)

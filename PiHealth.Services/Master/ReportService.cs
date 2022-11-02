@@ -67,7 +67,10 @@ namespace PiHealth.Services.Master
                             join p in _repositoryPatient.Table on pp.PatientId equals p.Id
                             join app in _repositoryAppointment.Table on pp.AppointmentId equals app.Id
                             join ds in _repositoryDoctorService.Table on pp.DoctorServiceId equals ds.Id
-                            where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
+                            where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate) 
+                            && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                            && app.IsDeleted == false && app.AppUserId == doctorId && p.IsDeleted == false
+                            && pp.IsDeleted == false && ds.AppUserId == doctorId & ds.IsDeleted == false
                             select new { date = app.AppointmentDateTime, p.PatientName, ds.ServiceName, ds.Fees };
 
                 if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(name))
@@ -91,8 +94,9 @@ namespace PiHealth.Services.Master
             var query = from pp in _repositoryPatientProfile.Table.ToList()
                         join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
                         join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
-                        where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-                        && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
+                        where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate) 
+                        && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                        && app.AppUserId == doctorId && app.IsDeleted == false && p.IsDeleted == false
                         && pp.IsDeleted == false
                         group pp by new { p.PatientGender, app.AppointmentDateTime } into grp
                         select new
@@ -105,9 +109,9 @@ namespace PiHealth.Services.Master
             var _grpData = query.Select(f => new Report()
             {
                 data = f.gender,
-                date = f.date.ToString("dd/MM/yyyy"),
+                date = f.date.ToString("dd-MMM"),
                 count = f.count
-            }).ToList();
+            }).OrderBy(a=>a.date).ToList();
 
             var _obj = _grpData.Select(a => a.date).Distinct().ToList();
             var _objName = _grpData.Select(a => a.data).Distinct().ToList();
@@ -138,9 +142,10 @@ namespace PiHealth.Services.Master
                         join pd in _repositoryPatientDiagnosis.Table.ToList() on pp.Id equals pd.PatientProfileId
                         join dm in _repositoryDiagnosisMaster.Table.ToList() on pd.DiagnosisMasterId equals dm.Id
                         join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
-                        where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-                        && app.AppUserId == doctorId && app.IsActive == true && pp.IsDeleted == false
-                        && pd.IsDeleted == false
+                        where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
+                        && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                        && app.AppUserId == doctorId && app.IsDeleted == false && pp.IsDeleted == false
+                        && pd.IsDeleted == false && dm.IsDeleted == false
                         group pp by new { dm.Name, app.AppointmentDateTime } into grp
                         select new
                         {
@@ -151,10 +156,10 @@ namespace PiHealth.Services.Master
             var _grpData = query.Select(f => new Report()
             {
                 data = f.diagnosisName,
-                date = f.date.ToString("dd/MM/yyyy"),
+                date = f.date.ToString("dd-MMM"),
                 count = f.count,
 
-            }).ToList();
+            }).OrderBy(a=>a.date).ToList();
 
             var _obj = _grpData.Select(a => a.date).Distinct().ToList();
             var _objName = _grpData.Select(a => a.data).Distinct().ToList();
@@ -184,8 +189,9 @@ namespace PiHealth.Services.Master
             var query = from pp in _repositoryPatientProfile.Table.ToList()
                         join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
                         join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
-                        where app.ReferredBy != null && app.AppointmentDateTime > fromDate &&
-                        app.AppointmentDateTime < toDate && app.AppUserId == doctorId && app.IsActive == true
+                        where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
+                        && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                        && app.ReferredBy != null && app.AppUserId == doctorId && app.IsDeleted == false
                         && pp.IsDeleted == false && p.IsDeleted == false
                         group pp by new { app.ReferredBy, app.AppointmentDateTime } into grp
                         select new
@@ -197,9 +203,9 @@ namespace PiHealth.Services.Master
             var _grpData = query.Select(f => new Report()
             {
                 data = f.referredBy,
-                date = f.date.ToString("dd/MM/yyyy"),
+                date = f.date.ToString("dd-MMM"),
                 count = f.count
-            }).ToList();
+            }).OrderBy(a=>a.date).ToList();
 
             var _obj = _grpData.Select(a => a.date).Distinct().ToList();
             var _objName = _grpData.Select(a => a.data).Distinct().ToList();
@@ -229,8 +235,9 @@ namespace PiHealth.Services.Master
             var query = from pp in _repositoryPatientProfile.Table.ToList()
                         join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
                         join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
-                        where app.AppointmentDateTime > fromDate && app.AppointmentDateTime < toDate
-                        && app.AppUserId == doctorId && app.IsActive == true && p.IsDeleted == false
+                        where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
+                        && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                        && app.AppUserId == doctorId && app.IsDeleted == false && p.IsDeleted == false
                         && pp.IsDeleted == false
                         group pp by new { app.VisitType, app.AppointmentDateTime } into grp
                         select new
@@ -242,9 +249,9 @@ namespace PiHealth.Services.Master
             var _grpData = query.Select(a => new Report()
             {
                 data = a.visitType,
-                date = a.date.ToString("dd/MM/yyyy"),
+                date = a.date.ToString("dd-MMM"),
                 count = a.count
-            }).ToList();
+            }).OrderBy(a=>a.date).ToList();
             var _obj = _grpData.Select(a => a.date).Distinct().ToList();
             ResponseData response = new ResponseData();
             var _datas = _grpData.Select(a => a.data).Distinct().ToList();

@@ -26,6 +26,7 @@ namespace PiHealth.Web.MappingExtention
             model.description = entity.Description;
             model.id = entity.Id;
             model.isActive = entity.IsActive;
+            model.isDeleted = entity.IsDeleted;
             model.createdBy = entity.CreatedBy;
             model.createdDate = entity.CreatedDate;
             model.updatedBy = entity.UpdatedBy;
@@ -47,6 +48,7 @@ namespace PiHealth.Web.MappingExtention
             entity.Description = model.description;
             entity.Id = model.id;
             entity.IsActive = model.isActive;
+            entity.IsDeleted = model.isDeleted;
             entity.CreatedBy =model.createdBy;
             entity.CreatedDate = model.createdDate;
             entity.UpdatedBy = model.updatedBy;

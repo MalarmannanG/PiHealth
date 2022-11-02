@@ -50,7 +50,7 @@ namespace PiHealth.Web.Controllers.API
             var user = _userService.GetAll(name: model?.name);
             var total = user.Count();
             var orderBy = string.IsNullOrEmpty(model?.order_by) ? "Name" : model.order_by;
-            user = user.OrderByDescending(a => a.Name).Skip(model.skip);
+            user = user.OrderBy(a => a.Name).Skip(model.skip);
 
             if (model.take > 0)
             {

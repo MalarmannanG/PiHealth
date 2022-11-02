@@ -24,7 +24,7 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<Appointment> GetAll(long[] patientIds = null, long[] doctorIds = null, bool? isProcedure = null, DateTime? fromDate = null, DateTime? toDate = null)
         {
 
-            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
+            var data = _repository.Table.Where(a => a.IsActive && !a.IsDeleted).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).AsQueryable();
 
 
             if (patientIds != null )
@@ -72,7 +72,7 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<Appointment> GetAll(string patientName, string doctorName, string clinicName, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
         {
 
-            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
+            var data = _repository.Table.Where(a => a.IsActive && !a.IsDeleted).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
 
             //data = data.WhereIf(!string.IsNullOrEmpty(clinicName), a => a.Patient.DoctorMaster.Name.Contains(clinicName))
             //     .WhereIf(!string.IsNullOrEmpty(patientName), e => e.Patient.PatientName.Contains(patientName))
@@ -103,7 +103,7 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<Appointment> GetDashboardAll(long patientId, long doctorId, long clinicId, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
         {
 
-            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).
+            var data = _repository.Table.Where(a => a.IsActive && !a.IsDeleted).Include(a => a.Patient).
                 ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
 
             data = data.WhereIf(clinicId > 0,  a => a.Patient.DoctorMasterId == clinicId)
@@ -145,7 +145,7 @@ namespace PiHealth.Services.Master
         public virtual IQueryable<Appointment> GetDashboardCardCount(long patientId, long doctorId, long clinicId, DateTime? fromDate, DateTime? toDate )
         {
 
-            var data = _repository.Table.Where(a => a.IsActive).Include(a => a.Patient).
+            var data = _repository.Table.Where(a => a.IsActive && !a.IsDeleted).Include(a => a.Patient).
                 ThenInclude(a => a.DoctorMaster).Include(a => a.AppUser).AsQueryable();
 
             data = data.WhereIf(clinicId > 0, a => a.Patient.DoctorMaster.Id == clinicId)
@@ -219,7 +219,7 @@ namespace PiHealth.Services.Master
 
         public virtual async Task Delete(Appointment entity)
         {
-            entity.IsActive = false;
+            //entity.IsActive = false;
             await _repository.UpdateAsync(entity);
         }
 

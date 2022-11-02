@@ -21,7 +21,8 @@ namespace PiHealth.Services.Master
 
         public virtual IQueryable<PatientProfileData> GetAll(string description = null, long id = 0)
         {
-            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).WhereIf(id > 0, a => a.Key == id).WhereIf(!string.IsNullOrEmpty(description), a => a.Description.Contains(description));
+            var data = _repository.TableNoTracking.Where(a => !a.IsDeleted).WhereIf(id > 0, a => a.Key == id)
+                .WhereIf(!string.IsNullOrEmpty(description), a => a.Description.Contains(description));
             return data;
         }
         public virtual async Task<PatientProfileData> Create(PatientProfileData entity)
@@ -38,9 +39,11 @@ namespace PiHealth.Services.Master
         {
             return await _repository.GetByIdAsync(id);
         }
-        public virtual async Task<PatientProfileData> GetPatientProfileData(string description,long key, long id)
+        public virtual async Task<PatientProfileData> GetPatientProfileData(string description = null
+            ,long key = 0, long id = 0)
         {
-            return await _repository.Table.Where(a => a.Description.ToLower() == description.ToLower() && a.Key == key && !a.IsDeleted && a.Id != id).FirstOrDefaultAsync();
+            return await _repository.Table.Where(a => a.Description.ToLower() == description.ToLower() 
+            && a.Key == key && !a.IsDeleted && a.Id != id).FirstOrDefaultAsync();
         }
     }
 }

@@ -98,8 +98,8 @@ namespace PiHealth.Controllers.API.Masters
                 return BadRequest();
             }
 
-            entity = await _patientProfileDataService.GetPatientProfileData(model.description, model.key, 0);
-            if (entity == null)
+            var temp = await _patientProfileDataService.GetPatientProfileData(model.description, model.key, model.id);
+            if (temp == null)
             {
                 entity = model.ToEntity(entity);
                 entity.ModifiedDate = DateTime.Now;

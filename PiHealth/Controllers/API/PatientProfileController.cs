@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
 using Newtonsoft.Json;
+using System.Xml.Linq;
+using System.Net;
 
 namespace PiHealth.Web.Controllers.API
 {
@@ -247,10 +249,18 @@ namespace PiHealth.Web.Controllers.API
             var startdate = DateTime.Now;
             var appointments = _appointmentService.GetAllInActive().Where(a => a.PatientId == model.PatientId).ToList();
             var appointmentIds = appointments.Select(a => a.Id).ToArray();
-            var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
+            //var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
+            var entities = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds);
+            var total = entities.Count();
+            entities = entities.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
+            if (model.take > 0)
+            {
+                entities = entities.Take(model.take);
+            }
+            var result = entities.Select(a => a.ToModel(new PatientProfileModel())).ToList();
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for PatienProfile AllInactive {0}", diff.TotalSeconds.ToString()));
-            return Ok(patientProfiles);
+            return Ok(new { result, total});
         }
 
         [HttpGet]
@@ -337,6 +347,12 @@ namespace PiHealth.Web.Controllers.API
                         _appoinment.IsActive = false;
                         _appoinment.UpdatedBy = ActiveUser.Id;
                         _appoinment.UpdatedDate = DateTime.Now;
+                        await _appointmentService.Update(_appoinment);
+                    }
+                    if (!string.IsNullOrEmpty(model.appointment.referredBy) &&
+                        _appoinment.ReferredBy != model.appointment.referredBy)
+                    {
+                        _appoinment.ReferredBy = model.appointment.referredBy;
                         await _appointmentService.Update(_appoinment);
                     }
 
@@ -532,13 +548,78 @@ namespace PiHealth.Web.Controllers.API
 
         [HttpGet]
         [Route("getInitialLoad")]
+        //public IActionResult getInitialLoad()
+        //{
+        //    var startdate = DateTime.Now;
+        //    var prescriptions = _prescriptionMasterService.GetAll().ToList();
+        //    var testMasters = _testMasterService.GetAll().ToList();
+        //    var diagnosis = _diagnosisMasterService.GetAll().ToList();
+        //    var templates = _templateMasterService.GetAllTemplates().ToList();
+        //    //var procedures = _procedureMasterService.GetAll().ToList();
+        //    var procedures = _procedureMasterService.GetAll()
+        //        .Select(a => new
+        //        {
+        //            actualCost = a.ActualCost,
+        //            anesthesia = a.Anesthesia,
+        //            complication = a.Complication,
+        //            date = a.Date,
+        //            description = a.Description,
+        //            diagnosis = a.Diagnosis,
+        //            id = a.Id,
+        //            others = a.Others,
+        //            name = a.Procedurename
+        //        }).ToList();
+        //    var doctors = _doctorService.GetAll().ToList();
+        //    //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
+        //    TimeSpan diff = DateTime.Now - startdate;
+        //    log.Error(string.Format("Time taken for PatienProfile Initial Load {0}", diff.TotalSeconds.ToString()));
+        //    return Ok(new
+        //    {
+        //        prescriptions = prescriptions,
+        //        testMasters = testMasters,
+        //        diagnosis = diagnosis,
+        //        templates = templates,
+        //        procedures = procedures,
+        //        doctors = doctors
+        //    });
+        //}
+
         public IActionResult getInitialLoad()
         {
             var startdate = DateTime.Now;
-            var prescriptions = _prescriptionMasterService.GetAll().ToList();
-            var testMasters = _testMasterService.GetAll().ToList();
-            var diagnosis = _diagnosisMasterService.GetAll().ToList();
-            var templates = _templateMasterService.GetAllTemplates().ToList();
+            var prescriptions = _prescriptionMasterService.GetAll()
+                .Select(a => new
+                {
+                    id = a.Id,
+                    genericName = a.GenericName,
+                    categoryName = a.CategoryName,
+                    medicineName = a.MedicineName,
+                    strength = a.Strength,
+                    units = a.Units,
+                    remarks = a.Remarks,
+                    instructions = a.Instructions,
+                    beforeFood = a.BeforeFood,
+                    morning = a.Morning,
+                    noon = a.Noon,
+                    night = a.Night,
+                    noOfDays = a.NoOfDays,
+                    sos = a.Sos,
+                    stat = a.Stat
+                }).OrderBy(a =>a.medicineName).ToList();
+            //var testMasters = _testMasterService.GetAll().ToList();
+            var diagnosis = _diagnosisMasterService.GetAll()
+                .Select(a => new
+                {
+                    id =a.Id,
+                    name = a.Name,
+                    description = a.Description
+                }).OrderBy(a =>a.name).ToList();
+            var templates = _templateMasterService.GetAllTemplates()
+                .Select(a => new
+                {
+                    id = a.Id,
+                    name = a.Name,
+                }).OrderBy(a=>a.name).ToList();
             //var procedures = _procedureMasterService.GetAll().ToList();
             var procedures = _procedureMasterService.GetAll()
                 .Select(a => new
@@ -552,15 +633,26 @@ namespace PiHealth.Web.Controllers.API
                     id = a.Id,
                     others = a.Others,
                     name = a.Procedurename
-                }).ToList();
-            var doctors = _doctorService.GetAll().ToList();
+                }).OrderBy(a=>a.name).ToList();
+            var doctors = _doctorService.GetAll()
+                .Select(a => new
+                {
+                    id = a.Id,
+                    name = a.Name,
+                    clinicName = a.ClinicName,
+                    address = a.Address,
+                    phoneNo1 = a.PhoneNo1,
+                    phoneNo2 = a.PhoneNo2,
+                    email = a.Email,
+                    pinCode = a.PinCode
+                }).OrderBy(a=>a.clinicName).ToList();
             //var patientProfileDatas = _patientProfileDataMapService.GetAll(id).ToList();
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for PatienProfile Initial Load {0}", diff.TotalSeconds.ToString()));
             return Ok(new
             {
                 prescriptions = prescriptions,
-                testMasters = testMasters,
+                //testMasters = testMasters,
                 diagnosis = diagnosis,
                 templates = templates,
                 procedures = procedures,
@@ -620,6 +712,15 @@ namespace PiHealth.Web.Controllers.API
                 return Ok(result.ToModel(new VitalsReportModel()));
             else
                 return Ok(new VitalsReportModel());
+        }
+
+        [HttpGet]
+        [Route("GetFacilities")]
+        public IActionResult GetFacilities(long id)
+        {
+            var result = _doctorService.GetAll().Select(a => new { id = a.Id, name = a.Name })
+                .OrderBy(a => a.name).ToList();
+            return Ok(new {result});
         }
 
         #endregion PatientProfile Ends

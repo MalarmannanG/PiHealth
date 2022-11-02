@@ -16,6 +16,7 @@ namespace PiHealth.DataModel.Entity
         public string Description { get; set; }
         public string VisitType { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDeleted { get; set; }
         public string DayOrNight { get; set; }
         public string TimeOfAppintment { get; set; }
         public DateTime AppointmentDateTime { get; set; }
