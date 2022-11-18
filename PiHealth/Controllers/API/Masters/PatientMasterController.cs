@@ -94,6 +94,7 @@ namespace PiHealth.Web.Controllers.API.Masters
                 mobileNumber = a.MobileNumber,
                 //referedBy = a.DoctorMasterId,
                 referedByName = a.DoctorMaster.Name,
+                referedDoctorName = a.DoctorMaster.ClinicName,
                 address = a.Address
             }).ToList();
             return Ok(new { result, total });
@@ -188,7 +189,7 @@ namespace PiHealth.Web.Controllers.API.Masters
         {
             var doctors = _userService.GetAll(userType: "Doctor").Select(a => new { id = a.Id, name = a.Name })
                 .OrderBy(a => a.name).ToList();
-            var facilities = _doctorMasterService.GetAll().Select(a => new {id=a.Id,name=a.Name})
+            var facilities = _doctorMasterService.GetAll().Select(a => new {id=a.Id,name=a.Name,doctorName=a.ClinicName})
                 .OrderBy(a=>a.name).ToList();
             return Ok(new { doctors, facilities });
         }

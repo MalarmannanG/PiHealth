@@ -138,6 +138,7 @@ namespace PiHealth.Controllers.API
 
             var facilityQuery = _doctorMasterService.GetAll().OrderBy(a => a.Name);
             var facilities = facilityQuery?.Select(a => new {id = a.Id,name = a.Name}).ToList();
+            facilities = facilities.DistinctBy(a => a.name).ToList();
 
             TimeSpan diff = DateTime.Now - startdate;
             log.Error(string.Format("Time taken for Dashboard InitialLoad {0}", diff.TotalSeconds.ToString()));
@@ -152,7 +153,9 @@ namespace PiHealth.Controllers.API
             DateTime? fromDate = string.IsNullOrEmpty(model.fromDate) ? null : DateTime.Parse(model.fromDate);
             DateTime? toDate = string.IsNullOrEmpty(model.toDate) ? null : DateTime.Parse(model.toDate);
 
-            var appointments = _appointmentService.GetDashboardAll(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate, isProcedure: model?.isProcedure);
+            //var appointments = _appointmentService.GetDashboardAll(patientId: model.patientId, doctorId: model.doctorId, clinicId: model.clinicId, fromDate: fromDate, toDate: toDate, isProcedure: model?.isProcedure);
+            var appointments = _appointmentService.GetDashboardAll(patientId: model.patientId, doctorId: model.doctorId,
+                clinicName: model.clinicName, fromDate: fromDate, toDate: toDate, isProcedure: model?.isProcedure);
             var total = appointments?.Count();
 
             //appointments = appointments?.OrderByDescending(a => a.AppointmentDateTime);

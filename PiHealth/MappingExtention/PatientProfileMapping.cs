@@ -88,11 +88,11 @@ namespace PiHealth.Web.MappingExtention
             model.units = entity.Units;
             model.strength = entity.Strength;
             model.beforeFood = entity.BeforeFood;
-            if (!string.IsNullOrEmpty(entity.Remarks))
-            {
-                model.beforeFood = entity.Remarks.ToLower().Contains("before") ? true : false;
-                model.beforeFood = entity.Remarks.ToLower().Contains("after") ? false : true;
-            }
+            //if (!string.IsNullOrEmpty(entity.Remarks))
+            //{
+            //    model.beforeFood = entity.Remarks.ToLower().Contains("before") ? true : false;
+            //    model.beforeFood = entity.Remarks.ToLower().Contains("after") ? false : true;
+            //}
             model.afterFood = entity.AfterFood;
             model.morning = entity.Morning;
             model.noon = entity.Noon;

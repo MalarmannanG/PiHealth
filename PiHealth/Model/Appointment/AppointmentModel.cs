@@ -54,6 +54,7 @@ namespace PiHealth.Web.Model.Appointment
         public long patientId { get; set; }
         public long doctorId { get; set; }
         public long clinicId { get; set; }
+        public string clinicName { get; set; }
         public string fromDate { get; set; }
         public string toDate { get; set; }
         public bool todayPatients { get; set; }

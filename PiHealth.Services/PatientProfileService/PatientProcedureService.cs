@@ -40,5 +40,11 @@ namespace PiHealth.Services.PatientProfileService
         {
             await _repository.UpdateAsync(entity);
         }
+
+        public virtual async Task DeleteByPatientProfileId(long patientProfileId)
+        {
+            var items = _repository.Table.Where(a => a.PatientProfileId == patientProfileId).AsQueryable();
+            _repository.Delete(items);
+        }
     }
 }

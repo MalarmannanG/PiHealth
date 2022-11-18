@@ -146,16 +146,28 @@ namespace PiHealth.Web.Controllers.API
             var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             appointment.AppointmentDateTime = FormattedDate;
 
-            var appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate,0);
-            if (appts.Count() < 1)
+            // appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate,0);
+            var patientAppointment = _appointmentService.GetAlreadyExistPatientAppointment(model.patientId.Value, FormattedDate, 0);
+            var doctorAppointment = _appointmentService.GetAlreadyExistDoctorAppointment(model.consultingDoctorID.Value, FormattedDate, 0);
+            var pac = patientAppointment.Count();
+            var dac = doctorAppointment.Count();
+            if (patientAppointment.Count() < 1 && doctorAppointment.Count() < 1)
             {
                 await _appointmentService.Create(appointment);
                 _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             }
+            else if(patientAppointment.Count() > 0 && doctorAppointment.Count() < 1)
+            {
+                model.id = -2;
+            }
+            else if(patientAppointment.Count() < 1 && doctorAppointment.Count() > 0)
+            {
+                model.id = -3;
+            }
             else
             {
-                appointment = appts.First();
-                model.appointmentDateTime = appointment.AppointmentDateTime;
+                //appointment = appts.First();
+                //model.appointmentDateTime = appointment.AppointmentDateTime;
                 model.id = -1;
             }
             return Ok(model);
@@ -175,16 +187,28 @@ namespace PiHealth.Web.Controllers.API
             var updated = model.ToEntity(appointment);
             var FormattedDate = DateTime.ParseExact(model.appointmentISOString, "ddd MMM dd yyyy HH:mm:ss", CultureInfo.InvariantCulture);
             appointment.AppointmentDateTime = FormattedDate;
-            var appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate, model.id);
-            if (appts.Count() < 1)
+            //var appts = _appointmentService.AppointmentAlreadyExist(model.patientId.Value, model.consultingDoctorID.Value, FormattedDate, model.id);
+            var patientAppointment = _appointmentService.GetAlreadyExistPatientAppointment(model.patientId.Value, FormattedDate, model.id);
+            var doctorAppointment = _appointmentService.GetAlreadyExistDoctorAppointment(model.consultingDoctorID.Value, FormattedDate, model.id);
+            var pac = patientAppointment.Count();
+            var dac = doctorAppointment.Count();
+            if (patientAppointment.Count() < 1 && doctorAppointment.Count() < 1)
             {
                 await _appointmentService.Update(appointment);
                 _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: ActiveUser.Id, value1: "Success");
             }
+            else if (patientAppointment.Count() > 0 && doctorAppointment.Count() < 1)
+            {
+                model.id = -2;
+            }
+            else if (patientAppointment.Count() < 1 && doctorAppointment.Count() > 0)
+            {
+                model.id = -3;
+            }
             else
             {
-                appointment = appts.First();
-                model.appointmentDateTime = appointment.AppointmentDateTime;
+                //appointment = appts.First();
+                //model.appointmentDateTime = appointment.AppointmentDateTime;
                 model.id = -1;
             }
             return Ok(model);

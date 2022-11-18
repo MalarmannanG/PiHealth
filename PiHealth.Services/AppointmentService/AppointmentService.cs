@@ -100,13 +100,14 @@ namespace PiHealth.Services.Master
             return data;
         }
 
-        public virtual IQueryable<Appointment> GetDashboardAll(long patientId, long doctorId, long clinicId, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
+        public virtual IQueryable<Appointment> GetDashboardAll(long patientId, long doctorId, 
+            string clinicName, DateTime? fromDate, DateTime? toDate, bool? isProcedure)
         {
 
             var data = _repository.Table.Where(a => a.IsActive && !a.IsDeleted).Include(a => a.Patient).
                 ThenInclude(a => a.DoctorMaster).Include(a => a.VitalsReport).Include(a => a.AppUser).AsQueryable();
 
-            data = data.WhereIf(clinicId > 0,  a => a.Patient.DoctorMasterId == clinicId)
+            data = data.WhereIf(!string.IsNullOrEmpty(clinicName), a => a.Patient.DoctorMaster.Name.Contains(clinicName))
                  .WhereIf(patientId > 0, e => e.Patient.Id == patientId)
                  .WhereIf(doctorId > 0, e => e.AppUser.Id == doctorId );
 
@@ -229,11 +230,30 @@ namespace PiHealth.Services.Master
         }
         public virtual IQueryable<Appointment> AppointmentAlreadyExist(long PatientId, long DoctorId, DateTime appoinmentDate, long? Id)
         {
-            var data = _repository.Table.Where(a => a.PatientId == PatientId && a.AppUserId == DoctorId).WhereIf(Id>0 ,e=>e.Id != Id).AsQueryable();
+            var data = _repository.Table.Where(a => a.PatientId == PatientId && a.AppUserId == DoctorId).WhereIf(Id > 0, e => e.Id != Id).AsQueryable();
             data = data.Where(a => a.AppointmentDateTime >= appoinmentDate.AddMinutes(-15));
             data = data.Where(a => a.AppointmentDateTime <= appoinmentDate.AddMinutes(15));
             return data;
         }
+
+        public virtual IQueryable<Appointment> GetAlreadyExistPatientAppointment(long PatientId, 
+            DateTime appoinmentDate, long? Id)
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted).WhereIf(Id > 0, e => e.Id != Id).AsQueryable();
+            data = data.Where(a => a.PatientId == PatientId && a.AppointmentDateTime <= appoinmentDate.AddMinutes(15)
+            && a.AppointmentDateTime >= appoinmentDate.AddMinutes(-15));
+            return data;
+        }
+
+        public virtual IQueryable<Appointment> GetAlreadyExistDoctorAppointment(long DoctorId,
+           DateTime appoinmentDate, long? Id)
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted).WhereIf(Id > 0, e => e.Id != Id).AsQueryable();
+            data = data.Where(a => a.AppUserId == DoctorId && a.AppointmentDateTime <= appoinmentDate.AddMinutes(15)
+            && a.AppointmentDateTime >= appoinmentDate.AddMinutes(-15));
+            return data;
+        }
+
         private DateTime getDateTimeFormate(DateTime? fromDate)
         {
             var date = fromDate.Value;

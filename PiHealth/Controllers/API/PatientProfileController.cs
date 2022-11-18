@@ -130,7 +130,9 @@ namespace PiHealth.Web.Controllers.API
             else
             {
                 patientProfile.procedureModel = new ProcedureModel();
-                var entity = await _patientProcedureService.GetByProfileId(patientProfile.id);
+                //var entity =  await _patientProcedureService.GetByProfileId(patientProfile.id);
+                var entity = patientProfile.procedureMasterId > 0 ?
+                    await _patientProcedureService.GetByProfileId(patientProfile.id) : null;
                 if (entity != null)
                 {
                     patientProfile.procedureModel = entity.ToModel1(new ProcedureModel());
@@ -218,7 +220,7 @@ namespace PiHealth.Web.Controllers.API
             var startdate = DateTime.Now;
             var appointments = _appointmentService.GetAllInActive().Where(a => a.PatientId == model.PatientId && a.AppointmentDateTime <= model.appointmentDate).ToList();
             var appointmentIds = appointments.Select(a => a.Id).ToArray();
-            var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
+            var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.Appointment.AppointmentDateTime).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             for (int i = 0; i < patientProfiles.Count; i++)
             {
                 var _patientProfileData = _patientProfileDataMapService.GetAll(patientProfiles[i].id).Select(a => new PatientProfileDataMapMdl() { key = a.PatientProfileData.Key, description = a.PatientProfileData.Description, patientProfileDataId = a.PatientProfileDataId, patientProfileId = a.PatientProfileId });
@@ -246,7 +248,7 @@ namespace PiHealth.Web.Controllers.API
             //var patientProfiles = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds).OrderByDescending(a => a.CreatedDate).ToList().Select(a => a.ToModel(new PatientProfileModel())).ToList();
             var entities = _patientProfileService.GetAll(patientId: model.PatientId, appointmentIds: appointmentIds);
             var total = entities.Count();
-            entities = entities.OrderByDescending(a => a.CreatedDate).Skip(model.skip);
+            entities = entities.OrderByDescending(a => a.Appointment.AppointmentDateTime).Skip(model.skip);
             if (model.take > 0)
             {
                 entities = entities.Take(model.take);
@@ -403,6 +405,8 @@ namespace PiHealth.Web.Controllers.API
                         entity.ModifiedDate = DateTime.Now;
                         entity.ModifiedBy = ActiveUser.Id;
                         await _patientProcedureService.Update(entity);
+                        //await _patientProcedureService.DeleteByPatientProfileId(patientProfile.Id);
+                        //await _patientProcedureService.Create(entity);
 
                     }
                     else
@@ -411,6 +415,7 @@ namespace PiHealth.Web.Controllers.API
                         entity.PatientProfileId = patientProfile.Id;
                         entity.CreatedDate = DateTime.Now;
                         entity.CreatedBy = ActiveUser.Id;
+                        await _patientProcedureService.DeleteByPatientProfileId(patientProfile.Id);
                         await _patientProcedureService.Create(entity);
                     }
                 }
@@ -712,7 +717,7 @@ namespace PiHealth.Web.Controllers.API
         [Route("GetFacilities")]
         public IActionResult GetFacilities(long id)
         {
-            var result = _doctorService.GetAll().Select(a => new { id = a.Id, name = a.Name })
+            var result = _doctorService.GetAll().Select(a => new { id = a.Id, name = a.Name,doctorName =a.ClinicName })
                 .OrderBy(a => a.name).ToList();
             return Ok(new {result});
         }

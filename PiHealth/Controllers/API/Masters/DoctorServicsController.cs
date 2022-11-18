@@ -41,7 +41,7 @@ namespace PiHealth.Controllers.API.Masters
         {
             var entities = _doctorService.GetAll(model.userId, name: model.name);
             var total = entities.Count();
-            entities = entities.OrderBy(a => model.Sorting ?? "id asc").Skip(model.SkipCount);
+            entities = entities.OrderByDescending(a => a.CreatedDate).Skip(model.SkipCount);
             if (model.MaxResultCount > 0)
             {
                 entities = entities.Take(model.MaxResultCount);

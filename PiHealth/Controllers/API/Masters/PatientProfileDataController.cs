@@ -50,7 +50,7 @@ namespace PiHealth.Controllers.API.Masters
         {
             var entities = _patientProfileDataService.GetAll(model.description, model.key);
             var total = entities.Count();
-            entities = entities.Skip(model.skip);
+            entities = entities.OrderByDescending(a=>a.CreatedDate).Skip(model.skip);
             if (model.take > 0)
             {
                 entities = entities.Take(model.take);
