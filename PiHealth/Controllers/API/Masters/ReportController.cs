@@ -80,6 +80,15 @@ namespace PiHealth.Controllers.API.Masters
             var result = entities;
             return Ok(new { result, total });
         }
+        [HttpGet]
+        [Route("GetAgeRangeReport")]
+        public async Task<ActionResult> GetAgeRangeReport([FromQuery] ReportQueryModel model)
+        {
+            model.doctorId = ActiveUser.Id;
+            var result = _reportService.GetAgeRangeReport(doctorId: model.doctorId,
+                fromDate: model.fromDate, toDate: model.toDate);
+            return Ok(result);
+        }
 
     }
 }

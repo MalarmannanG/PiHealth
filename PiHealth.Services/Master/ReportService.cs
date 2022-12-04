@@ -1,5 +1,6 @@
 ﻿using PiHealth.DataModel;
 using PiHealth.DataModel.Entity;
+using PiHealth.Services.AppConstants;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,28 +15,41 @@ namespace PiHealth.Services.Master
         public readonly IRepository<Patient> _repositoryPatient;
         public readonly IRepository<Appointment> _repositoryAppointment;
         public readonly IRepository<PatientProfile> _repositoryPatientProfile;
-        public readonly IRepository<PatientDiagnosis> _repositoryPatientDiagnosis;
-        public readonly IRepository<DiagnosisMaster> _repositoryDiagnosisMaster;
-        public readonly IRepository<DoctorService> _repositoryDoctorService;
+        //public readonly IRepository<PatientDiagnosis> _repositoryPatientDiagnosis;
+        //public readonly IRepository<DiagnosisMaster> _repositoryDiagnosisMaster;
+        public readonly IRepository<DoctorService> _repositoryDoctorService; 
+        public readonly IRepository<PatientProfileData> _repositoryPatientProfileData;
+        public readonly IRepository<PatientProfileDataMapping> _repositoryPatientProfileDataMapping;
 
         public ReportService(IRepository<Patient> repositoryPatient,
             IRepository<Appointment> repositoryAppointment,
             IRepository<PatientProfile> repositoryPatientProfile,
-            IRepository<PatientDiagnosis> repositoryPatientDiagnosis,
-            IRepository<DiagnosisMaster> repositoryDiagnosisMaster,
-            IRepository<DoctorService> repositoryDoctorService)
+            //IRepository<PatientDiagnosis> repositoryPatientDiagnosis,
+            //IRepository<DiagnosisMaster> repositoryDiagnosisMaster,
+            IRepository<DoctorService> repositoryDoctorService,
+            IRepository<PatientProfileDataMapping> repositoryPatientProfileDataMapping,
+            IRepository<PatientProfileData> repositoryPatientProfileData)
         {
             _repositoryPatient = repositoryPatient;
             _repositoryAppointment = repositoryAppointment;
             _repositoryPatientProfile = repositoryPatientProfile;
-            _repositoryPatientDiagnosis = repositoryPatientDiagnosis;
-            _repositoryDiagnosisMaster = repositoryDiagnosisMaster;
+            //_repositoryPatientDiagnosis = repositoryPatientDiagnosis;
+            //_repositoryDiagnosisMaster = repositoryDiagnosisMaster;
             _repositoryDoctorService = repositoryDoctorService;
+            _repositoryPatientProfileData = repositoryPatientProfileData;
+            _repositoryPatientProfileDataMapping = repositoryPatientProfileDataMapping;
         }
 
         public class Report
         {
             public string data { get; set; }
+            public int count { get; set; }
+            public string date { get; set; }
+        }
+
+        public class AgeReport
+        {
+            public int data { get; set; }
             public int count { get; set; }
             public string date { get; set; }
         }
@@ -138,24 +152,39 @@ namespace PiHealth.Services.Master
         public virtual ResponseData GetDiseaseCategories(long doctorId = 0,
             DateTime? fromDate = null, DateTime? toDate = null)
         {
+            //var query = from pp in _repositoryPatientProfile.Table.ToList()
+            //            join pd in _repositoryPatientDiagnosis.Table.ToList() on pp.Id equals pd.PatientProfileId
+            //            join dm in _repositoryDiagnosisMaster.Table.ToList() on pd.DiagnosisMasterId equals dm.Id
+            //            join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
+            //            where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
+            //            && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+            //            && app.AppUserId == doctorId && app.IsDeleted == false && pp.IsDeleted == false
+            //            && pd.IsDeleted == false && dm.IsDeleted == false
+            //            group pp by new { dm.Name, app.AppointmentDateTime } into grp
+            //            select new
+            //            {
+            //                diagnosisName = grp.Key.Name,
+            //                date = grp.Key.AppointmentDateTime,
+            //                count = grp.Count()
+            //            };
             var query = from pp in _repositoryPatientProfile.Table.ToList()
-                        join pd in _repositoryPatientDiagnosis.Table.ToList() on pp.Id equals pd.PatientProfileId
-                        join dm in _repositoryDiagnosisMaster.Table.ToList() on pd.DiagnosisMasterId equals dm.Id
+                        join pd in _repositoryPatientProfileDataMapping.Table.ToList() on pp.Id equals pd.PatientProfileId
+                        join dm in _repositoryPatientProfileData.Table.ToList() on pd.PatientProfileDataId equals dm.Id
                         join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
                         where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
                         && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
-                        && app.AppUserId == doctorId && app.IsDeleted == false && pp.IsDeleted == false
-                        && pd.IsDeleted == false && dm.IsDeleted == false
-                        group pp by new { dm.Name, app.AppointmentDateTime } into grp
+                        && app.AppUserId == doctorId && app.IsDeleted == false && pp.IsDeleted == false && dm.IsDeleted == false
+                        && dm.Key == (long)ProfileDataEnum.Impression
+                        group pp by new { dm.Description, app.AppointmentDateTime } into grp
                         select new
                         {
-                            diagnosisName = grp.Key.Name,
+                            impressionName = grp.Key.Description,
                             date = grp.Key.AppointmentDateTime,
                             count = grp.Count()
                         };
             var _grpData = query.Select(f => new Report()
             {
-                data = f.diagnosisName,
+                data = f.impressionName,
                 date = f.date.ToString("dd-MMM"),
                 count = f.count,
 
@@ -271,6 +300,60 @@ namespace PiHealth.Services.Master
             }
             return response;
         }
+
+
+        public virtual ResponseData GetAgeRangeReport(long doctorId = 0,
+          DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            var query = from pp in _repositoryPatientProfile.Table.ToList()
+                        join p in _repositoryPatient.Table.ToList() on pp.PatientId equals p.Id
+                        join app in _repositoryAppointment.Table.ToList() on pp.AppointmentId equals app.Id
+                        where DateOnly.FromDateTime(app.AppointmentDateTime) >= DateOnly.FromDateTime((DateTime)fromDate)
+                        && DateOnly.FromDateTime(app.AppointmentDateTime) <= DateOnly.FromDateTime((DateTime)toDate)
+                        && app.AppUserId == doctorId && app.IsDeleted == false && p.IsDeleted == false
+                        && pp.IsDeleted == false
+                        group pp by new { p.Age, app.AppointmentDateTime } into grp
+                        select new
+                        {
+                            age = grp.Key.Age,
+                            date = grp.Key.AppointmentDateTime,
+                            count = grp.Count()
+                        };
+
+            
+            var _grpData = query.Select(f => new AgeReport()
+            {
+                data = (int)f.age,
+                date = f.date.ToString("dd-MMM"),
+                count = f.count
+            }).OrderBy(a => a.date).ToList();
+
+            var _obj = _grpData.Select(a => a.date).Distinct().ToList();
+            var _objName = new List<string>() { "19-30", "31-40", "41-50","51-60", "61+" };
+
+            ResponseData response = new ResponseData();
+            var _datas = _grpData.Select(a => a.data).Distinct().ToList();
+            response.dates = _grpData.Select(a => a.date).Distinct().ToList();
+
+            response.dataItems = _objName.Select(a => new DataFormat()
+            {
+                name = a,
+                data = new List<int>()
+            }).ToList();
+          
+            foreach (var item in response.dates)
+            {
+
+                response.dataItems[0].data.Add(_grpData.Where(g => g.date == item && (g.data > 18 && g.data < 31)).Sum(a => a.count));
+                response.dataItems[1].data.Add(_grpData.Where(g => g.date == item && (g.data > 30 && g.data < 41)).Sum(a => a.count));
+                response.dataItems[2].data.Add(_grpData.Where(g => g.date == item && (g.data > 40 && g.data < 51)).Sum(a => a.count));
+                response.dataItems[3].data.Add(_grpData.Where(g => g.date == item && (g.data > 50 && g.data < 61)).Sum(a => a.count));
+                response.dataItems[4].data.Add(_grpData.Where(g => g.date == item && (g.data > 60 )).Sum(a => a.count));
+            }
+            return response;
+        }
+
+
     }
 
 
