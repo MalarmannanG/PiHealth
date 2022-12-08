@@ -43,6 +43,19 @@ namespace PiHealth.Controllers.API.Masters
                 fromDate: model.fromDate, toDate: model.toDate);
             return Ok(result);
         }
+        [HttpGet]
+        [Route("GetImpressionData")]
+        public IActionResult GetImpressionData([FromQuery] ReportQueryModel model)
+        {
+            model.doctorId = ActiveUser.Id;
+            var entities = _reportService.GetImpressionData(name: model.name, doctorId: model.doctorId,
+                fromDate: model.fromDate, toDate: model.toDate);
+            var total = entities.Count;
+            entities = entities.OrderBy(a => a.impressionName).ToList();
+             
+            var result = entities;
+            return Ok(new { result, total });
+        }
 
         [HttpGet]
         [Route("GetDoctorReferrals")]
