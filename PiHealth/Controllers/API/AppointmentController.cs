@@ -249,6 +249,35 @@ namespace PiHealth.Web.Controllers.API
             return Ok(new { doctors, patients });
         }
 
+        [HttpGet]
+        [Route("GetPatientPastAppointments")]
+        public IActionResult GetPatientPastAppointments([FromQuery] PatientDashboardQueryModel model)
+        {
+            var appointments = _appointmentService.GetPatientPastAppointments(model.patientId,model.searchText);
+            var total = appointments.Count();
+            appointments = appointments.OrderByDescending(a => a.AppointmentDateTime).Skip(model.skip);
+            if (model.take > 0)
+            {
+                appointments = appointments.Take(model.take);
+            }
+            return Ok(new { appointments, total });
+        }
+
+        [HttpGet]
+        [Route("GetPatientUpcomingAppointments")]
+        public IActionResult GetPatientUpcomingAppointments([FromQuery] PatientDashboardQueryModel model)
+        {
+            var dateTime = DateTime.Now.Date;
+            var appointments = _appointmentService.GetPatientUpcomingAppointments(model.patientId, dateTime,model.searchText);
+            var total = appointments.Count();
+            appointments = appointments.OrderByDescending(a => a.AppointmentDateTime).Skip(model.skip);
+            if (model.take > 0)
+            {
+                appointments = appointments.Take(model.take);
+            }
+            return Ok(new { appointments, total });
+        }
+
         #endregion Appointment Ends
     }
 }

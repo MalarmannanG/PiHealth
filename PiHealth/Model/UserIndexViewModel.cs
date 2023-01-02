@@ -23,6 +23,8 @@ namespace PiHealth.Web.Model
         public string specializationName { get; set; }
         public string registrationNo { get; set; }
         public DateTime? createdDate { get; set; }
+        public string? otp { get; set; }
+        public DateTime? otpSentDateTime {get;set;}
     }
 
     public class UserQueryModel : BaseQueryModel

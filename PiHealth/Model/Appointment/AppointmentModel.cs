@@ -60,4 +60,10 @@ namespace PiHealth.Web.Model.Appointment
         public bool todayPatients { get; set; }
         public bool? isProcedure { get; set; }
     }
+
+    public class PatientDashboardQueryModel : BaseQueryModel
+    {
+        public long patientId { get; set; }
+        public string searchText { get; set; }
+    }
 }

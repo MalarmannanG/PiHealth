@@ -28,6 +28,8 @@ namespace PiHealth.Web.MappingExtention
                 model.specializationName = entity.Specialization.Name;
             }
             model.registrationNo = entity.RegistrationNo;
+            model.otp = entity.Otp;
+            model.otpSentDateTime = entity.OtpSentDateTime;
             return model;
         }
 
@@ -51,6 +53,8 @@ namespace PiHealth.Web.MappingExtention
                 model.specializationName = entity.Specialization.Name;
             }
             model.registrationNo = entity.RegistrationNo;
+            model.otp = entity.Otp;
+            model.otpSentDateTime = entity.OtpSentDateTime;
             return model;
         }
 
@@ -70,6 +74,8 @@ namespace PiHealth.Web.MappingExtention
             if (model.specializationId.HasValue)
                 entity.SpecializationId = model.specializationId.Value;
             entity.RegistrationNo = model.registrationNo;
+            entity.Otp = model.otp;
+            entity.OtpSentDateTime = model.otpSentDateTime;
             return entity;
         }
     }

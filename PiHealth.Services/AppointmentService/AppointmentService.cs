@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Threading;
+using System.Globalization;
 
 namespace PiHealth.Services.Master
 {
@@ -228,6 +229,7 @@ namespace PiHealth.Services.Master
         {
             return await _repository.Table.Where(a => a.Id == id)?.Include(a => a.VitalsReport).Include(a => a.AppUser).Include(a => a.PatientFiles).Include(a => a.Patient).ThenInclude(a => a.DoctorMaster)?.FirstOrDefaultAsync();
         }
+
         public virtual IQueryable<Appointment> AppointmentAlreadyExist(long PatientId, long DoctorId, DateTime appoinmentDate, long? Id)
         {
             var data = _repository.Table.Where(a => a.PatientId == PatientId && a.AppUserId == DoctorId).WhereIf(Id > 0, e => e.Id != Id).AsQueryable();
@@ -270,6 +272,33 @@ namespace PiHealth.Services.Master
         public virtual async Task<VitalsReport> GetVitalReports(long id)
         {
             return await _repository.Table.Where(a=>a.Id == id).Select(a=>a.VitalsReport).FirstOrDefaultAsync();
+        }
+
+        public virtual IQueryable<Appointment> GetPatientPastAppointments(long PatientId, string searchText)
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted && !a.IsActive).Include(a => a.AppUser).AsQueryable();
+            data = data.Where(a => a.PatientId == PatientId)
+                .WhereIf(!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText)
+                , a => a.AppUser.Name.ToLower().Contains(searchText.ToLower())
+                || a.Description.ToLower().Contains(searchText.ToLower())
+                || a.VisitType.ToLower().Contains(searchText.ToLower())
+                || a.ReferredBy.ToLower().Contains(searchText.ToLower())
+                || a.AppointmentDateTime.ToString() == searchText);
+                        return data;
+        }
+
+        public virtual IQueryable<Appointment> GetPatientUpcomingAppointments(long PatientId,
+            DateTime appoinmentDate, string searchText)
+        {
+            var data = _repository.Table.Where(a => !a.IsDeleted && a.IsActive).Include(a=>a.AppUser).AsQueryable();
+            data = data.Where(a => a.PatientId == PatientId && a.AppointmentDateTime >= appoinmentDate)
+                .WhereIf(!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText)
+                ,a => a.AppUser.Name.ToLower().Contains(searchText.ToLower())
+                || a.Description.ToLower().Contains(searchText.ToLower()) 
+                || a.VisitType.ToLower().Contains(searchText.ToLower())
+                || a.ReferredBy.ToLower().Contains(searchText.ToLower())
+                || a.AppointmentDateTime.ToString() == searchText);
+            return data;
         }
     }
 }

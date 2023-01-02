@@ -6,10 +6,13 @@ using PiHealth.Services;
 using PiHealth.Services.UserAccounts;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
 
 namespace PiHealth.Service.UserAccounts
@@ -32,6 +35,10 @@ namespace PiHealth.Service.UserAccounts
         IQueryable<Specialization> GetAllSpecialition(string name);
         IQueryable<AppUser> GetIdByDoctorName(string name);
 
+        Task<AppUser> GetUserByEmail(string email);
+        Task<AppUser> GetUserPatientByMobileNumber(string mobileNumber);
+        string GenerateOTP();
+        string SendOTP(string mobileNumber,string otp);
 
     }
     public class AppUserService : IAppUserService
@@ -130,6 +137,45 @@ namespace PiHealth.Service.UserAccounts
             }
         }
 
+        public virtual Task<AppUser> GetUserByEmail(string email)
+        {
+            return _repository.Table.FirstOrDefaultAsync(a => a.Email.ToLower() == email.ToLower() && a.IsActive);
+        }
 
+        public virtual Task<AppUser> GetUserPatientByMobileNumber(string mobileNumber)
+        {
+            return _repository.Table.FirstOrDefaultAsync(a => a.PhoneNo == mobileNumber && a.IsActive 
+            && a.UserType == "Patient");
+        }
+
+        public string GenerateOTP()
+        {
+            var random = new Random();
+            string otp = string.Empty;
+            for(int i = 0; i < 6; i++)
+            {
+                otp = otp + random.Next(0, 10);
+            }
+            return otp;
+        }
+
+        public string SendOTP(string mobileNumber,string otp)
+        {
+            String message = HttpUtility.UrlEncode("Dear Patient, Your otp is "
+                + otp + " and is valid for 2 mins. - PiHealth" );
+            using (var wb = new WebClient())
+            {
+                byte[] response = wb.UploadValues("https://api.textlocal.in/send/", new NameValueCollection()
+                {
+                {"apikey" , "NzgzNDc5NDg0ZTQ0NGM3ODZhNGQ1NzRjMzU3YTRmNjg="},
+                {"numbers" , mobileNumber},
+                {"message" , message},
+                {"sender" , "PIHEAL"},
+                {"test","1" },
+                });
+                string result = System.Text.Encoding.UTF8.GetString(response);
+                return result;
+            }
+        }
     }
 }

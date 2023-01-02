@@ -32,7 +32,8 @@ namespace PiHealth.DataModel.Entity
         public virtual ICollection<UserToken> Tokens { get; set; }
         public virtual ICollection<Appointment> Appointments { get; set; }
 
-
+        public string? Otp { get; set; }
+        public Nullable<System.DateTime> OtpSentDateTime { get; set; }
 
     }
 }

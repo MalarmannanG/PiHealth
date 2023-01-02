@@ -194,6 +194,14 @@ namespace PiHealth.Web.Controllers.API.Masters
             return Ok(new { doctors, facilities });
         }
 
+        [HttpGet]
+        [Route("GetPatientByNameAndMobileNumber")]
+        public IActionResult GetPatientByNameAndMobileNumber()
+        {
+            var patient = _patientService.GetByName(ActiveUser.Name, 0, ActiveUser.PhoneNo);
+            return Ok(patient?.Result);
+        }
+
         [AllowAnonymous]
         [HttpGet]
         [Route("Migration")]

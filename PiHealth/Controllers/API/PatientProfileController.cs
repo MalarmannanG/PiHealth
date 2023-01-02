@@ -203,7 +203,7 @@ namespace PiHealth.Web.Controllers.API
                 else
                 {
                     var patient = await _patientService.Get(result.Patient.Id);
-                    patientProfile.procedureModel.referedByName = patient.DoctorMaster.Name;
+                    patientProfile.procedureModel.referedByName = patient.DoctorMaster?.Name;
                     patientProfile.procedureModel.referedBy = result.Patient.DoctorMasterId;
                 }
 

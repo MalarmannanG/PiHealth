@@ -16,6 +16,13 @@ using Microsoft.EntityFrameworkCore;
 using PiHealth.DataModel.Options;
 using PiHealth.Web.Helper;
 using PiHealth.Web.Filter;
+using PiHealth.Web.Model.Patient;
+using PiHealth.DataModel.Entity;
+using System;
+using PiHealth.Web.MappingExtention;
+using PiHealth.Services.PiHealthPatients;
+using PiHealth.Web.Model.Prefix;
+using Microsoft.Extensions.Options;
 
 namespace PiHealth.Web.Controllers
 {
@@ -31,6 +38,8 @@ namespace PiHealth.Web.Controllers
         private readonly AccessFunctionService _accessFunctionService;
         private readonly AccessModuleService _accessModuleService;
         private readonly AccessRoleFunctionService _accessRoleService;
+        private readonly IOptionsSnapshot<PrefixOption> _prefixOption;
+        private readonly PatientService _patientService;
 
         public AccountController(
             AccessFunctionService accessFunctionService,
@@ -39,7 +48,9 @@ namespace PiHealth.Web.Controllers
             IAppUserService usersService,
             ITokenStoreService tokenStoreService,
             SecurityService securityService,
-            AuditLogServices auditLogServices)
+            AuditLogServices auditLogServices,
+            IOptionsSnapshot<PrefixOption> prefixOption,
+            PatientService patientService)
 
         {
             _accessFunctionService = accessFunctionService;
@@ -51,8 +62,77 @@ namespace PiHealth.Web.Controllers
             _auditLogService = auditLogServices;
             _tokenStoreService = tokenStoreService;
             _tokenStoreService.CheckArgumentIsNull(nameof(_tokenStoreService));
+            _prefixOption = prefixOption;
+            _patientService = patientService;
         }
 
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("Signup")]
+        [CustomExceptionFilter]
+        public async Task<IActionResult> Signup([FromBody] SignupModel signupModel)
+        {
+            UserModel userModel = new UserModel();
+            userModel.userName = signupModel.name;
+            userModel.name = signupModel.name;
+            userModel.email = signupModel.email;
+            userModel.phoneNo = signupModel.mobileNumber;
+            userModel.userType = "Patient";
+            userModel.gender = signupModel.gender;
+            userModel.address = signupModel.address;
+            PatientModel patientModel = new PatientModel();
+            patientModel.patientName = signupModel.name;
+            patientModel.initial = signupModel.initial;
+            patientModel.gender = signupModel.gender;
+            patientModel.mobileNumber = signupModel.mobileNumber;
+            patientModel.age = signupModel.age;
+            patientModel.address = signupModel.address;
+            if (userModel == null || patientModel == null)
+            {
+                return BadRequest();
+            }
+
+            var emailExist = _usersService.EmailAlreadyExit(signupModel.email);
+            var _templates = await _patientService.GetByName(patientModel.patientName, 0, patientModel.mobileNumber);
+
+            if (!emailExist && _templates == null)
+            {
+                //inserting into AppUser table
+                var user = userModel.ToEntity(new AppUser());
+                user.SerialNumber = new Guid().ToString();
+                user.CreatedDate = DateTime.UtcNow;
+                user.Password = _securityService.GetSha256Hash(signupModel.password);
+                if (userModel.specializationId.HasValue)
+                {
+                    user.SpecializationId = userModel.specializationId.Value;
+                }
+                user.RegistrationNo = userModel.registrationNo;
+                user.IsActive = true;
+                user = await _usersService.Create(user);
+                userModel = user.ToModel(new UserModel());
+
+                //inserting into Patient Table
+                var ulIdPrefix = (_prefixOption?.Value?.ULIDPrefix ?? "");
+                var entity = patientModel.ToEntity(new Patient());
+                entity.HrNo = _patientService.NewULID();
+                entity.HrNo = ulIdPrefix + entity.HrNo;
+                entity.CreatedBy = 0;
+                entity.CreatedDate = DateTime.Now;
+                var patient = _patientService.Create(entity);
+                patientModel = patient?.ToModel(new PatientModel());
+            }
+            else if (emailExist)
+            {
+                return Ok(-1);
+            }
+            else if(_templates != null)
+            {
+                return Ok(-2);
+            }
+
+            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, RequestIP: RequestIP, userid: 0, value1: "Success", value2: "Create");
+            return Ok(new { userModel = userModel, patientModel = patientModel });
+        }
 
         [AllowAnonymous]
         [HttpPost]
@@ -86,6 +166,8 @@ namespace PiHealth.Web.Controllers
 
             return Ok(new { token = accessToken, refresh_token = refreshToken, role = user.UserType, username = user.Name, id = user.Id, name = user.Name, registrationNo = user.RegistrationNo });
         }
+
+
 
         //[AllowAnonymous]
         //[HttpPost]
@@ -216,6 +298,59 @@ namespace PiHealth.Web.Controllers
 
             return Ok(new { status = true });
 
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("ForgotPassword")]
+        [CustomExceptionFilter]
+        public async Task<IActionResult> ForgotPassword([FromBody] LoginRequestModel forgotPasswordUser)
+        {
+            if(forgotPasswordUser == null)
+            {
+                return BadRequest();
+            }
+
+            var user = await _usersService.GetUserByEmail(forgotPasswordUser.Email);
+
+            if(user == null)
+            {
+                return Ok(-1);
+            }
+            else
+            {
+                user.Password = _securityService.GetSha256Hash(forgotPasswordUser.Password);
+                await _usersService.Update(user);
+            }
+
+            return Ok(user);
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("SendOTP")]
+        [CustomExceptionFilter]
+        public async Task<IActionResult> SendOTP([FromBody] PatientSignInModel patientSignInModel)
+        {
+            if(patientSignInModel == null)
+            {
+                return BadRequest();
+            }
+
+            var userPatient = await _usersService.GetUserPatientByMobileNumber(patientSignInModel.mobileNumber);
+
+            if(userPatient == null)
+            {
+                return Ok(-1);
+            }
+
+            userPatient.Otp = _usersService.GenerateOTP();
+            var result = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+
+            //result error response:{ "errors":[{ "code":80,"message":"Invalid template"}],"status":"failure"}
+            //if (result?.status == "")
+
+            return Ok(new {userPatient,result});
         }
     }
 }

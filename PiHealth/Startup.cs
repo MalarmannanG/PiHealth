@@ -31,6 +31,7 @@ using PiHealth.Extention;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Options;
 
 namespace PiHealth
 {
@@ -122,7 +123,10 @@ namespace PiHealth
                 option.Filters.Add(typeof(ExceptionHandlingFilter)); // by type                
             }).AddJsonOptions(
                 options => options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-                );
+                ).AddNewtonsoftJson(
+          options => {
+              options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+          }); ;
 
             services.AddSwaggerGen(c =>
             {
