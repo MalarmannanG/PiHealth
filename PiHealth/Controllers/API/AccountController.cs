@@ -23,6 +23,7 @@ using PiHealth.Web.MappingExtention;
 using PiHealth.Services.PiHealthPatients;
 using PiHealth.Web.Model.Prefix;
 using Microsoft.Extensions.Options;
+using System.Net.Http;
 
 namespace PiHealth.Web.Controllers
 {
@@ -332,25 +333,29 @@ namespace PiHealth.Web.Controllers
         [CustomExceptionFilter]
         public async Task<IActionResult> SendOTP([FromBody] PatientSignInModel patientSignInModel)
         {
-            if(patientSignInModel == null)
+            if (patientSignInModel == null)
             {
                 return BadRequest();
             }
 
             var userPatient = await _usersService.GetUserPatientByMobileNumber(patientSignInModel.mobileNumber);
 
-            if(userPatient == null)
+            if (userPatient == null)
             {
                 return Ok(-1);
             }
 
             userPatient.Otp = _usersService.GenerateOTP();
-            var result = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            //var result = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            var url = "http://online.chennaisms.com/api/mt/SendSMS?user=bulksms6&password=Bulksms@9&senderid=NKLGSM&channel=Trans&DCS=0&flashsms=0&number=91"+ userPatient.PhoneNo+"&text=Hello%2C%20Your%20OTP%20for%20Ganga%20Supermarket%20account%20is%20"+ userPatient.Otp + "%20Regards%2C%20GSM%20%28Ganga%20Supermarket%29&route=6";
+            var client = new HttpClient();
+            var result = await client.GetAsync(url);
 
-            //result error response:{ "errors":[{ "code":80,"message":"Invalid template"}],"status":"failure"}
-            //if (result?.status == "")
+            userPatient.OtpSentDateTime = DateTime.Now;
+            await _usersService.Update(userPatient);
 
             return Ok(new {userPatient,result});
+            //return Ok(new { result });
         }
     }
 }
