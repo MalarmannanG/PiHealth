@@ -23,6 +23,9 @@ using PiHealth.Web.MappingExtention;
 using PiHealth.Services.PiHealthPatients;
 using PiHealth.Web.Model.Prefix;
 using Microsoft.Extensions.Options;
+using Abp.Json;
+using StackExchange.Profiling.Internal;
+using Newtonsoft.Json;
 
 namespace PiHealth.Web.Controllers
 {
@@ -345,12 +348,13 @@ namespace PiHealth.Web.Controllers
             }
 
             userPatient.Otp = _usersService.GenerateOTP();
-            var result = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            var smsResponse = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            //var result = JsonConvert.DeserializeObject(smsResponse);
 
             //result error response:{ "errors":[{ "code":80,"message":"Invalid template"}],"status":"failure"}
             //if (result?.status == "")
 
-            return Ok(new {userPatient,result});
+            return Ok(new {userPatient, smsResponse });
         }
     }
 }

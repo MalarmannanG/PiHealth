@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
@@ -38,7 +39,7 @@ namespace PiHealth.Service.UserAccounts
         Task<AppUser> GetUserByEmail(string email);
         Task<AppUser> GetUserPatientByMobileNumber(string mobileNumber);
         string GenerateOTP();
-        string SendOTP(string mobileNumber,string otp);
+        Task<string> SendOTP(string mobileNumber,string otp);
 
     }
     public class AppUserService : IAppUserService
@@ -159,23 +160,37 @@ namespace PiHealth.Service.UserAccounts
             return otp;
         }
 
-        public string SendOTP(string mobileNumber,string otp)
+        public async Task<string> SendOTP(string mobileNumber,string otp)
         {
-            String message = HttpUtility.UrlEncode("Dear Patient, Your otp is "
-                + otp + " and is valid for 2 mins. - PiHealth" );
-            using (var wb = new WebClient())
+            HttpClient client = new HttpClient();
+            try
             {
-                byte[] response = wb.UploadValues("https://api.textlocal.in/send/", new NameValueCollection()
-                {
-                {"apikey" , "NzgzNDc5NDg0ZTQ0NGM3ODZhNGQ1NzRjMzU3YTRmNjg="},
-                {"numbers" , mobileNumber},
-                {"message" , message},
-                {"sender" , "PIHEAL"},
-                {"test","1" },
-                });
-                string result = System.Text.Encoding.UTF8.GetString(response);
-                return result;
+                var url = "http://online.chennaisms.com/api/mt/SendSMS?user=bulksms6&password=Bulksms@9&senderid=NKLGSM&channel=Trans&DCS=0&flashsms=0&number=91"+mobileNumber+"&text=Hello%2C%20Your%20OTP%20for%20PiHealth%20account%20is%"+otp+"%20Regards%2C%20PiHealth%29&route=6";
+                using HttpResponseMessage response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                string responseBody = await response.Content.ReadAsStringAsync();
+                // Above three lines can be replaced with new helper method below
+                // string responseBody = await client.GetStringAsync(uri);
+                return responseBody;
+            }
+            catch (HttpRequestException e)
+            {
+                return "Error Occured";
+            }
+
+            //        String message = HttpUtility.UrlEncode("Dear Patient, Your otp is "
+            //    + otp + " and is valid for 2 mins. - PiHealth" );
+            //using (var wb = new WebClient())
+            //{
+            //    byte[] response = wb.UploadValues("https://api.textlocal.in/send/", new NameValueCollection()
+            //    {
+            //    {"apikey" , "NzgzNDc5NDg0ZTQ0NGM3ODZhNGQ1NzRjMzU3YTRmNjg="},
+            //    {"numbers" , mobileNumber},
+            //    {"message" , message},
+            //    {"sender" , "PIHEAL"},
+            //    {"test","true" },
+            //    });
+            //    string result = System.Text.Encoding.UTF8.GetString(response);
             }
         }
     }
-}

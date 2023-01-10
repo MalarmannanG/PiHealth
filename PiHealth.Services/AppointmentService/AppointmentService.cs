@@ -279,12 +279,11 @@ namespace PiHealth.Services.Master
             var data = _repository.Table.Where(a => !a.IsDeleted && !a.IsActive).Include(a => a.AppUser).AsQueryable();
             data = data.Where(a => a.PatientId == PatientId)
                 .WhereIf(!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText)
-                , a => a.AppUser.Name.ToLower().Contains(searchText.ToLower())
-                || a.Description.ToLower().Contains(searchText.ToLower())
-                || a.VisitType.ToLower().Contains(searchText.ToLower())
-                || a.ReferredBy.ToLower().Contains(searchText.ToLower())
-                || a.AppointmentDateTime.ToString() == searchText);
-                        return data;
+                , a => a.AppUser.Name.Contains(searchText)
+                || a.Description.Contains(searchText)
+                || a.VisitType.Contains(searchText)
+                || a.ReferredBy.Contains(searchText));
+            return data;
         }
 
         public virtual IQueryable<Appointment> GetPatientUpcomingAppointments(long PatientId,
@@ -293,11 +292,10 @@ namespace PiHealth.Services.Master
             var data = _repository.Table.Where(a => !a.IsDeleted && a.IsActive).Include(a=>a.AppUser).AsQueryable();
             data = data.Where(a => a.PatientId == PatientId && a.AppointmentDateTime >= appoinmentDate)
                 .WhereIf(!string.IsNullOrEmpty(searchText) && !string.IsNullOrWhiteSpace(searchText)
-                ,a => a.AppUser.Name.ToLower().Contains(searchText.ToLower())
-                || a.Description.ToLower().Contains(searchText.ToLower()) 
-                || a.VisitType.ToLower().Contains(searchText.ToLower())
-                || a.ReferredBy.ToLower().Contains(searchText.ToLower())
-                || a.AppointmentDateTime.ToString() == searchText);
+                , a => a.AppUser.Name.Contains(searchText)
+                || a.Description.Contains(searchText)
+                || a.VisitType.Contains(searchText)
+                || a.ReferredBy.Contains(searchText));
             return data;
         }
     }
