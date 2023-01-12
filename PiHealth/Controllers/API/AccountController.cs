@@ -26,6 +26,7 @@ using Microsoft.Extensions.Options;
 using Abp.Json;
 using StackExchange.Profiling.Internal;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace PiHealth.Web.Controllers
 {
@@ -170,6 +171,37 @@ namespace PiHealth.Web.Controllers
             return Ok(new { token = accessToken, refresh_token = refreshToken, role = user.UserType, username = user.Name, id = user.Id, name = user.Name, registrationNo = user.RegistrationNo });
         }
 
+
+        [AllowAnonymous]
+        [HttpPost]
+        [Route("PatientLogin")]
+        [CustomExceptionFilter]
+        public async Task<IActionResult> PatientLogin([FromBody]PatientSignInModel model)
+        {
+            if(model == null)
+            {
+                return BadRequest();
+            }
+
+            var userPatient = await _usersService.GetUserPatientByMobileNumber(model.mobileNumber);
+
+            if (userPatient == null)
+            {
+                return Ok(-1);
+            }
+
+            if(userPatient.Otp != model.otp)
+            {
+                _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: userPatient.Id, RequestIP: RequestIP, value1: $"OTP-{userPatient.Otp} Not Matched", value2: "Failed");
+                return Ok(-2);
+            }
+
+            var (accessToken, refreshToken) = await _tokenStoreService.CreateJwtTokens(userPatient).ConfigureAwait(false);
+
+            _auditLogService.InsertLog(ControllerName: ControllerName, ActionName: ActionName, UserAgent: UserAgent, userid: userPatient.Id, RequestIP: RequestIP, value1: $"Phone No-{userPatient.PhoneNo}", value2: "Success");
+
+            return Ok(new { token = accessToken, refresh_token = refreshToken, role = userPatient.UserType, username = userPatient.Name, id = userPatient.Id, name = userPatient.Name, registrationNo = userPatient.RegistrationNo });
+        }
 
 
         //[AllowAnonymous]
@@ -335,26 +367,33 @@ namespace PiHealth.Web.Controllers
         [CustomExceptionFilter]
         public async Task<IActionResult> SendOTP([FromBody] PatientSignInModel patientSignInModel)
         {
-            if(patientSignInModel == null)
+            if (patientSignInModel == null)
             {
                 return BadRequest();
             }
 
             var userPatient = await _usersService.GetUserPatientByMobileNumber(patientSignInModel.mobileNumber);
 
-            if(userPatient == null)
+            if (userPatient == null)
             {
                 return Ok(-1);
             }
 
             userPatient.Otp = _usersService.GenerateOTP();
-            var smsResponse = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            //var smsResponse = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
             //var result = JsonConvert.DeserializeObject(smsResponse);
-
-            //result error response:{ "errors":[{ "code":80,"message":"Invalid template"}],"status":"failure"}
-            //if (result?.status == "")
-
-            return Ok(new {userPatient, smsResponse });
+            //var result = _usersService.SendOTP(userPatient.PhoneNo, userPatient.Otp);
+            var url = "http://online.chennaisms.com/api/mt/SendSMS?user=bulksms6&password=Bulksms@9&senderid=NKLGSM&channel=Trans&DCS=0&flashsms=0&number=91"+ userPatient.PhoneNo+"&text=Hello%2C%20Your%20OTP%20for%20Ganga%20Supermarket%20account%20is%20"+ userPatient.Otp + "%20Regards%2C%20GSM%20%28Ganga%20Supermarket%29&route=6";
+            var client = new HttpClient();
+            var result = await client.GetAsync(url);
+            if (result.IsSuccessStatusCode)
+            {
+                userPatient.OtpSentDateTime = DateTime.Now;
+                await _usersService.Update(userPatient);
+            }
+            //return Ok(new {userPatient, smsResponse });
+            return Ok(new {userPatient,result});
+            //return Ok(new { result });
         }
     }
 }
